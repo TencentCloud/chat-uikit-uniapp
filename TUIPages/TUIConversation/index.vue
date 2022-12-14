@@ -31,7 +31,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, reactive, toRefs, computed, onMounted } from "vue";
-import { onNavigationBarButtonTap, onShow } from "@dcloudio/uni-app";
+import { onNavigationBarButtonTap, onShow, onUnload } from "@dcloudio/uni-app";
 import TUIConversationList from "./conversation-list";
 import Dialog from "./components/dialog.vue";
 import store from "../../TUICore/store";
@@ -96,6 +96,11 @@ const TUIConversation = defineComponent({
         },
       ],
     });
+  
+    onUnload(() => {
+     uni.$TUIKit.TUIConversationServer.destroyed();
+    });
+    
     onNavigationBarButtonTap(() => {
       data.showDialog = !data.showDialog;
     });

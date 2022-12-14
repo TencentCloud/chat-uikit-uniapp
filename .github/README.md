@@ -3,6 +3,20 @@ chat-uikit-uniapp 是基于腾讯云 IM SDK 的一款 uniapp UI 组件库，它�
 chat-uikit-uniapp 界面效果如下图所示：
 ![](https://user-images.githubusercontent.com/37072197/201026468-96ec361a-4ba4-4535-842a-79e31d894834.png)
 
+本文介绍如何快速集成腾讯云 Web IM SDK 的 uni-app UI 组件库。对于其他平台，请参考文档：
+
+[**chat-uikit-vue**](https://github.com/TencentCloud/chat-uikit-vue)
+
+[**chat-uikit-react**](https://github.com/TencentCloud/chat-uikit-react)
+
+[**chat-uikit-wechat**](https://github.com/TencentCloud/chat-uikit-wechat)
+
+[**chat-uikit-android**](https://github.com/TencentCloud/chat-uikit-android)
+
+[**chat-uikit-ios**](https://github.com/TencentCloud/chat-uikit-ios)
+
+[**chat-uikit-flutter**](https://github.com/TencentCloud/chat-uikit-flutter)
+
 ## chat-uikit-uniapp 支持平台
 
 - Android
@@ -66,11 +80,11 @@ npm i
 
 ```javascript
 <script>
-import { TIM, TIMUploadPlugin, Aegis} from './pages/TUIKit/debug/tim.js';
+import { TIM, TIMUploadPlugin, Aegis} from "./pages/TUIKit/debug/tim.js";
 import { genTestUserSig, aegisID } from "./pages/TUIKit/debug/index.js";
 const aegis = new Aegis({
-	id: aegisID, // 项目key
-	reportApiSpeed: true, // 接口测速
+  id: aegisID, // 项目key
+  reportApiSpeed: true, // 接口测速
 });
 uni.$aegis = aegis;
 
@@ -79,8 +93,10 @@ const config = {
   SDKAppID: 0, // Your SDKAppID
   secretKey: "", // Your secretKey
 };
-uni.$chat_SDKAppID = config.SDKAppID;
 const userSig = genTestUserSig(config).userSig;
+uni.$chat_SDKAppID = config.SDKAppID;
+uni.$chat_userID = config.userID;
+uni.$chat_userSig = userSig;
 // 创建 sdk 实例
 uni.$TUIKit = TIM.create({
   SDKAppID: uni.$chat_SDKAppID,
@@ -119,7 +135,7 @@ export default {
     },
     // sdk ready 以后可调用 API
     handleSDKReady(event) {
-      uni.setStorageSync('$chat_SDKReady', true);
+      uni.$chat_isSDKReady = true;
       uni.hideLoading();
     },
     handleSDKNotReady(event) {
@@ -139,13 +155,13 @@ export default {
     kickedOutReason(type) {
       switch (type) {
         case uni.$TIM.TYPES.KICKED_OUT_MULT_ACCOUNT:
-          return "由于多实例登录";
+          return "多实例登录";
         case uni.$TIM.TYPES.KICKED_OUT_MULT_DEVICE:
-          return "由于多设备登录";
+          return "多设备登录";
         case uni.$TIM.TYPES.KICKED_OUT_USERSIG_EXPIRED:
-          return "由于 userSig 过期";
+          return "userSig 过期";
         case uni.$TIM.TYPES.KICKED_OUT_REST_API:
-          return "由于 REST API kick 接口踢出";
+          return "REST API kick 接口踢出";
         default:
           return "";
       }
@@ -244,12 +260,21 @@ userID 信息，可通过 [即时通信 IM 控制台](https://console.cloud.tenc
 
 ![](https://user-images.githubusercontent.com/37072197/203218377-6fcc7251-9fd8-44b5-8659-ae533cc3e2a6.png)
 
-### 更多高级特性
+## 更多高级特性
+### 音视频通话 TUICallKit 插件
+> ?
+> - TUIKit 中默认没有集成 TUICallKit 音视频组件。如果您需要集成通话功能，可参考以下文档实现。
+> 
+> - 打包到 APP 请参考官网文档：[音视频通话（uniapp-客户端）](https://cloud.tencent.com/document/product/269/83858)  
+> - 打包到小程序请参考官网文档：[音视频通话（uniapp-小程序）](https://cloud.tencent.com/document/product/269/83857)
+> - 打包到 H5，不支持音视频通话
 
-#### 接入音视频通话能力
+TUICallKit 主要负责语音、视频通话。
+#### 客户端通话示意图：
+<img width="1015" src="https://user-images.githubusercontent.com/37072197/207490936-0a98bc14-88e1-4650-a3db-01c6a6783b79.png"/>
 
-打包到 APP 请参考官网文档[TUICallKit 集成方案](https://cloud.tencent.com/document/product/647/78732)
-打包到小程序请参考官网文档 [TUICallKit 集成方案](https://cloud.tencent.com/document/product/647/78912)
+#### 小程序通话示意图
+<img width="1015" src="https://user-images.githubusercontent.com/37072197/207491199-2e5be240-44d4-49cd-9d30-f006478e6762.png"/>
 
 #### 接入离线推送能力
 
@@ -276,6 +301,7 @@ UserSig 签发方式是将 UserSig 的计算代码集成到您的服务端，并
 #### 4. 运行在小程序端出现异常报错
 
 可能和微信开发者工具版本有关，请使用最新的开发者工具，以及确认稳定的调试基础库版本。
+
 
 ### 技术咨询
 

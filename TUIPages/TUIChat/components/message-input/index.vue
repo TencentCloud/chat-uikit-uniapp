@@ -85,6 +85,7 @@
         ></image>
         <view class="TUI-Extension-slot-name">录像</view>
       </view>
+       <!-- #ifndef H5 -->
       <view class="TUI-Extension-slot" @tap="handleCalling(1)">
         <image
           class="TUI-Extension-icon"
@@ -99,6 +100,7 @@
         ></image>
         <view class="TUI-Extension-slot-name">视频通话</view>
       </view>
+       <!-- #endif -->
     </view>
   </view>
 </template>
@@ -208,7 +210,6 @@ const TUIChatInput = defineComponent({
         // 后置摄像头
         success: (res) => {
           if (res) {
-            console.error(res, "----linda");
             TUIServer.sendVideoMessage(res);
           }
         },
@@ -229,10 +230,10 @@ const TUIChatInput = defineComponent({
       // #ifdef APP-PLUS
       if (typeof uni.$TUICallKit === "undefined") {
         console.error(
-          "请集成 TUICallKit 插件，使用真机运行并且自定义基座调试，官网文档：https://cloud.tencent.com/document/product/647/78732 , 调试地址：https://nativesupport.dcloud.net.cn/NativePlugin/use/use"
+          "请集成 TUICallKit 插件，使用真机运行并且自定义基座调试，请参考官网文档：https://cloud.tencent.com/document/product/269/83857"
         );
         uni.showToast({
-          title: "请使用真机运行并且自定义基座调试，可能影响音视频功能～ ",
+          title: "请集成 TUICallKit 插件哦 ～ ",
           icon: "none",
           duration: 3000,
         });
@@ -248,7 +249,26 @@ const TUIChatInput = defineComponent({
         );
       }
       // #endif
-      // #ifndef APP-PLUS
+   	
+      // #ifdef MP-WEIXIN
+      if (typeof uni.$TUICallKit !== "undefined" && uni.$TUICallKit.value?.value !== null) {
+       uni.$TUICallKit.value.call({
+        userID: userID,
+        type: value
+       })
+      } else {
+       console.error(
+         "请集成 TUICallKit 插件哦～，请参考官网文档：https://cloud.tencent.com/document/product/269/83858" 
+       );
+       uni.showToast({
+         title: "请集成 TUICallKit 插件哦 ～ ",
+         icon: "none",
+         duration: 3000,
+       });
+      }
+      // #endif
+      			
+      // #ifdef H5
       uni.showToast({
         title: "暂不支持",
         icon: "none",

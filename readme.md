@@ -2,8 +2,7 @@
 
 chat-uikit-uniapp 是基于腾讯云 IM SDK 的一款 uniapp UI 组件库，它提供了一些通用的 UI 组件，包含会话、聊天、群组等功能。基于 UI 组件您可以像搭积木一样快速搭建起自己的业务逻辑。
 chat-uikit-uniapp 界面效果如下图所示：
-![](https://user-images.githubusercontent.com/37072197/201026468-96ec361a-4ba4-4535-842a-79e31d894834.png)
-
+![](https://qcloudimg.tencent-cloud.cn/raw/06ccb31cb4dd0ae0d93a15794f63bb81.png)
 ## chat-uikit-uniapp 支持平台
 
 - Android
@@ -69,8 +68,8 @@ npm i @tencentcloud\chat-uikit-uniapp && xcopy .\node_modules\@tencentcloud\chat
 import { TIM, TIMUploadPlugin, Aegis} from './pages/TUIKit/debug/tim.js';
 import { genTestUserSig, aegisID } from "./pages/TUIKit/debug/index.js";
 const aegis = new Aegis({
-	id: aegisID, // 项目key
-	reportApiSpeed: true, // 接口测速
+  id: aegisID, // 项目key
+  reportApiSpeed: true, // 接口测速
 });
 uni.$aegis = aegis;
 
@@ -79,8 +78,10 @@ const config = {
   SDKAppID: 0, // Your SDKAppID
   secretKey: "", // Your secretKey
 };
-uni.$chat_SDKAppID = config.SDKAppID;
 const userSig = genTestUserSig(config).userSig;
+uni.$chat_SDKAppID = config.SDKAppID;
+uni.$chat_userID = config.userID;
+uni.$chat_userSig = userSig;
 // 创建 sdk 实例
 uni.$TUIKit = TIM.create({
   SDKAppID: uni.$chat_SDKAppID,
@@ -119,7 +120,7 @@ export default {
     },
     // sdk ready 以后可调用 API
     handleSDKReady(event) {
-      uni.setStorageSync('$chat_SDKReady', true);
+      uni.$chat_isSDKReady = true;
       uni.hideLoading();
     },
     handleSDKNotReady(event) {
@@ -134,18 +135,23 @@ export default {
         title: `${this.kickedOutReason(event.data.type)}被踢出，请重新登录。`,
         icon: "none",
       });
+      console.warn(
+        `${this.kickedOutReason(
+          event.data.type
+        )}被踢出，请重新登录。请根据自己的需求在 IM 控制台打开多平台登录`
+      );
     },
 
     kickedOutReason(type) {
       switch (type) {
         case uni.$TIM.TYPES.KICKED_OUT_MULT_ACCOUNT:
-          return "由于多实例登录";
+          return "多实例登录";
         case uni.$TIM.TYPES.KICKED_OUT_MULT_DEVICE:
-          return "由于多设备登录";
+          return "多设备登录";
         case uni.$TIM.TYPES.KICKED_OUT_USERSIG_EXPIRED:
-          return "由于 userSig 过期";
+          return "userSig 过期";
         case uni.$TIM.TYPES.KICKED_OUT_REST_API:
-          return "由于 REST API kick 接口踢出";
+          return " REST API kick 接口踢出";
         default:
           return "";
       }
@@ -241,24 +247,29 @@ userID 信息，可通过 [即时通信 IM 控制台](https://console.cloud.tenc
 ![create user](https://user-images.githubusercontent.com/57951148/192585588-c5300d12-6bb5-45a4-831b-f7d733573840.png)
 
 #### 步骤 5：运行效果
+![](https://user-images.githubusercontent.com/37072197/201026468-96ec361a-4ba4-4535-842a-79e31d894834.png)
 
-![](https://qcloudimg.tencent-cloud.cn/raw/06ccb31cb4dd0ae0d93a15794f63bb81.png)
+## 更多高级特性
+### 音视频通话 TUICallKit 插件
+> ?
+> - TUIKit 中默认没有集成 TUICallKit 音视频组件。如果您需要集成通话功能，可参考以下文档实现。
+> 
+> - 打包到 APP 请参考官网文档： [音视频通话（uniapp-客户端）](https://cloud.tencent.com/document/product/269/83858)  
+> - 打包到小程序请参考官网文档： [音视频通话（uniapp-小程序）](https://cloud.tencent.com/document/product/269/83857)
+> - 打包到 H5，不支持音视频通话
 
-### 技术咨询
+TUICallKit 主要负责语音、视频通话。
+#### 客户端通话示意图：
+<img width="1015" src="https://user-images.githubusercontent.com/37072197/207490936-0a98bc14-88e1-4650-a3db-01c6a6783b79.png"/>
 
-了解更多详情您可 QQ 咨询：<dx-tag-link link="#QQ" tag="技术交流群">309869925</dx-tag-link>
+#### 小程序通话示意图
+<img width="1015" src="https://user-images.githubusercontent.com/37072197/207491199-2e5be240-44d4-49cd-9d30-f006478e6762.png"/>
 
-### 更多高级特性
-
-#### 接入音视频通话能力
-
-请参考官网文档 [TUICallKit 集成方案](https://cloud.tencent.com/document/product/647/78742)
-
-### 接入离线推送能力
+## 接入离线推送能力
 
 在 APP 中集成离线推送能力，请参考官网文档 [uni-app 离线推送](https://cloud.tencent.com/document/product/269/79124)
 
-### 常见问题
+## 常见问题
 
 #### 1. 什么是 UserSig？
 
@@ -279,3 +290,7 @@ UserSig 签发方式是将 UserSig 的计算代码集成到您的服务端，并
 #### 4. 运行在小程序端出现异常报错
 
 可能和微信开发者工具版本有关，请使用最新的开发者工具，以及确认稳定的调试基础库版本。
+
+## 技术咨询
+
+了解更多详情您可 QQ 咨询：<dx-tag-link link="#QQ" tag="技术交流群">309869925</dx-tag-link>
