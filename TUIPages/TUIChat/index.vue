@@ -126,6 +126,7 @@ import {
   onReady,
   onLoad,
   onNavigationBarButtonTap,
+  onUnload,
 } from "@dcloudio/uni-app";
 
 // 消息元素组件
@@ -193,7 +194,7 @@ export default defineComponent({
       messageList: computed(() => timStore.messageList),
       conversation: computed(() => timStore.conversation),
       triggered: false,
-      scrollTop: 9999,
+      scrollTop: 999,
       text: "",
       types: uni.$TIM.TYPES,
       currentMessage: {},
@@ -232,7 +233,9 @@ export default defineComponent({
         title: options && options.conversationName,
       });
     });
-
+    onUnload(() => {
+     TUIServer.destroyed();
+    });
     // 监听数据渲染，展示最新一条消息
     watch(messages, (newVal: any, oldVal: any) => {
       // 下拉刷新不滑动 todo 优化
@@ -242,7 +245,7 @@ export default defineComponent({
         data.oldMessageTime = messages.value[0].time;
         handleShowTime();
         if (oldVal && newLastMessage.ID !== oldLastMessage.ID) {
-          handleScrollBottom(); // 非从conversationList 首次进入
+          // handleScrollBottom(); // 非从conversationList 首次进入
         }
       });
     });
@@ -252,7 +255,7 @@ export default defineComponent({
       // 延时 300 ，能完成更新 ！！！  首次进入回话，滑动到底部优化 安卓出现抖动
       // data.scrollTop = 9999;
       setTimeout(() => {
-        data.scrollTop = 9999;
+        data.scrollTop = 998;
       }, 500);
     });
 

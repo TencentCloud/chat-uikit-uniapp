@@ -1,3 +1,10 @@
+## 1.0.3 (2022-12-09)
+### 修复
+- 消息接收重复监听
+- 修复已知问题，提升稳定性
+### 新增
+- [音视频通话（uniapp-小程序）](https://cloud.tencent.com/document/product/269/83857)
+- [音视频通话（uniapp-客户端）](https://cloud.tencent.com/document/product/269/83858)
 ## 1.0.2 (2022-11-11)
 ### 新增
 - 支持 github 仓库形式接入源码

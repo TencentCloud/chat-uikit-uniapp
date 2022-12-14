@@ -48,7 +48,9 @@ export default class TUIConversationServer extends IComponentServer {
 		// #endif
     uni.showLoading({ title: '加载中' });
     this.bindTIMEvent();
-		//this.getConversationList();
+    if (uni.$chat_isSDKReady) {
+     this.getConversationList();
+    }
   }
 
   /**

@@ -4,6 +4,7 @@
 <script lang="ts">
 import TUIGroupManage from "./manage-components/manage.vue";
 import { defineComponent, reactive, toRefs, computed } from 'vue';
+import { onUnload } from "@dcloudio/uni-app";
 import store from '../../TUICore/store';
 import {  TUIGroupServer } from '../../TUICore/server'
 
@@ -16,13 +17,16 @@ const TUIConversation = defineComponent({
 
   setup(props) {
     const timStore = store.state.timStore;
-		uni.$TUIKit.TUIGroupServer = new TUIGroupServer();
+    uni.$TUIKit.TUIGroupServer = new TUIGroupServer();
     const data: any = reactive({
       conversation: computed(() => timStore.conversation),
       userInfo: {
         isGroup: false,
         list: [],
       },
+    });
+    onUnload(() => {
+     uni.$TUIKit.TUIGroupServer.destroyed();
     });
     return {
       ...toRefs(data),
