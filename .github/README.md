@@ -103,16 +103,9 @@ uni.$TUIKit = TIM.create({
 });
 uni.$TIM = TIM;
 // 注册文件上传插件
-// #ifdef MP-WEIXIN || H5
 uni.$TUIKit.registerPlugin({
   "tim-upload-plugin": TIMUploadPlugin,
 });
-// #endif
-// #ifdef APP-PLUS
-uni.$TUIKit.registerPlugin({
-  "cos-wx-sdk": TIMUploadPlugin,
-});
-// #endif
 export default {
   onLaunch: function () {
     this.bindTIMEvent();

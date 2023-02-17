@@ -1,8 +1,8 @@
 // #ifdef APP-PLUS
 import TIM from "tim-wx-sdk";
-import COS from "cos-wx-sdk-v5";
+import TIMUploadPlugin from "tim-upload-plugin";
 import Aegis from "aegis-weex-sdk";
-export { TIM, COS as TIMUploadPlugin, Aegis };
+export { TIM, TIMUploadPlugin, Aegis };
 // #endif
 
 // #ifdef H5
