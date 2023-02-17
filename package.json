@@ -24,7 +24,7 @@
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
     "tim-js-sdk": "^v2.24.1",
-    "tim-upload-plugin": "^1.0.4",
+    "tim-upload-plugin": "^1.1.0",
     "tim-wx-sdk": "^v2.24.1",
     "typescript": "~4.1.5",
     "vue": "^3.0.0",

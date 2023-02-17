@@ -1,3 +1,8 @@
+## 1.1.0 (2023-2-17)
+### 变更
+- tim-upload-plugin 升级到 [1.1.0](https://www.npmjs.com/package/tim-upload-plugin) 版本，该版本支持了 iOS 和 安卓上传富媒体消息
+- 使用 tim-upload-plugin 上传插件，支持视频封面
+
 ## 1.0.3 (2022-12-09)
 ### 修复
 - 消息接收重复监听
