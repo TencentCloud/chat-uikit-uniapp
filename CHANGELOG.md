@@ -1,3 +1,6 @@
+## 1.1.1 (2023-4-17)
+### 新增
+- 集成 callkit 代码
 ## 1.1.0 (2023-2-17)
 ### 变更
 - tim-upload-plugin 升级到 [1.1.0](https://www.npmjs.com/package/tim-upload-plugin) 版本，该版本支持了 iOS 和 安卓上传富媒体消息

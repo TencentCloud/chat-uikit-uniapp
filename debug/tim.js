@@ -14,7 +14,7 @@ export { TIM, TIMUploadPlugin, Aegis };
 // #endif
 
 // #ifdef MP-WEIXIN
-import TIM from "tim-wx-sdk";
+import TIM from "tim-js-sdk";
 import TIMUploadPlugin from "tim-upload-plugin";
 import Aegis from "aegis-mp-sdk";
 export { TIM, TIMUploadPlugin, Aegis };
