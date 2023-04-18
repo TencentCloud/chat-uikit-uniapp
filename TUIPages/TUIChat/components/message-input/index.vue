@@ -251,7 +251,7 @@ const TUIChatInput = defineComponent({
       // #endif
    	
       // #ifdef MP-WEIXIN
-      if (typeof uni.$TUICallKit !== "undefined" && uni.$TUICallKit.value?.value !== null) {
+      if (typeof uni.$TUICallKit !== "undefined" && uni.$TUICallKit.value !== null) {
        uni.$TUICallKit.value.call({
         userID: userID,
         type: value
