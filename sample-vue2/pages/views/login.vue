@@ -88,6 +88,7 @@ import { TUILogin } from "@tencentcloud/tui-core";
 import {
   TUIGlobal,
   TUITranslateService,
+  TUIUserService,
 } from "@tencentcloud/chat-uikit-engine";
 import Link from "../../utils/link";
 import { genTestUserSig } from "../../TUIKit/debug";
@@ -140,6 +141,7 @@ const login = (loginInfo: any) => {
         uni.switchTab({
           url: "/TUIKit/components/TUIConversation/index",
         });
+        TUIUserService.switchUserStatus({ displayOnlineStatus: true });
         uni.showToast({
           title: "登录成功！",
           icon: "success",
