@@ -19,7 +19,8 @@
           </div>
           <div class="profile-main-item">
             <span class="profile-main-label"
-              >{{ TUITranslateService.t("用户ID") }}:</span>
+              >{{ TUITranslateService.t("用户ID") }}:</span
+            >
             <span class="profile-main-label">{{ userProfile.userID }}</span>
           </div>
         </div>
@@ -37,12 +38,11 @@ import {
   TUITranslateService,
   TUIUserService,
 } from "@tencentcloud/chat-uikit-engine";
-import {
-  ref,
-} from "../../TUIKit/adapter-vue";
+import { ref } from "../../TUIKit/adapter-vue";
 import { onShow } from "@dcloudio/uni-app";
 import { TUILogin } from "@tencentcloud/tui-core";
 const userProfile = ref({});
+const displayOnlineStatus = ref(false);
 onShow(() => {
   getUserProfile();
 });
@@ -54,10 +54,10 @@ const getUserProfile = () => {
 const exitLogin = () => {
   TUILogin.logout().then(() => {
     uni.reLaunch({
-      url: './login'
-    })
+      url: "./login",
+    });
   });
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -103,7 +103,7 @@ const exitLogin = () => {
         color: #999999;
         letter-spacing: 0;
         font-size: 14px;
-     }
+      }
     }
   }
   .footer {

@@ -33,7 +33,7 @@ HBuilder 不会默认创建 package.json 文件，因此您需要先创建 packa
 
 安装 Demo 依赖
 ```shell
-npm i 
+npm i --legacy-peer-deps
 ```
 #### 步骤 2：获取 SDKAppID 与 secretKey
 

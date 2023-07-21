@@ -1,6 +1,6 @@
 <template>
   <div class="TUIChat" :class="[!isPC ? 'TUIChat-H5' : '']">
-    <div  class="TUIChat-main">
+    <div class="TUIChat-main">
       <div class="TUIChat-safe-tips">
         <span>
           {{
@@ -13,11 +13,11 @@
           TUITranslateService.t("TUIChat.点此投诉")
         }}</a>
       </div>
-     <scroll-view
-      class="TUI-message-list"
-      scroll-y="true"
-      :scroll-top="scrollTop"
-    >
+      <scroll-view
+        class="TUI-message-list"
+        scroll-y="true"
+        :scroll-top="scrollTop"
+      >
         <p
           class="message-more"
           @click="getHistoryMessageList"
@@ -47,7 +47,7 @@
             />
             <div
               v-else-if="!item.isRevoked"
-              @longpress="handleToggleMessageItem($event, item, index)"
+              @longpress="handleToggleMessageItem($event, item, index, true)"
               @click.prevent.right="
                 handleToggleMessageItem($event, item, index)
               "
@@ -68,6 +68,7 @@
                   :content="item.getMessageContent()"
                   :messageItem="item"
                   :isPC="isPC"
+                  @previewImage="handleImagePreview"
                 />
                 <MessageVideo
                   v-if="item.type === TYPES.MSG_VIDEO"
@@ -131,6 +132,12 @@
           {{ TUITranslateService.t("TUIChat.确认重发该消息？") }}
         </p>
       </Dialog>
+      <ImagePreviewer
+        v-if="showImagePreview"
+        :currentImage="currentImagePreview"
+        :imageList="imageMessageList"
+        @close="onImagePreviewerClose"
+      ></ImagePreviewer>
     </div>
   </div>
 </template>
@@ -143,13 +150,9 @@ import {
   defineExpose,
   nextTick,
   onMounted,
+  computed,
 } from "../../../adapter-vue";
-import {
-  onShow
-} from "@dcloudio/uni-app";
-import
-TUIChatEngine, 
-{
+import TUIChatEngine, {
   TUIGlobal,
   IMessageModel,
   TUIStore,
@@ -173,9 +176,10 @@ import MessageVideo from "./message-elements/message-video.vue";
 import MessageTool from "./message-tool/index.vue";
 import MessageRevoked from "./message-tool/message-revoked.vue";
 import Dialog from "../../common/Dialog";
-
+import ImagePreviewer from "../../common/ImagePreviewer/index";
 import { getImgLoad } from "../utils/utils";
 import { CHAT_SCROLL_TYPE } from "../../../constant";
+
 const isPC = ref(TUIGlobal.getPlatform() === "pc");
 const isH5 = ref(TUIGlobal.getPlatform() === "h5");
 const messageListRef = ref();
@@ -185,10 +189,11 @@ const isCompleted = ref(false);
 const currentConversationID = ref("");
 const nextReqMessageID = ref();
 const toggleID = ref("");
-const scrollTop  = ref(999);
+const scrollTop = ref(5000);  // 首次是 15 条消息，最大消息高度为300
 const TYPES = ref(TUIChatEngine.TYPES);
-const list = ref();
+const listRef = ref();
 const isLoadMessage = ref(false);
+const isLongpressing = ref(false);
 
 // 方法传值
 const msgToolRef = ref();
@@ -200,10 +205,23 @@ const emits = defineEmits(["handleEditor"]);
 
 // 消息滑动到底部，建议搭配 nextTick 使用
 const scrollToBottom = () => {
-  nextTick(() => {
-    scrollTop.value += scrollTop.value + 20;
-  });
+  // 文本消息高度：60, 最大消息高度 280
+  scrollTop.value += 300;
+  // 解决 uniapp 打包到 app 首次进入滑动到底部，300 可设置
+  const timer = setTimeout(() => {
+    scrollTop.value += 1;
+    clearTimeout(timer);
+  }, 300);
 };
+
+// 图片预览相关
+const showImagePreview = ref(false);
+const currentImagePreview = ref<IMessageModel>();
+const imageMessageList = computed(() =>
+  messageList?.value?.filter((item: IMessageModel) => {
+    return !item.isRevoked && item.type === TYPES.value.MSG_IMAGE;
+  })
+);
 
 TUIStore.watch(StoreName.CHAT, {
   messageList: (list: Array<IMessageModel>) => {
@@ -231,19 +249,21 @@ const getHistoryMessageList = () => {
     nextReqMessageID.value = ID;
     isLoadMessage.value = false;
   });
-
 };
 
 // todo: webview 跳转
-const openComplaintLink = (type: any) => {
-};
+const openComplaintLink = (type: any) => {};
 
 // 消息操作
 const handleToggleMessageItem = (
   e: any,
   message: IMessageModel,
-  index: number
+  index: number,
+  isLongpress = false
 ) => {
+  if (isLongpress) {
+    isLongpressing.value = true;
+  }
   toggleID.value = message.ID;
 };
 
@@ -258,7 +278,7 @@ const handleH5LongPress = (
   if (!isH5.value) return;
   function longPressHandler() {
     clearTimeout(timer);
-    handleToggleMessageItem(e, message, index);
+    handleToggleMessageItem(e, message, index, true);
   }
   function touchStartHandler() {
     timer = setTimeout(longPressHandler, 500);
@@ -272,6 +292,9 @@ const handleH5LongPress = (
       break;
     case "touchend":
       touchEndHandler();
+      setTimeout(() => {
+        isLongpressing.value = false;
+      }, 200);
       break;
   }
 };
@@ -285,6 +308,27 @@ const handleEdit = (message: IMessageModel) => {
 const resendMessage = (message: IMessageModel) => {
   reSendDialogShow.value = true;
   resendMessageData.value = message;
+};
+
+// 图片预览
+// 开启图片预览
+const handleImagePreview = (message: IMessageModel) => {
+  if (
+    showImagePreview.value ||
+    currentImagePreview.value ||
+    isLongpressing.value
+  ) {
+    return;
+  }
+  showImagePreview.value = true;
+  currentImagePreview.value = message;
+};
+// 关闭图片预览
+const onImagePreviewerClose = () => {
+  showImagePreview.value = false;
+  setTimeout(() => {
+    currentImagePreview.value = null;
+  }, 50);
 };
 
 const resendMessageConfirm = () => {

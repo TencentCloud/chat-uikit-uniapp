@@ -3,7 +3,6 @@ import { TUIChatKit } from "./TUIKit";
 TUIChatKit.init();
 const SDKAppID = 0; // Your SDKAppID
 const secretKey = ""; //Your secretKey
-
 uni.$chat_SDKAppID = SDKAppID;
 uni.$chat_secretKey = secretKey;
 
