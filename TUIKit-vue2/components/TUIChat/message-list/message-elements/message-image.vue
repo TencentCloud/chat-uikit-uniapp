@@ -52,11 +52,9 @@ watchEffect(() => {
 
 // 预览
 const handleImagePreview = () => {
-  uni.previewImage({
-    current: data.value.url,
-    // 当前显示图片的http链接
-    urls: [data.value.url],
-  });
+  if (!data.value.progress) {
+    emits("previewImage", props.messageItem);
+  }
 };
 
 </script>

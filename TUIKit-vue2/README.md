@@ -1,9 +1,9 @@
-## 关于 chat-uikit-uniapp（vue2）
-chat-uikit-uniapp（vue2） 是基于腾讯云 Chat SDK 的一款 uniapp UI 组件库，它提供了一些通用的 UI 组件，包含会话、聊天、群组等功能。基于这些精心设计的 UI 组件，您可以快速构建优雅的、可靠的、可扩展的 Chat 应用。
+## 关于 chat-uikit-uniapp（vue2 /vue3）
+chat-uikit-uniapp （vue2 /vue3）是基于腾讯云 Chat SDK 的一款 uniapp UI 组件库，它提供了一些通用的 UI 组件，包含会话、聊天、群组等功能。基于这些精心设计的 UI 组件，您可以快速构建优雅的、可靠的、可扩展的 Chat 应用。
 chat-uikit-uniapp 界面效果如下图所示：
 ![](https://qcloudimg.tencent-cloud.cn/raw/0b21caf014aea40a96d401c68b465e9b.png)
 
-(“TUIContact关系链功能”及“音视频通话功能”暂未开放，敬请期待)
+(“音视频通话功能”暂未开放，敬请期待)
 
 ## chat-uikit-uniapp 支持平台
 - Android
@@ -13,8 +13,7 @@ chat-uikit-uniapp 界面效果如下图所示：
 
 ## 开发环境要求
 - HBuilderX
-- Vue2
-- TypeScript
+- Vue2 / Vue3
 - sass（sass-loader 版本 ≤ 10.1.1）
 - node（12.13.0 ≤ node 版本 ≤ 17.0.0, 推荐使用 Node.js 官方 LTS 版本 16.17.0）
 - npm（版本请与 node 版本匹配）
@@ -25,18 +24,6 @@ chat-uikit-uniapp 界面效果如下图所示：
 
 ### 步骤1：创建项目 （已有项目可忽略）
  ![](https://qcloudimg.tencent-cloud.cn/raw/65f2b6fe9c219ff1ef9f69e096f926eb.png)
-
-> **注意1: **
-> 请在项目 mianfest.json > 基础配置里边确认 Vue 版本选择。
-> ![](https://qcloudimg.tencent-cloud.cn/raw/acd4566db21c225849fe7014346a674f.png)
-
-HBuilder 不会默认创建 package.json 文件，因此您需要先创建 package.json 文件。请执行以下命令：
-> `npm init -y`
-
-> **注意2: 运行到小程序**
-> 请在项目 mianfest.json > 微信小程序配置,勾选以下选项
-> ![](https://qcloudimg.tencent-cloud.cn/raw/7be1ab6cac29853d6ad5c50fa8e3eefc.png)
-
 ### 步骤2：下载并引入 TUIKit
 
 通过 [npm](https://www.npmjs.com/package/@tencentcloud/chat-uikit-uniapp-vue2) 方式下载 TUIKit 并集成组件。
@@ -61,10 +48,44 @@ npm i @tencentcloud/chat-uikit-uniapp-vue2
 xcopy .\node_modules\@tencentcloud\chat-uikit-uniapp-vue2 .\TUIKit /i /e
 ```
 
+#### 2. 【工程配置】
+- HBuilder 不会默认创建 package.json 文件，因此您需要先创建 package.json 文件。
+请执行以下命令：
+``` shell
+npm init -y
+```
+- 在根目录下创建 vue.config.js
+> **注意：**
+> 
+> 必须要创建此文件，否则会有 ts 警告。
+``` javascript
+const ScriptSetup = require('unplugin-vue2-script-setup/webpack').default;
+module.exports = {
+  parallel: false,
+  configureWebpack: {
+    plugins: [
+      ScriptSetup({
+        /* options */
+      }),
+    ],
+  },
+  chainWebpack(config) {
+    // disable type check and let `vue-tsc` handles it
+    config.plugins.delete('fork-ts-checker');
+  },
+};
+```
+> **注意：**
+> 
+> - 【此项目使用 ts 开发，同时也支持 js 项目直接集成】
+> - 【暂时不支持 vue cli 创建的工程】
+> -  打包小程序, 请在项目 mianfest.json > 微信小程序配置,勾选以下选项
+> ![](https://qcloudimg.tencent-cloud.cn/raw/7be1ab6cac29853d6ad5c50fa8e3eefc.png)
 
-#### 2. 【main.js 文件】
+#### 3. 【main.js 文件】
 ``` javascript
 import App from "./App";
+// vue2 工程
 // #ifndef VUE3
 import Vue from "vue";
 import VueCompositionAPI from "@vue/composition-api";
@@ -83,11 +104,11 @@ app.$mount();
 > 
 > HBuilderX （HBuilderX 版本 >= 3.8.4.20230531）会默认创建 uni.promisify.adaptor ,可忽略引入
 
-
-#### 3.【App.vue 文件】
+#### 4.【App.vue 文件】
 ``` javascript
 <script lang="ts">
 import { TUIChatKit, genTestUserSig } from "./TUIKit";
+import { vueVersion } from "./TUIKit/adapter-vue";
 import { TUILogin } from "@tencentcloud/tui-core";
 // 必填信息
 const config = {
@@ -118,7 +139,7 @@ export default {
       // 此功能为增值服务，请参考：https://cloud.tencent.com/document/product/269/79139
       // 如果您已购买内容审核服务，开启此功能请设置为 true
       useProfanityFilterPlugin: false,
-      framework: "vue2" // 当前开发使用框架 vue2 / vue3
+      framework: `vue${vueVersion}` // 当前开发使用框架 vue2 / vue3
     });
   },
  onShow: function() {
@@ -141,7 +162,7 @@ page {
 }
 </style>
 ```
-#### 4.【pages.json 文件】
+#### 5.【pages.json 文件】
 ``` javascript
 {
   "pages": [
@@ -193,29 +214,6 @@ page {
   }
 }
 ```
-#### 5.【在根目录下创建 vue.config.js】
-> **注意**
-> 
-> 必须要创建此文件
-
-``` javascript
-const ScriptSetup = require('unplugin-vue2-script-setup/webpack').default;
-module.exports = {
-  parallel: false,
-  configureWebpack: {
-    plugins: [
-      ScriptSetup({
-        /* options */
-      }),
-    ],
-  },
-  chainWebpack(config) {
-    // disable type check and let `vue-tsc` handles it
-    config.plugins.delete('fork-ts-checker');
-  },
-};
-```
-
 ### 步骤3：获取 SDKAppID 、密钥与 userID
 
 设置 App.vue 文件示例代码中的相关参数 SDKAppID、secretKey 以及 userID ，其中 SDKAppID 和密钥等信息，可通过 [即时通信 IM 控制台](https://console.cloud.tencent.com/im) 获取，单击目标应用卡片，进入应用的基础配置页面。例如：
