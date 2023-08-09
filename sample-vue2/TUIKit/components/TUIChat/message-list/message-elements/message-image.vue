@@ -1,14 +1,18 @@
 <template>
   <div class="message-image"  @click="handleImagePreview">
     <image
+      class="image"
+      mode="aspectFit"
       :src="data.url"
-      :style="{ height: imgHeight, width: imgWidth }"
+      @load="imageLoad"
+      :style="{ width: imageStyles.width, height: imageStyles.height }"
     ></image>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { watchEffect, ref, watch, defineProps } from "../../../../adapter-vue";
+import { watchEffect, ref, defineProps } from "../../../../adapter-vue";
+const DEFAULT_MAX_SIZE = 155;
 const props = defineProps({
   content: {
     type: Object,
@@ -23,32 +27,36 @@ const props = defineProps({
 const data = ref({
   progress: 0,
 });
-const message = ref();
-const show = ref();
-const skeleton: any = ref();
 const emits = defineEmits(["uploading", "previewImage"]);
-// 计算图片的大小
-const imgHeight = ref("");
-const imgWidth = ref("");
+const imageStyles = ref({ width: 'auto', height: 'auto' });
+
+const genImageStyles = (value: { width: any; height: any; }) => {
+  const { width, height } = value;
+  if (width === 0 || height === 0) {
+    return;
+  }
+
+  let imageWidth = 0;
+  let imageHeight = 0;
+  if (width >= height) {
+    imageWidth = DEFAULT_MAX_SIZE;
+    imageHeight = (DEFAULT_MAX_SIZE * height) / width;
+  } else {
+    imageWidth = (DEFAULT_MAX_SIZE * width) / height;
+    imageHeight = DEFAULT_MAX_SIZE;
+  }
+  imageStyles.value.width = imageWidth + "px";
+  imageStyles.value.height = imageHeight + "px";
+}
 
 watchEffect(() => {
   data.value = props.content;
-  // 等比例计算图片的 width、height
-  const DEFAULT_MAX_SIZE = 155;
-  let imageWidth = 0;
-  let imageHeight = 0;
-  let imageInfo = props.content;
-  if (imageInfo.width >= imageInfo.height) {
-    imageWidth = DEFAULT_MAX_SIZE;
-    imageHeight = (DEFAULT_MAX_SIZE * imageInfo.height) / imageInfo.width;
-  } else {
-    imageWidth = (DEFAULT_MAX_SIZE * imageInfo.width) / imageInfo.height;
-    imageHeight = DEFAULT_MAX_SIZE;
-  }
-
-  imgWidth.value = imageWidth + "px";
-  imgHeight.value = imageHeight + "px";
+  genImageStyles(props.content);
 });
+
+const imageLoad = (event: any) => {
+  genImageStyles(event.detail);
+};
 
 // 预览
 const handleImagePreview = () => {
@@ -61,8 +69,9 @@ const handleImagePreview = () => {
 <style lang="scss" scoped>
 .message-image {
   position: relative;
-  image {
+  .image {
     max-width: 150px;
+    will-change: transform;
   }
   .progress {
     position: absolute;

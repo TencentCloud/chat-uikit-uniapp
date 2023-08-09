@@ -17,7 +17,10 @@ chat-uikit-uniapp 界面效果如下图所示：
 - sass（sass-loader 版本 ≤ 10.1.1）
 - node（12.13.0 ≤ node 版本 ≤ 17.0.0, 推荐使用 Node.js 官方 LTS 版本 16.17.0）
 - npm（版本请与 node 版本匹配）
-   
+
+> **注意**
+> 
+> HBuilderX （HBuilderX 版本 >= 3.8.4.20230531）或者升级到最新版本 
 ## TUIKit 源码集成
 
 通过以下步骤发送您的第一条消息。
@@ -222,6 +225,29 @@ userID 信息，可通过 [即时通信 IM 控制台](https://console.cloud.tenc
 
 ### 步骤4：运行效果
 ![](https://qcloudimg.tencent-cloud.cn/raw/0d01fb6e6a156fe8720ae268c1491048.png)
+
+## 集成音视频通话 CallKit 组件
+### 步骤1: 购买 uni-app 原生插件
+登录 uni [原生插件市场](https://ext.dcloud.net.cn/)，在  [TencentCloud-TUICallKit](https://ext.dcloud.net.cn/plugin?id=9035) 插件 详情页中购买（免费插件也可以在插件市场0元购）。购买后才能够云端打包使用插件。购买插件时请选择正确的 appid，以及绑定正确包名。
+
+### 步骤2: 使用自定义基座打包 uni 原生插件 （请使用真机运行自定义基座）
+使用 uni 原生插件必须先提交云端打包才能生效，购买插件后在应用的 manifest.json 页面的 App原生插件配置 项下单击选择云端插件，选择腾讯云原生音视频插件。
+
+### 步骤3：引入原生插件
+在 App.vue 文件注册原生插件。
+使用 uni.requireNativePlugin 在 App.vue 注册原生插件，参数为腾讯云原生音视频插件ID: TencentCloud-TUICallKit
+``` javascript
+uni.$TUICallKit = uni.requireNativePlugin('TencentCloud-TUICallKit');
+console.log(uni.$TUICallKit, "TUICallKit ｜ ok"); // 本地日志
+```
+> **注意**
+> 
+> 更多 TUICallKit API详情可参考文档 [TUICallKit-API](https://cloud.tencent.com/document/product/647/78732)。
+> TUIKit 组件目前仅支持 1v1 通话，群通话计划 9月。
+
+### 步骤4：本地调试和发布
+使用自定义基座开发调试 TencentCloud-TUICallKit 插件 后，不可直接将自定义基座 APK 作为正式版发布。
+需要重新提交云端打包（不能勾选“自定义基座”）生成正式版本。
 
 ## 参考文档
 - [常见问题(uniapp)](https://cloud.tencent.com/document/product/269/68183)
