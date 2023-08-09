@@ -143,7 +143,7 @@ const handleLongPress = (e: any) => {
     // 录音通道数
     encodeBitRate: 192000,
     // 编码码率
-    format: "aac", // 音频格式，选择此格式创建的音频消息，可以在即时通信 IM 全平台（Android、iOS、微信小程序和Web）互通
+    format: "mp3", // 音频格式，选择此格式创建的音频消息，可以在即时通信 IM 全平台（Android、iOS、微信小程序和Web）互通
   });
   title.value = "正在录音";
   isRecording.value = true;

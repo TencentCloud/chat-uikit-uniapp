@@ -8,7 +8,7 @@
       :file="voice"
       :class="[message.flow === 'out' && 'icon-reserve']"
     ></Icon>
-    <label>{{ content.second }}s</label>
+    <label>{{ content.second }} "</label>
   </div>
 </template>
 
@@ -77,10 +77,13 @@ const handlePlay = () => {
   max-width: 100%;
   overflow: hidden;
   .icon {
-    margin: 0 4px;
+    margin: 0 7px;
   }
 }
 .reserve {
   flex-direction: row-reverse;
+  .icon {
+    transform: rotate(180deg);
+  }
 }
 </style>

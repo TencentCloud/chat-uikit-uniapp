@@ -1,6 +1,6 @@
 <template>
   <div class="TUIChat" :class="[!isPC ? 'TUIChat-H5' : '']">
-    <div  class="TUIChat-main">
+    <div class="TUIChat-main">
       <div class="TUIChat-safe-tips">
         <span>
           {{
@@ -13,11 +13,24 @@
           TUITranslateService.t("TUIChat.点此投诉")
         }}</a>
       </div>
-     <scroll-view
-      class="TUI-message-list"
-      scroll-y="true"
-      :scroll-top="scrollTop"
-    >
+      <div
+        class="TUIChat-application-tips"
+        v-if="isGroup && groupApplicationCount > 0"
+        @click="toggleApplicationList()"
+      >
+        <span
+          >{{ groupApplicationCount }}
+          {{ TUITranslateService.t("TUIChat.条入群申请") }}
+          <span class="application-tips-btn">{{
+            TUITranslateService.t("TUIChat.点击处理")
+          }}</span>
+        </span>
+      </div>
+      <scroll-view
+        class="TUI-message-list"
+        scroll-y="true"
+        :scroll-top="scrollTop"
+      >
         <p
           class="message-more"
           @click="getHistoryMessageList"
@@ -46,8 +59,8 @@
               :content="item.getMessageContent()"
             />
             <div
-              v-else-if="!item.isRevoked"
-              @longpress="handleToggleMessageItem($event, item, index)"
+              v-else-if="!item.isRevoked && !item.getSignalingInfo()"
+              @longpress="handleToggleMessageItem($event, item, index, true)"
               @click.prevent.right="
                 handleToggleMessageItem($event, item, index)
               "
@@ -68,6 +81,7 @@
                   :content="item.getMessageContent()"
                   :messageItem="item"
                   :isPC="isPC"
+                  @previewImage="handleImagePreview"
                 />
                 <MessageVideo
                   v-if="item.type === TYPES.MSG_VIDEO"
@@ -100,6 +114,13 @@
                 />
               </MessageBubble>
             </div>
+            <MessagePlugin
+              v-else-if="!item.isRevoked && item.getSignalingInfo()"
+              :message="item"
+              @resendMessage="resendMessage"
+              @handleToggleMessageItem="handleToggleMessageItem"
+              @handleH5LongPress="handleH5LongPress"
+            />
             <MessageRevoked
               v-else
               :isEdit="item.type === TYPES.MSG_TEXT"
@@ -111,7 +132,6 @@
                 'message-tool',
                 item.flow === 'out' ? 'message-tool-out' : 'message-tool-in',
               ]"
-              ref="msgToolRef"
               :messageItem="item"
               v-if="item.ID === toggleID"
             />
@@ -131,6 +151,18 @@
           {{ TUITranslateService.t("TUIChat.确认重发该消息？") }}
         </p>
       </Dialog>
+      <ImagePreviewer
+        v-if="showImagePreview"
+        :currentImage="currentImagePreview"
+        :imageList="imageMessageList"
+        @close="onImagePreviewerClose"
+      ></ImagePreviewer>
+      <MessageGroupSystem
+        v-if="showGroupApplication"
+        :groupID="groupID"
+        @toggleApplicationList="toggleApplicationList"
+        @handleGroupApplication="handleGroupApplication"
+      ></MessageGroupSystem>
     </div>
   </div>
 </template>
@@ -143,19 +175,17 @@ import {
   defineExpose,
   nextTick,
   onMounted,
+  computed,
+  onUnmounted,
 } from "../../../adapter-vue";
-import {
-  onShow
-} from "@dcloudio/uni-app";
-import
-TUIChatEngine, 
-{
+import TUIChatEngine, {
   TUIGlobal,
   IMessageModel,
   TUIStore,
   StoreName,
   TUITranslateService,
   TUIChatService,
+  TUIGroupService,
 } from "@tencentcloud/chat-uikit-engine";
 
 import Link from "./link";
@@ -172,10 +202,23 @@ import MessageTimestamp from "./message-elements/message-timestamp.vue";
 import MessageVideo from "./message-elements/message-video.vue";
 import MessageTool from "./message-tool/index.vue";
 import MessageRevoked from "./message-tool/message-revoked.vue";
-import Dialog from "../../common/Dialog";
+import MessageGroupSystem from "./message-elements/message-group-system.vue";
+import MessagePlugin from "../../../plugins/plugin-components/message-plugin.vue";
 
+import Dialog from "../../common/Dialog";
+import ImagePreviewer from "../../common/ImagePreviewer/index";
 import { getImgLoad } from "../utils/utils";
 import { CHAT_SCROLL_TYPE } from "../../../constant";
+const props = defineProps({
+  groupID: {
+    type: String,
+    default: "",
+  },
+  isGroup: {
+    type: Boolean,
+    default: false,
+  },
+});
 const isPC = ref(TUIGlobal.getPlatform() === "pc");
 const isH5 = ref(TUIGlobal.getPlatform() === "h5");
 const messageListRef = ref();
@@ -185,28 +228,96 @@ const isCompleted = ref(false);
 const currentConversationID = ref("");
 const nextReqMessageID = ref();
 const toggleID = ref("");
-const scrollTop  = ref(999);
+const scrollTop = ref(5000); // 首次是 15 条消息，最大消息高度为300
 const TYPES = ref(TUIChatEngine.TYPES);
-const list = ref();
+const listRef = ref();
 const isLoadMessage = ref(false);
+const isLongpressing = ref(false);
 
-// 方法传值
-const msgToolRef = ref();
+// 加群申请系统消息
+const groupApplicationCount = ref(0);
+const showGroupApplication = ref(false);
+const applicationUserIDList = ref([]);
 
 // 消息重发 Dialog
 const reSendDialogShow = ref(false);
 const resendMessageData = ref();
 const emits = defineEmits(["handleEditor"]);
 
+// 图片预览相关
+const showImagePreview = ref(false);
+const currentImagePreview = ref<typeof IMessageModel>();
+const imageMessageList = computed(() =>
+  messageList?.value?.filter((item: typeof IMessageModel) => {
+    return !item.isRevoked && item.type === TYPES.value.MSG_IMAGE;
+  })
+);
+
 // 消息滑动到底部，建议搭配 nextTick 使用
 const scrollToBottom = () => {
-  nextTick(() => {
-    scrollTop.value += scrollTop.value + 20;
+  // 文本消息高度：60, 最大消息高度 280
+  scrollTop.value += 300;
+  // 解决 uniapp 打包到 app 首次进入滑动到底部，300 可设置
+  const timer = setTimeout(() => {
+    scrollTop.value += 1;
+    clearTimeout(timer);
+  }, 300);
+};
+
+// 监听回调函数
+const onCurrentConversationIDUpdated = (conversationID: string) => {
+  currentConversationID.value = conversationID;
+  TUIGroupService.getGroupApplicationList().then((res: any) => {
+    const applicationList = res.data.applicationList.filter(
+      (application: any) => application.groupID === props.groupID
+    );
+    applicationUserIDList.value = applicationList.map((application: any) => {
+      return application.applicationType === 0
+        ? application.applicant
+        : application.userID;
+    });
+    TUIStore.update(
+      StoreName.CUSTOM,
+      "groupApplicationCount",
+      applicationList.length
+    );
   });
 };
 
+// operationType 操作类型 1: 有用户申请加群   23: 普通群成员邀请用户进群
+const onGroupSystemNoticeList = (list: Array<typeof IMessageModel>) => {
+  const systemNoticeList = list.filter((message) => {
+    const { operationType } = message.payload;
+    return (
+      (operationType === 1 || operationType === 23) &&
+      message.to === props.groupID
+    );
+  });
+
+  systemNoticeList.forEach((systemNotice) => {
+    const { operationType } = systemNotice.payload;
+    if (operationType === 1) {
+      const { operatorID } = systemNotice.payload;
+      if (!applicationUserIDList.value.includes(operatorID)) {
+        applicationUserIDList.value.push(operatorID);
+      }
+    }
+    if (operationType === 23) {
+      const { inviteeList } = systemNotice.payload;
+      inviteeList.forEach((invitee) => {
+        if (!applicationUserIDList.value.includes(invitee)) {
+          applicationUserIDList.value.push(invitee);
+        }
+      });
+    }
+  });
+  const applicationCount = applicationUserIDList.value.length;
+  TUIStore.update(StoreName.CUSTOM, "groupApplicationCount", applicationCount);
+};
+
+// 消息列表监听
 TUIStore.watch(StoreName.CHAT, {
-  messageList: (list: Array<IMessageModel>) => {
+  messageList: (list: Array<typeof IMessageModel>) => {
     messageList.value = list;
     // 点击加载更多的消息不需要滑动到底部
     if (!isLoadMessage.value) {
@@ -219,11 +330,33 @@ TUIStore.watch(StoreName.CHAT, {
 });
 
 TUIStore.watch(StoreName.CONV, {
-  currentConversationID: (id: string) => {
-    currentConversationID.value = id;
+  currentConversationID: onCurrentConversationIDUpdated,
+});
+
+// 群系统消息
+TUIStore.watch(StoreName.GRP, {
+  groupSystemNoticeList: onGroupSystemNoticeList,
+});
+
+// 群系统消息数量
+TUIStore.watch(StoreName.CUSTOM, {
+  groupApplicationCount: (count: Number) => {
+    groupApplicationCount.value = count;
   },
 });
 
+// 取消监听
+onUnmounted(() => {
+  TUIStore.unwatch(StoreName.CONV, {
+    currentConversationID: onCurrentConversationIDUpdated,
+  });
+  // 群系统消息
+  TUIStore.unwatch(StoreName.GRP, {
+    groupSystemNoticeList: onGroupSystemNoticeList,
+  });
+});
+
+// 获取历史消息
 const getHistoryMessageList = () => {
   isLoadMessage.value = true;
   TUIChatService.getMessageList().then((res: any) => {
@@ -231,19 +364,31 @@ const getHistoryMessageList = () => {
     nextReqMessageID.value = ID;
     isLoadMessage.value = false;
   });
-
 };
 
+const toggleApplicationList = () => {
+  showGroupApplication.value = !showGroupApplication.value;
+};
+
+const handleGroupApplication = (userID: string) => {
+  const index = applicationUserIDList.value.indexOf(userID);
+  if (index !== -1) {
+    applicationUserIDList.value.splice(index, 1);
+  }
+};
 // todo: webview 跳转
-const openComplaintLink = (type: any) => {
-};
+const openComplaintLink = (type: any) => {};
 
 // 消息操作
 const handleToggleMessageItem = (
   e: any,
-  message: IMessageModel,
-  index: number
+  message: typeof IMessageModel,
+  index: number,
+  isLongpress = false
 ) => {
+  if (isLongpress) {
+    isLongpressing.value = true;
+  }
   toggleID.value = message.ID;
 };
 
@@ -251,14 +396,14 @@ const handleToggleMessageItem = (
 let timer: number;
 const handleH5LongPress = (
   e: any,
-  message: IMessageModel,
+  message: typeof IMessageModel,
   index: number,
   type: string
 ) => {
   if (!isH5.value) return;
   function longPressHandler() {
     clearTimeout(timer);
-    handleToggleMessageItem(e, message, index);
+    handleToggleMessageItem(e, message, index, true);
   }
   function touchStartHandler() {
     timer = setTimeout(longPressHandler, 500);
@@ -272,19 +417,43 @@ const handleH5LongPress = (
       break;
     case "touchend":
       touchEndHandler();
+      setTimeout(() => {
+        isLongpressing.value = false;
+      }, 200);
       break;
   }
 };
 
 // 消息撤回后，编辑消息
-const handleEdit = (message: IMessageModel) => {
+const handleEdit = (message: typeof IMessageModel) => {
   emits("handleEditor", message, "reedit");
 };
 
 // 重发消息
-const resendMessage = (message: IMessageModel) => {
+const resendMessage = (message: typeof IMessageModel) => {
   reSendDialogShow.value = true;
   resendMessageData.value = message;
+};
+
+// 图片预览
+// 开启图片预览
+const handleImagePreview = (message: typeof IMessageModel) => {
+  if (
+    showImagePreview.value ||
+    currentImagePreview.value ||
+    isLongpressing.value
+  ) {
+    return;
+  }
+  showImagePreview.value = true;
+  currentImagePreview.value = message;
+};
+// 关闭图片预览
+const onImagePreviewerClose = () => {
+  showImagePreview.value = false;
+  setTimeout(() => {
+    currentImagePreview.value = null;
+  }, 50);
 };
 
 const resendMessageConfirm = () => {

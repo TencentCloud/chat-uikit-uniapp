@@ -2,7 +2,7 @@ const TUIContact = {
   "群聊通知": "Group Chat Notifications",
   "系统通知": "System Notifications",
   "我的群聊": "My Group Chats",
-  "输入群ID，按回车搜索": "Enter a group ID",
+  "输入群ID搜索": "Enter a groupID",
   "群名称": "Group name",
   "群ID": "Group ID",
   "加入群聊": "Join group chat",
@@ -22,7 +22,10 @@ const TUIContact = {
   "加群": "join",
   "我的好友": "Friend",
   "发送消息": "Send Message",
-  "个性签名": "Signature"
+  "个性签名": "Signature",
+  "等待管理员同意": "Successful application, waiting for the administrator to agree to join the group application",
+  "加群成功": "Join the group successfully",
+  "您已是群成员": "You are already a group member",
 }
 
 export default TUIContact;
