@@ -12,34 +12,27 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  watchEffect,
-  computed,
-  ref,
-  nextTick,
-  defineProps,
-  defineEmits,
-  watch,
-} from "../../adapter-vue";
+import { ref } from "../../adapter-vue";
+import { TUIGlobal } from "@tencentcloud/chat-uikit-engine";
 import { onLoad, onReady } from "@dcloudio/uni-app";
 const props = defineProps({
   data: {
     type: String,
-    default: () => (''),
+    default: () => "",
   },
 });
 
 const videoData = ref();
 const show = ref(false);
 const videoContext = ref();
-onLoad((option) => {
+onLoad((option: any) => {
   videoData.value = option && option.videoUrl;
   show.value = true;
 });
 
 onReady(() => {
   show.value = true;
-  videoContext.value = uni.createVideoContext("videoEle");
+  videoContext.value = TUIGlobal?.global?.createVideoContext("videoEle");
 });
 </script>
 <style lang="scss" scoped>

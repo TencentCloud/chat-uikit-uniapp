@@ -8,5 +8,4 @@ vueVersion = 2;
 export * from "vue";
 vueVersion = 3;
 // #endif
-
 export { vueVersion };

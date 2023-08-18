@@ -13,13 +13,8 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  watchEffect,
-  ref,
-  watch,
-  defineProps,
-  onMounted,
-} from "../../../../adapter-vue";
+import { TUIGlobal } from "@tencentcloud/chat-uikit-engine";
+import { watchEffect, ref, onMounted } from "../../../../adapter-vue";
 import Icon from "../../../common/Icon.vue";
 import voice from "../../../../assets/icon/voice.png";
 const props = defineProps({
@@ -37,7 +32,7 @@ const data = ref();
 const message = ref();
 const show = ref();
 const isPlay = ref(false);
-const audio = uni.createInnerAudioContext();
+const audio = TUIGlobal?.global?.createInnerAudioContext();
 watchEffect(() => {
   data.value = props.content;
   message.value = props.messageItem;
@@ -50,9 +45,9 @@ onMounted(() => {
   audio.onEnded(() => {
     console.log("停止播放");
   });
-  audio.onError((e) => {
+  audio.onError(() => {
     // ios 音频播放无声，可能是因为系统开启了静音模式
-    uni.showToast({
+    TUIGlobal?.global?.showToast({
       icon: "none",
       title: "该音频暂不支持播放",
     });

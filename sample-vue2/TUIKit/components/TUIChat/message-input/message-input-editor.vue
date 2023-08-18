@@ -28,14 +28,7 @@
 </template>
 <script lang="ts" setup>
 import { TUIGlobal } from "@tencentcloud/chat-uikit-engine";
-import {
-  defineProps,
-  defineEmits,
-  ref,
-  defineExpose,
-  nextTick,
-  watch,
-} from "../../../adapter-vue";
+import { ref, nextTick, watch } from "../../../adapter-vue";
 import { ISendMessagePayload } from "../../../interface";
 
 const props = defineProps({
@@ -67,6 +60,10 @@ const props = defineProps({
   enableTyping: {
     type: Boolean,
     default: true,
+  },
+  isGroup: {
+    type: Boolean,
+    default: false,
   },
 });
 const emits = defineEmits(["sendMessage", "onTyping", "onFocus", "onAt"]);
@@ -143,8 +140,8 @@ const onInput = (e: any) => {
   // uniapp 识别 @ 消息
   const text = e?.detail?.value;
   isEditorContentEmpty();
-  if (text.endsWith("@") || text.endsWith("@\n")) {
-    uni.hideKeyboard();
+  if (props.isGroup && (text.endsWith("@") || text.endsWith("@\n"))) {
+    TUIGlobal?.global?.hideKeyboard();
     emits("onAt", true);
   }
 };

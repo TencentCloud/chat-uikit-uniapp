@@ -33,25 +33,7 @@ chat-uikit-uniapp 界面效果如下图所示：
 
 在 App.vue 页面引用 TUIKit 组件，为此您需要修改以下文件。
 
-#### 1.【npm 下载】
-
-为了方便您后续的拓展，建议您将 TUIKit 组件复制到自己工程的 pages 目录下，在自己的项目目录下执行以下命令：
-``` shell
-# macOS
-npm i @tencentcloud/chat-uikit-uniapp-vue2
-```
-``` shell
-mkdir -p ./TUIKit && cp -r ./node_modules/@tencentcloud/chat-uikit-uniapp-vue2/ ./TUIKit
-```
-``` shell
-# windows
-npm i @tencentcloud/chat-uikit-uniapp-vue2
-```
-``` shell
-xcopy .\node_modules\@tencentcloud\chat-uikit-uniapp-vue2 .\TUIKit /i /e
-```
-
-#### 2. 【工程配置】
+#### 1. 【工程配置】
 - HBuilder 不会默认创建 package.json 文件，因此您需要先创建 package.json 文件。
 请执行以下命令：
 ``` shell
@@ -84,6 +66,25 @@ module.exports = {
 > - 【暂时不支持 vue cli 创建的工程】
 > -  打包小程序, 请在项目 mianfest.json > 微信小程序配置,勾选以下选项
 > ![](https://qcloudimg.tencent-cloud.cn/raw/7be1ab6cac29853d6ad5c50fa8e3eefc.png)
+
+#### 2.【npm 下载】
+
+为了方便您后续的拓展，建议您将 TUIKit 组件复制到自己工程的 pages 目录下，在自己的项目目录下执行以下命令：
+``` shell
+# macOS
+npm i @tencentcloud/chat-uikit-uniapp-vue2
+```
+``` shell
+mkdir -p ./TUIKit && rsync -av --exclude={'node_modules','package.json','excluded-list.txt'} ./node_modules/@tencentcloud/chat-uikit-uniapp-vue2/ ./TUIKit
+```
+``` shell
+# windows
+npm i @tencentcloud/chat-uikit-uniapp-vue2
+```
+``` shell
+xcopy .\node_modules\@tencentcloud\chat-uikit-uniapp-vue2 .\TUIKit /i /e /exclude:.\node_modules\@tencentcloud\chat-uikit-uniapp-vue2\excluded-list.txt
+```
+
 
 #### 3. 【main.js 文件】
 ``` javascript
@@ -248,6 +249,23 @@ console.log(uni.$TUICallKit, "TUICallKit ｜ ok"); // 本地日志
 ### 步骤4：本地调试和发布
 使用自定义基座开发调试 TencentCloud-TUICallKit 插件 后，不可直接将自定义基座 APK 作为正式版发布。
 需要重新提交云端打包（不能勾选“自定义基座”）生成正式版本。
+
+## 常见问题
+### 1. 如何实现独立集成 TUIChat 组件?
+请参考官网文档 [TUIChat 独立集成方案 (vue2)](https://cloud.tencent.com/document/product/269/96744)
+
+### 2. HBuilder 报错: SyntaxError: Unexpected token '.'
+
+如果按照以上接入步骤接入运行后，出现以下错误信息。则说明您当前的 HBuilder 版本过低，请升级至最新版本。
+
+<img width="600" alt="截屏2023-08-11 14 28 54" src="https://github.com/TencentCloud/chat-uikit-vue/assets/57951148/28fdf9fe-5d4f-4a22-a5f0-61abd82dca66">
+
+### 3. 运行时报错："TypeError: Cannot read properties of undefined (reading "getFriendList")"
+
+若按照上述步骤接入后，运行时出现以下错误，请您**务必删除 TUIKit 目录下的 node_modules 目录**，以保证 TUIKit 的依赖唯一性，避免 TUIKit 多份依赖造成问题。
+
+<img width="400" alt="image" src="https://github.com/TencentCloud/chat-uikit-vue/assets/57951148/f7c85dfe-b4bd-4c73-88d9-3a9f0d7797f2">
+
 
 ## 参考文档
 - [常见问题(uniapp)](https://cloud.tencent.com/document/product/269/68183)

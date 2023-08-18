@@ -3,10 +3,7 @@
     class="message-input-audio"
     :class="[props.isAudioMainShow && 'message-input-audio-open']"
   >
-    <div
-      v-if="isApp || isWeChat || isH5"
-      @click="switchAudio"
-    >
+    <div v-if="isApp || isWeChat || isH5" @click="switchAudio">
       <Icon class="audio-message-icon" :file="audio"></Icon>
     </div>
     <view
@@ -34,16 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  defineComponent,
-  ref,
-  toRefs,
-  watchEffect,
-  defineProps,
-  watch,
-  onMounted,
-  defineEmits,
-} from "../../../adapter-vue";
+import { ref, onMounted } from "../../../adapter-vue";
 
 import {
   TUIGlobal,
@@ -67,7 +55,7 @@ const props = defineProps({
 const emits = defineEmits(["switchAudio"]);
 
 const showAudioMain = ref<boolean>(false);
-const recorderManager = uni.getRecorderManager();
+const recorderManager = TUIGlobal?.global?.getRecorderManager();
 const popupToggle = ref(false);
 const isRecording = ref(false);
 const canSend = ref();
@@ -75,13 +63,13 @@ const textValue = ref("按住说话");
 const title = ref();
 const recordTime = ref();
 const recordTimer = ref(null);
-const currentConversation = ref<IConversationModel>();
+const currentConversation = ref<typeof IConversationModel>();
 const isH5 = ref(TUIGlobal.getPlatform() === "h5");
 const isApp = ref(TUIGlobal.getPlatform() === "app");
 const isWeChat = ref(TUIGlobal.getPlatform() === "wechat");
 
 TUIStore.watch(StoreName.CONV, {
-  currentConversation: (conversation: IConversationModel) => {
+  currentConversation: (conversation: typeof IConversationModel) => {
     currentConversation.value = conversation;
   },
 });
@@ -93,7 +81,7 @@ const switchAudio = () => {
 
 onMounted(() => {
   // 加载声音录制管理器
-  recorderManager.onStop((res) => {
+  recorderManager.onStop((res: any) => {
     clearInterval(recordTimer.value);
     // 兼容 uniapp 打包app，duration 和 fileSize 需要用户自己补充
     // 文件大小 ＝ (音频码率) x 时间长度(单位:秒) / 8
@@ -104,11 +92,11 @@ onMounted(() => {
         ? res.fileSize
         : ((48 * recordTime.value) / 8) * 1024,
     };
-    uni.hideLoading();
+    TUIGlobal?.global?.hideLoading();
     // 兼容 uniapp 语音消息没有duration
     if (canSend.value) {
       if (msg.duration < 1000) {
-        uni.showToast({
+        TUIGlobal?.global?.showToast({
           title: "录音时间太短",
           icon: "none",
         });
@@ -120,7 +108,7 @@ onMounted(() => {
             currentConversation?.value?.userProfile?.userID,
           conversationType: currentConversation?.value?.type,
           payload: { file: msg },
-        } as SendMessageParams;
+        } as typeof SendMessageParams;
         TUIChatService?.sendAudioMessage(options);
       }
     }
@@ -185,7 +173,7 @@ const handleTouchEnd = () => {
   isRecording.value = false;
   popupToggle.value = false;
   textValue.value = "按住说话";
-  uni.hideLoading();
+  TUIGlobal?.global?.hideLoading();
   recorderManager.stop();
 };
 </script>

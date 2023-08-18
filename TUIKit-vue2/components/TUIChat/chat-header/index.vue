@@ -9,19 +9,19 @@ import {
 } from "@tencentcloud/chat-uikit-engine";
 import { onLoad } from "@dcloudio/uni-app";
 import { ref } from "../../../adapter-vue";
-const currentConversation = ref<IConversationModel>();
+const currentConversation = ref<typeof IConversationModel>();
 const typingStatus = ref(false);
 
 const setChatHeaderContent = (content: string) => {
   if (content) {
-    uni.setNavigationBarTitle({
+    TUIGlobal?.global?.setNavigationBarTitle({
       title: content,
   });
   }
 };
 
 TUIStore.watch(StoreName.CONV, {
-  currentConversation: (conversation: IConversationModel) => {
+  currentConversation: (conversation: typeof IConversationModel) => {
     currentConversation.value = conversation;
     if(!typingStatus.value){
       setChatHeaderContent(currentConversation?.value?.getShowName());
