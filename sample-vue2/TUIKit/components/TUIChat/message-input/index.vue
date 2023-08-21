@@ -20,6 +20,7 @@
       :enableInput="props.enableInput"
       :enableAt="props.enableAt"
       :enableTyping="props.enableTyping"
+      :isGroup="isGroup"
       @sendMessage="sendMessage"
       @onTyping="onTyping"
       @onAt="onAt"
@@ -46,18 +47,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import {
+import TUIChatEngine, {
   TUIGlobal,
   TUIStore,
   StoreName,
+  IConversationModel,
 } from "@tencentcloud/chat-uikit-engine";
-import {
-  defineProps,
-  defineEmits,
-  ref,
-  defineExpose,
-  watch,
-} from "../../../adapter-vue";
+import { ref } from "../../../adapter-vue";
 import MessageInputEditor from "./message-input-editor.vue";
 import MessageInputAt from "./message-input-at/index.vue";
 import MessageInputAudio from "./message-input-audio.vue";
@@ -109,18 +105,20 @@ const emit = defineEmits([
 const replyOrReference = ref();
 const editor = ref();
 const messageInputAtRef = ref();
-const currentConversation = ref<IConversationModel>();
+const currentConversation = ref<typeof IConversationModel>();
 const isPC = ref(TUIGlobal.getPlatform() === "pc");
 const isH5 = ref(TUIGlobal.getPlatform() === "h5");
 const isWeChat = ref(TUIGlobal.getPlatform() === "wechat");
 const isApp = ref(TUIGlobal.getPlatform() === "app");
 const isAudioEnable = ref(isWeChat.value || isApp.value);
-const isAudioMainShow = ref<boolean>(false);
 const currentFunction = ref<string>("");
+const isGroup = ref<boolean>(false);
 
 TUIStore.watch(StoreName.CONV, {
-  currentConversation: (conversation: IConversationModel) => {
+  currentConversation: (conversation: typeof IConversationModel) => {
     currentConversation.value = conversation;
+    isGroup.value =
+      currentConversation?.value?.type === TUIChatEngine.TYPES.CONV_GROUP;
   },
 });
 
@@ -157,7 +155,7 @@ const onAt = (show: boolean) => {
 };
 
 const onFocus = (keyboardHeight?: number) => {
-  if(isH5.value){
+  if (isH5.value) {
     switchEmojiAndFeature("");
   }
 };
@@ -168,7 +166,7 @@ const resetReplyOrReference = () => {
 
 const sendMessage = async () => {
   let messageList;
-  if(editor?.value?.getEditorContent){
+  if (editor?.value?.getEditorContent) {
     messageList = editor?.value?.getEditorContent();
   }
   editor?.value?.resetEditor && editor?.value?.resetEditor();
@@ -243,7 +241,7 @@ defineExpose({
       }
     }
   }
-  &-emoji-picker{
+  &-emoji-picker {
     padding-top: 10px;
   }
 }

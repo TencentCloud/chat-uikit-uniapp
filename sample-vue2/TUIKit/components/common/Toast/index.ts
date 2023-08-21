@@ -1,3 +1,4 @@
+import { TUIGlobal } from "@tencentcloud/chat-uikit-engine";
 import TOAST_TYPE from "./type";
 
 const Toast = (options: {
@@ -5,7 +6,7 @@ const Toast = (options: {
   type: string;
   duration: number;
 }) => {
-  uni.showToast({
+  TUIGlobal?.global?.showToast({
     title: options.message || "Toast",
     duration: options.duration || 2000,
     icon: handleIconType(options.type),

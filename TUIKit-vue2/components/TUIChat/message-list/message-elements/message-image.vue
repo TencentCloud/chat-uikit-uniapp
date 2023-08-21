@@ -1,5 +1,5 @@
 <template>
-  <div class="message-image"  @click="handleImagePreview">
+  <div class="message-image" @click="handleImagePreview">
     <image
       class="image"
       mode="aspectFit"
@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watchEffect, ref, defineProps } from "../../../../adapter-vue";
+import { watchEffect, ref } from "../../../../adapter-vue";
 const DEFAULT_MAX_SIZE = 155;
 const props = defineProps({
   content: {
@@ -28,9 +28,9 @@ const data = ref({
   progress: 0,
 });
 const emits = defineEmits(["uploading", "previewImage"]);
-const imageStyles = ref({ width: 'auto', height: 'auto' });
+const imageStyles = ref({ width: "auto", height: "auto" });
 
-const genImageStyles = (value: { width: any; height: any; }) => {
+const genImageStyles = (value: { width: any; height: any }) => {
   const { width, height } = value;
   if (width === 0 || height === 0) {
     return;
@@ -47,7 +47,7 @@ const genImageStyles = (value: { width: any; height: any; }) => {
   }
   imageStyles.value.width = imageWidth + "px";
   imageStyles.value.height = imageHeight + "px";
-}
+};
 
 watchEffect(() => {
   data.value = props.content;
@@ -64,7 +64,6 @@ const handleImagePreview = () => {
     emits("previewImage", props.messageItem);
   }
 };
-
 </script>
 <style lang="scss" scoped>
 .message-image {

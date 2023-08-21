@@ -55,7 +55,10 @@
             @click.stop="toggleID = ''"
           >
             <MessageTip
-              v-if="item.type === TYPES.MSG_GRP_TIP"
+              v-if="
+                item.type === TYPES.MSG_GRP_TIP ||
+                isCreateGroupCustomMessage(item)
+              "
               :content="item.getMessageContent()"
             />
             <div
@@ -167,17 +170,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import {
-  ref,
-  defineProps,
-  defineEmits,
-  getCurrentInstance,
-  defineExpose,
-  nextTick,
-  onMounted,
-  computed,
-  onUnmounted,
-} from "../../../adapter-vue";
+import { ref, computed, onUnmounted } from "../../../adapter-vue";
 import TUIChatEngine, {
   TUIGlobal,
   IMessageModel,
@@ -207,8 +200,8 @@ import MessagePlugin from "../../../plugins/plugin-components/message-plugin.vue
 
 import Dialog from "../../common/Dialog";
 import ImagePreviewer from "../../common/ImagePreviewer/index";
-import { getImgLoad } from "../utils/utils";
-import { CHAT_SCROLL_TYPE } from "../../../constant";
+import { isCreateGroupCustomMessage } from "../utils/utils";
+
 const props = defineProps({
   groupID: {
     type: String,
