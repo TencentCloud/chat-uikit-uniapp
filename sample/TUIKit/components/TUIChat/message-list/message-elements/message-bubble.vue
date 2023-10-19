@@ -207,7 +207,7 @@ const isNoPadding = computed(() => {
   // position: relative;
   display: flex;
   flex-direction: column;
-  padding: 0 8px;
+  margin: 0 8px;
   .name {
     padding-bottom: 4px;
     font-weight: 400;

@@ -19,6 +19,7 @@
           ]"
           @closeChat="closeChat"
         ></ChatHeader>
+        <Forward></Forward>
         <MessageList
           :class="[
             'TUI-chat-message-list',
@@ -77,6 +78,7 @@ import { ref, onUnmounted } from "../../adapter-vue";
 import ChatHeader from "./chat-header/index.vue";
 import MessageList from "./message-list/index.vue";
 import MessageInput from "./message-input/index.vue";
+import Forward from "./forward/index.vue";
 import MessageInputToolbar from "./message-input-toolbar/index.vue";
 import TUICore, { TUIConstants, ExtensionInfo } from "@tencentcloud/tui-core";
 import { isUniFrameWork } from "../../utils/is-uni";
@@ -104,6 +106,9 @@ TUIStore.watch(StoreName.CONV, {
         { filterManageGroup: isGroup.value }
       );
       groupManageExt.value = extList[0];
+    }
+    if (isUniFrameWork && !isGroup.value) {
+      groupManageExt.value = [];
     }
     groupID.value = conversation?.groupProfile?.groupID;
   },

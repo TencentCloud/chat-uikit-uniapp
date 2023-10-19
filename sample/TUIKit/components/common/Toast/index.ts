@@ -4,7 +4,7 @@ import TOAST_TYPE from "./type";
 const Toast = (options: {
   message: string;
   type: string;
-  duration: number;
+  duration?: number;
 }) => {
   TUIGlobal?.global?.showToast({
     title: options.message || "Toast",
