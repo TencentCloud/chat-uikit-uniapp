@@ -87,12 +87,16 @@
                     @previewImage="handleImagePreview"
                   />
                 </ProgressMessage>
-                <MessageVideo
+                <ProgressMessage
                   v-if="item.type === TYPES.MSG_VIDEO"
                   :content="item.getMessageContent()"
                   :messageItem="item"
-                  :isPC="isPC"
-                />
+                >
+                  <MessageVideo
+                    :content="item.getMessageContent()"
+                    :messageItem="item"
+                  />
+                </ProgressMessage>
                 <MessageAudio
                   v-if="item.type === TYPES.MSG_AUDIO"
                   :content="item.getMessageContent()"
