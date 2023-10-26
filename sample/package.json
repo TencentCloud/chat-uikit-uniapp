@@ -1,6 +1,6 @@
 {
   "name": "sample-uniapp",
-  "version": "1.0.0",
+  "version": "0.1.2",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -13,10 +13,11 @@
     "@vue/composition-api": "^1.7.1",
     "@tencentcloud/chat-uikit-engine": "latest",
     "@tencentcloud/tui-core": "latest",
-    "@tencentcloud/chat": "^3.0.0",
+    "@tencentcloud/chat": "latest",
     "tim-profanity-filter-plugin": "^0.9.0",
     "tim-upload-plugin": "^1.0.4",
-    "unplugin-vue2-script-setup": "^0.11.3"
+    "unplugin-vue2-script-setup": "^0.11.3",
+    "dayjs": "^1.11.10"
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.17.0",

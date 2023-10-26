@@ -2,44 +2,41 @@
   <div class="message-video">
     <div
       class="message-video-box"
-      :class="[!videoData.progress && 'message-video-cover']"
       @click="handlerVideoPlay"
     >
-      <image :src="videoData.snapshotUrl" class="message-video-box"></image>
-      <Icon :file="playIcon" class="video-play"></Icon>
+      <image :src="props.content.snapshotUrl" class="message-video-box"></image>
+      <Icon
+        v-if="props.messageItem.status === 'success' || props.messageItem.progress === 1"
+        class="video-play"
+        :file="playIcon"
+      ></Icon>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { watchEffect, ref } from "../../../../adapter-vue";
+import { withDefaults } from "../../../../adapter-vue";
 import Icon from "../../../common/Icon.vue";
 import playIcon from "../../../../assets/icon/video-play.png";
-const props = defineProps({
-  content: {
-    type: Object,
-    default: () => ({}),
-  },
-  messageItme: {
-    type: Object,
-    default: () => ({}),
-  },
-});
+import type { IMessageModel } from "@tencentcloud/chat-uikit-engine";
+import type { IVideoMessageContent } from "../../../../interface";
 
-const videoData = ref({
-  progress: 0,
-});
-const message = ref();
+const props = withDefaults(
+  defineProps<{
+    content: IVideoMessageContent;
+    messageItem: IMessageModel;
+  }>(),
+  {
+    content: () => ({} as IVideoMessageContent),
+    messageItem: () => ({} as IMessageModel),
+  }
+);
 
-watchEffect(() => {
-  videoData.value = props.content;
-});
-
-const handlerVideoPlay = () => {
+function handlerVideoPlay()  {
   uni.navigateTo({
-    url: `/TUIKit/components/TUIChat/video-play?videoUrl=${videoData.value.url}`,
+    url: `/TUIKit/components/TUIChat/video-play?videoUrl=${props.content.url}`,
   });
-};
+}
 </script>
 <style lang="scss" scoped>
 .message-video {
@@ -50,29 +47,13 @@ const handlerVideoPlay = () => {
     background-color: rgba(#000000, 0.3);
     border-radius: 6px;
     height: 200px; // todo 优化高度动态获取
+    font-size: 0;
   }
   .video-play {
     position: absolute;
-    right: 0;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    margin: auto;
-  }
-  &-cover {
-    display: inline-block;
-    position: relative;
-    .video-play {
-      position: absolute;
-      top: 0;
-      right: 0;
-      left: 0;
-      bottom: 0;
-      z-index: 3;
-      width: 35px;
-      height: 35px;
-      margin: auto;
-    }
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 }
 </style>
