@@ -9,6 +9,7 @@
     .login {
       &-title {
         flex-direction: column;
+        align-items: flex-start;
         padding: 60px 0 18px;
   
         p {

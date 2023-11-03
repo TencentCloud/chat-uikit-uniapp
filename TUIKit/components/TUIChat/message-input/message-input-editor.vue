@@ -183,7 +183,6 @@ defineExpose({
     flex: 1;
     display: flex;
     overflow-y: scroll;
-    height: fit-content;
     min-height: 20px;
   }
   &-mute {

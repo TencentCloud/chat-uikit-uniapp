@@ -44,7 +44,7 @@ const props = defineProps({
   },
   messageItem: {
     type: Object,
-    default: () => ({} as typeof IMessageModel),
+    default: () => ({} as IMessageModel),
   },
 });
 const isWidth = computed(() => {

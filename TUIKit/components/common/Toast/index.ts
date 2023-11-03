@@ -5,7 +5,7 @@ const Toast = (options: {
   message: string;
   type: string;
   duration?: number;
-}) => {
+}): void => {
   TUIGlobal?.global?.showToast({
     title: options.message || "Toast",
     duration: options.duration || 2000,

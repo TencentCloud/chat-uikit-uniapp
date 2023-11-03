@@ -16,9 +16,9 @@
 
 <script lang="ts" setup>
 import { withDefaults } from "../../../../adapter-vue";
+import type { IMessageModel } from "@tencentcloud/chat-uikit-engine";
 import Icon from "../../../common/Icon.vue";
 import playIcon from "../../../../assets/icon/video-play.png";
-import type { IMessageModel } from "@tencentcloud/chat-uikit-engine";
 import type { IVideoMessageContent } from "../../../../interface";
 
 const props = withDefaults(

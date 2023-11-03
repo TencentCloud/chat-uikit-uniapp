@@ -27,21 +27,22 @@
         </span>
       </div>
       <scroll-view
+        id="messageScrollList"
         class="TUI-message-list"
         scroll-y="true"
         :scroll-top="scrollTop"
       >
         <p
+          v-if="!isCompleted"
           class="message-more"
           @click="getHistoryMessageList"
-          v-if="!isCompleted"
         >
           {{ TUITranslateService.t("TUIChat.查看更多") }}
         </p>
         <li
           v-for="(item, index) in messageList"
           :key="item.vueForRenderKey"
-          :id="item.ID"
+          :id="`tui-${item.ID}`"
           ref="messageAimID"
           class="message-li"
         >
@@ -70,7 +71,10 @@
               <MessageBubble
                 :messageItem="item"
                 :content="item.getMessageContent()"
+                :blinkMessageIDList="blinkMessageIDList"
                 @resendMessage="resendMessage(item)"
+                @blinkMessage="blinkMessage"
+                @scrollTo="scrollTo"
               >
                 <MessageText
                   v-if="item.type === TYPES.MSG_TEXT"
@@ -175,7 +179,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, computed, onUnmounted } from "../../../adapter-vue";
+import { ref, computed, onMounted, onUnmounted, getCurrentInstance } from "../../../adapter-vue";
 import TUIChatEngine, {
   TUIGlobal,
   IMessageModel,
@@ -207,6 +211,7 @@ import MessagePlugin from "../../../plugins/plugin-components/message-plugin.vue
 import Dialog from "../../common/Dialog/index.vue";
 import ImagePreviewer from "../../common/ImagePreviewer/index.vue";
 import { isCreateGroupCustomMessage } from "../utils/utils";
+import { getBoundingClientRect, getScrollInfo, instanceMapping } from "../../../utils/universal-api/domOperation";
 
 const props = defineProps({
   groupID: {
@@ -218,6 +223,8 @@ const props = defineProps({
     default: false,
   },
 });
+
+const thisInstance = getCurrentInstance()?.proxy || getCurrentInstance();
 const isPC = ref(TUIGlobal.getPlatform() === "pc");
 const isH5 = ref(TUIGlobal.getPlatform() === "h5");
 const messageListRef = ref();
@@ -232,6 +239,7 @@ const TYPES = ref(TUIChatEngine.TYPES);
 const listRef = ref();
 const isLoadMessage = ref(false);
 const isLongpressing = ref(false);
+const blinkMessageIDList = ref<string[]>([]);
 
 // 加群申请系统消息
 const groupApplicationCount = ref(0);
@@ -245,9 +253,9 @@ const emits = defineEmits(["handleEditor"]);
 
 // 图片预览相关
 const showImagePreview = ref(false);
-const currentImagePreview = ref<typeof IMessageModel>();
+const currentImagePreview = ref<IMessageModel>();
 const imageMessageList = computed(() =>
-  messageList?.value?.filter((item: typeof IMessageModel) => {
+  messageList?.value?.filter((item: IMessageModel) => {
     return !item.isRevoked && item.type === TYPES.value.MSG_IMAGE;
   })
 );
@@ -284,7 +292,7 @@ const onCurrentConversationIDUpdated = (conversationID: string) => {
 };
 
 // operationType 操作类型 1: 有用户申请加群   23: 普通群成员邀请用户进群
-const onGroupSystemNoticeList = (list: Array<typeof IMessageModel>) => {
+const onGroupSystemNoticeList = (list: Array<IMessageModel>) => {
   const systemNoticeList = list.filter((message) => {
     const { operationType } = message.payload;
     return (
@@ -316,7 +324,7 @@ const onGroupSystemNoticeList = (list: Array<typeof IMessageModel>) => {
 
 // 消息列表监听
 TUIStore.watch(StoreName.CHAT, {
-  messageList: (list: Array<typeof IMessageModel>) => {
+  messageList: (list: Array<IMessageModel>) => {
     messageList.value = list
       .filter(message => !message.isDeleted)
       .map((message) => {
@@ -347,6 +355,10 @@ TUIStore.watch(StoreName.CUSTOM, {
   groupApplicationCount: (count: Number) => {
     groupApplicationCount.value = count;
   },
+});
+
+onMounted(() => {
+  instanceMapping.set('messageList', thisInstance);
 });
 
 // 取消监听
@@ -386,7 +398,7 @@ const openComplaintLink = (type: any) => {};
 // 消息操作
 const handleToggleMessageItem = (
   e: any,
-  message: typeof IMessageModel,
+  message: IMessageModel,
   index: number,
   isLongpress = false
 ) => {
@@ -400,7 +412,7 @@ const handleToggleMessageItem = (
 let timer: number;
 const handleH5LongPress = (
   e: any,
-  message: typeof IMessageModel,
+  message: IMessageModel,
   index: number,
   type: string
 ) => {
@@ -429,19 +441,19 @@ const handleH5LongPress = (
 };
 
 // 消息撤回后，编辑消息
-const handleEdit = (message: typeof IMessageModel) => {
+const handleEdit = (message: IMessageModel) => {
   emits("handleEditor", message, "reedit");
 };
 
 // 重发消息
-const resendMessage = (message: typeof IMessageModel) => {
+const resendMessage = (message: IMessageModel) => {
   reSendDialogShow.value = true;
   resendMessageData.value = message;
 };
 
 // 图片预览
 // 开启图片预览
-const handleImagePreview = (message: typeof IMessageModel) => {
+const handleImagePreview = (message: IMessageModel) => {
   if (
     showImagePreview.value ||
     currentImagePreview.value ||
@@ -465,5 +477,30 @@ const resendMessageConfirm = () => {
   const messageModel = resendMessageData.value;
   messageModel.resendMessage();
 };
+
+function blinkMessage(messageID: string): Promise<void> {
+  return new Promise((resolve) => {
+    const index = blinkMessageIDList.value.indexOf(messageID);
+    if (index < 0) {
+      blinkMessageIDList.value.push(messageID);
+      const timer = setTimeout(() => {
+        blinkMessageIDList.value.splice(blinkMessageIDList.value.indexOf(messageID), 1);
+        clearTimeout(timer);
+        resolve();
+      }, 3000);
+    }
+  });
+}
+
+function scrollTo(scrollHeight: number) {
+  scrollTop.value = scrollHeight;
+}
+
+// 滚动到最新消息
+async function scrollToLatestMessage() {
+  const { scrollHeight } = await getScrollInfo('#messageScrollList', 'messageList');
+  const { height } = await getBoundingClientRect('#messageScrollList', 'messageList');
+  scrollTop.value = scrollHeight - height;
+}
 </script>
 <style lang="scss" scoped src="./style/index.scss"></style>

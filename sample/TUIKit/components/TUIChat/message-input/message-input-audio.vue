@@ -63,13 +63,13 @@ const textValue = ref("按住说话");
 const title = ref();
 const recordTime = ref();
 const recordTimer = ref(null);
-const currentConversation = ref<typeof IConversationModel>();
+const currentConversation = ref<IConversationModel>();
 const isH5 = ref(TUIGlobal.getPlatform() === "h5");
 const isApp = ref(TUIGlobal.getPlatform() === "app");
 const isWeChat = ref(TUIGlobal.getPlatform() === "wechat");
 
 TUIStore.watch(StoreName.CONV, {
-  currentConversation: (conversation: typeof IConversationModel) => {
+  currentConversation: (conversation: IConversationModel) => {
     currentConversation.value = conversation;
   },
 });
@@ -108,7 +108,7 @@ onMounted(() => {
             currentConversation?.value?.userProfile?.userID,
           conversationType: currentConversation?.value?.type,
           payload: { file: msg },
-        } as typeof SendMessageParams;
+        } as SendMessageParams;
         TUIChatService?.sendAudioMessage(options);
       }
     }
