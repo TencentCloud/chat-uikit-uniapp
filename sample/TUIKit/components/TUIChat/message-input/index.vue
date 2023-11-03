@@ -1,48 +1,53 @@
 <template>
   <div :class="['message-input', !isPC && 'message-input-h5']">
-    <MessageInputAudio
-      v-if="isAudioEnable"
-      :class="[
-        'message-input-audio',
-        isWeChat && 'message-input-wx-audio',
-        isFunctionShow('audio') && 'message-input-wx-audio-open',
-      ]"
-      @switchAudio="switchAudio"
-      :isAudioMainShow="isFunctionShow('audio')"
-    ></MessageInputAudio>
-    <MessageInputEditor
-      v-show="!isFunctionShow('audio')"
-      class="message-input-editor"
-      ref="editor"
-      :placeholder="props.placeholder"
-      :isMuted="props.isMuted"
-      :muteText="props.muteText"
-      :enableInput="props.enableInput"
-      :enableAt="props.enableAt"
-      :enableTyping="props.enableTyping"
-      :isGroup="isGroup"
-      @sendMessage="sendMessage"
-      @onTyping="onTyping"
-      @onAt="onAt"
-      @onFocus="onFocus"
-    ></MessageInputEditor>
-    <MessageInputAt
-      v-if="props.enableAt"
-      ref="messageInputAtRef"
-      @insertAt="insertAt"
-      @onAtListOpen="onAtListOpen"
-    ></MessageInputAt>
-    <div class="message-input-emoji" @click="switchEmojiAndFeature('emoji')">
-      <Icon :file="faceIcon" class="icon icon-face"></Icon>
-    </div>
-    <div class="message-input-more" @click="switchEmojiAndFeature('more')">
-      <Icon :file="moreIcon" class="icon icon-more"></Icon>
-    </div>
-    <div class="message-input-emoji-picker" v-show="isFunctionShow('emoji')">
-      <EmojiPickerDialog
-        @insertEmoji="insertEmoji"
+    <div class="flex-row">
+      <MessageInputAudio
+        v-if="isAudioEnable"
+        :class="[
+          'message-input-audio',
+          isWeChat && 'message-input-wx-audio',
+          isFunctionShow('audio') && 'message-input-wx-audio-open',
+        ]"
+        :isAudioMainShow="isFunctionShow('audio')"
+        @switchAudio="switchAudio"
+      ></MessageInputAudio>
+      <MessageInputEditor
+        v-show="!isFunctionShow('audio')"
+        class="message-input-editor"
+        ref="editor"
+        :placeholder="props.placeholder"
+        :isMuted="props.isMuted"
+        :muteText="props.muteText"
+        :enableInput="props.enableInput"
+        :enableAt="props.enableAt"
+        :enableTyping="props.enableTyping"
+        :isGroup="isGroup"
         @sendMessage="sendMessage"
-      ></EmojiPickerDialog>
+        @onTyping="onTyping"
+        @onAt="onAt"
+        @onFocus="onFocus"
+      ></MessageInputEditor>
+      <MessageInputAt
+        v-if="props.enableAt"
+        ref="messageInputAtRef"
+        @insertAt="insertAt"
+        @onAtListOpen="onAtListOpen"
+      ></MessageInputAt>
+      <div class="message-input-emoji" @click="switchEmojiAndFeature('emoji')">
+        <Icon :file="faceIcon" class="icon icon-face"></Icon>
+      </div>
+      <div class="message-input-more" @click="switchEmojiAndFeature('more')">
+        <Icon :file="moreIcon" class="icon icon-more"></Icon>
+      </div>
+    </div>
+    <div>
+      <MessageQuote :style="{minWidth: 0}" :currentFunction="currentFunction"/>
+      <div class="message-input-emoji-picker" v-show="isFunctionShow('emoji')">
+        <EmojiPickerDialog
+          @insertEmoji="insertEmoji"
+          @sendMessage="sendMessage"
+        ></EmojiPickerDialog>
+      </div>
     </div>
   </div>
 </template>
@@ -58,6 +63,7 @@ import MessageInputEditor from "./message-input-editor.vue";
 import MessageInputAt from "./message-input-at/index.vue";
 import MessageInputAudio from "./message-input-audio.vue";
 import EmojiPickerDialog from "../message-input-toolbar/emoji-picker/emoji-picker-dialog.vue";
+import MessageQuote from "./message-input-quote/index.vue";
 import Icon from "../../common/Icon.vue";
 import faceIcon from "../../../assets/icon/face-uni.png";
 import moreIcon from "../../../assets/icon/more-uni.png";
@@ -105,7 +111,7 @@ const emit = defineEmits([
 const replyOrReference = ref();
 const editor = ref();
 const messageInputAtRef = ref();
-const currentConversation = ref<typeof IConversationModel>();
+const currentConversation = ref<IConversationModel>();
 const isPC = ref(TUIGlobal.getPlatform() === "pc");
 const isH5 = ref(TUIGlobal.getPlatform() === "h5");
 const isWeChat = ref(TUIGlobal.getPlatform() === "wechat");
@@ -115,7 +121,7 @@ const currentFunction = ref<string>("");
 const isGroup = ref<boolean>(false);
 
 TUIStore.watch(StoreName.CONV, {
-  currentConversation: (conversation: typeof IConversationModel) => {
+  currentConversation: (conversation: IConversationModel) => {
     currentConversation.value = conversation;
     isGroup.value =
       currentConversation?.value?.type === TUIChatEngine.TYPES.CONV_GROUP;
@@ -193,8 +199,7 @@ const sendMessage = async () => {
   resetReplyOrReference();
   await sendMessages(
     messageList,
-    currentConversation.value,
-    replyOrReference.value
+    currentConversation.value
   );
   emit("sendMessage");
 };
@@ -267,14 +272,17 @@ defineExpose({
 }
 .message-input-h5 {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  flex-direction: column;
   height: calc(100% - 20px);
   width: calc(100% - 20px);
   max-height: 100%;
   max-width: calc(100% - 20px);
   padding: 10px;
   overflow: hidden;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
 }
 </style>

@@ -9,7 +9,7 @@ import {
 } from "@tencentcloud/chat-uikit-engine";
 import { onLoad } from "@dcloudio/uni-app";
 import { ref } from "../../../adapter-vue";
-const currentConversation = ref<typeof IConversationModel>();
+const currentConversation = ref<IConversationModel>();
 const typingStatus = ref(false);
 
 const setChatHeaderContent = (content: string) => {
@@ -19,7 +19,7 @@ const setChatHeaderContent = (content: string) => {
 };
 
 TUIStore.watch(StoreName.CONV, {
-  currentConversation: (conversation: typeof IConversationModel) => {
+  currentConversation: (conversation: IConversationModel) => {
     currentConversation.value = conversation;
     if(!typingStatus.value){
       setChatHeaderContent(currentConversation?.value?.getShowName());
