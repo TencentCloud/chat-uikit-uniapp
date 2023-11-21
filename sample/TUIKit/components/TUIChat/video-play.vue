@@ -13,7 +13,7 @@
 
 <script lang="ts" setup>
 import { ref } from "../../adapter-vue";
-import { TUIGlobal } from "@tencentcloud/chat-uikit-engine";
+import { TUIGlobal } from "../../utils/universal-api/index";
 import { onLoad, onReady } from "@dcloudio/uni-app";
 const props = defineProps({
   data: {
@@ -32,7 +32,7 @@ onLoad((option: any) => {
 
 onReady(() => {
   show.value = true;
-  videoContext.value = TUIGlobal?.global?.createVideoContext("videoEle");
+  videoContext.value = TUIGlobal.createVideoContext("videoEle");
 });
 </script>
 <style lang="scss" scoped>

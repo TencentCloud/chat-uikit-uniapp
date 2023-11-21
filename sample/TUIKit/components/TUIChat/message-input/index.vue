@@ -53,7 +53,6 @@
 </template>
 <script setup lang="ts">
 import TUIChatEngine, {
-  TUIGlobal,
   TUIStore,
   StoreName,
   IConversationModel,
@@ -67,7 +66,7 @@ import MessageQuote from "./message-input-quote/index.vue";
 import Icon from "../../common/Icon.vue";
 import faceIcon from "../../../assets/icon/face-uni.png";
 import moreIcon from "../../../assets/icon/more-uni.png";
-
+import { isPC, isH5, isWeChat, isApp } from "../../../utils/env";
 import { sendMessages, sendTyping } from "../utils/sendMessage";
 
 const props = defineProps({
@@ -112,11 +111,7 @@ const replyOrReference = ref();
 const editor = ref();
 const messageInputAtRef = ref();
 const currentConversation = ref<IConversationModel>();
-const isPC = ref(TUIGlobal.getPlatform() === "pc");
-const isH5 = ref(TUIGlobal.getPlatform() === "h5");
-const isWeChat = ref(TUIGlobal.getPlatform() === "wechat");
-const isApp = ref(TUIGlobal.getPlatform() === "app");
-const isAudioEnable = ref(isWeChat.value || isApp.value);
+const isAudioEnable = ref(isWeChat || isApp);
 const currentFunction = ref<string>("");
 const isGroup = ref<boolean>(false);
 
@@ -181,7 +176,7 @@ const onAt = (show: boolean) => {
 };
 
 const onFocus = (keyboardHeight?: number) => {
-  if (isH5.value) {
+  if (isH5) {
     switchEmojiAndFeature("");
   }
 };

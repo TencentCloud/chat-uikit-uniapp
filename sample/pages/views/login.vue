@@ -60,20 +60,14 @@
 <script lang="ts" setup>
 import { computed, ref, vueVersion } from "../../TUIKit/adapter-vue";
 import { TUILogin } from "@tencentcloud/tui-core";
-import {
-  TUIGlobal,
-  TUITranslateService,
-  TUIUserService,
-} from "@tencentcloud/chat-uikit-engine";
+import { TUITranslateService, TUIUserService } from "@tencentcloud/chat-uikit-engine";
 import Link from "../../utils/link";
 import { genTestUserSig } from "../../TUIKit/debug";
+import { isPC, isH5, isApp } from "../../TUIKit/utils/env";
 import Icon from "../../TUIKit/components/common/Icon.vue";
 import logo from "../../static/logo-back.svg";
 const privateAgree = ref(false);
 const inputValue = ref("");
-const isH5 = ref(TUIGlobal.getPlatform() === "h5");
-const isPC = ref(TUIGlobal.getPlatform() === "pc");
-const isApp = ref(TUIGlobal.getPlatform() === "app");
 
 const onAgreePrivateProtocol = () => {
   privateAgree.value = !privateAgree.value;

@@ -5,7 +5,7 @@
     @touchstart="handleTouchStart"
     @touchend="handleTouchEnd"
   >
-    <ConversationHeader ref="headerRef" />
+    <ConversationHeader v-if="isShowConversationHeader" ref="headerRef" />
     <ConversationNetwork />
     <ConversationList
       class="tui-conversation-list"
@@ -16,12 +16,9 @@
   </div>
 </template>
 <script lang="ts" setup>
-import {
-  TUIStore,
-  TUIGlobal,
-  StoreName,
-} from "@tencentcloud/chat-uikit-engine";
+import { TUIStore, StoreName } from "@tencentcloud/chat-uikit-engine";
 import { ref } from "../../adapter-vue";
+import { TUIGlobal } from "../../utils/universal-api/index";
 import ConversationList from "./conversation-list/index.vue";
 import ConversationHeader from "./conversation-header/index.vue";
 import ConversationNetwork from "./conversation-network/index.vue";
@@ -34,6 +31,7 @@ const headerRef = ref<HTMLElement | undefined>();
 const conversationListDomRef = ref<HTMLElement | undefined>();
 const touchX = ref<number>(0);
 const touchY = ref<number>(0);
+const isShowConversationHeader = ref<boolean>(true);
 
 TUIStore.watch(StoreName.CONV, {
   totalUnreadCount: (count: number) => {
@@ -41,8 +39,14 @@ TUIStore.watch(StoreName.CONV, {
   },
 });
 
+TUIStore.watch(StoreName.CUSTOM, {
+  isShowConversationHeader: (showStatus: boolean) => {
+    isShowConversationHeader.value = showStatus !== false;
+  },
+});
+
 const handleSwitchConversation = (conversationID: string) => {
-  TUIGlobal?.global?.navigateTo({
+  TUIGlobal?.navigateTo({
     url: "/TUIKit/components/TUIChat/index",
   });
   emits("handleSwitchConversation", conversationID);

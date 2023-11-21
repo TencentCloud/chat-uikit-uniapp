@@ -32,16 +32,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "../../../adapter-vue";
-
 import {
-  TUIGlobal,
   TUIStore,
   StoreName,
   TUIChatService,
   SendMessageParams,
   IConversationModel,
 } from "@tencentcloud/chat-uikit-engine";
-
+import { isH5, isWeChat, isApp } from "../../../utils/env";
+import { TUIGlobal } from "../../../utils/universal-api/index";
 import Icon from "../../common/Icon.vue";
 import audio from "../../../assets/icon/audio.svg";
 
@@ -55,7 +54,7 @@ const props = defineProps({
 const emits = defineEmits(["switchAudio"]);
 
 const showAudioMain = ref<boolean>(false);
-const recorderManager = TUIGlobal?.global?.getRecorderManager();
+const recorderManager = TUIGlobal?.getRecorderManager();
 const popupToggle = ref(false);
 const isRecording = ref(false);
 const canSend = ref();
@@ -64,9 +63,6 @@ const title = ref();
 const recordTime = ref();
 const recordTimer = ref(null);
 const currentConversation = ref<IConversationModel>();
-const isH5 = ref(TUIGlobal.getPlatform() === "h5");
-const isApp = ref(TUIGlobal.getPlatform() === "app");
-const isWeChat = ref(TUIGlobal.getPlatform() === "wechat");
 
 TUIStore.watch(StoreName.CONV, {
   currentConversation: (conversation: IConversationModel) => {
@@ -92,11 +88,11 @@ onMounted(() => {
         ? res.fileSize
         : ((48 * recordTime.value) / 8) * 1024,
     };
-    TUIGlobal?.global?.hideLoading();
+    TUIGlobal?.hideLoading();
     // 兼容 uniapp 语音消息没有duration
     if (canSend.value) {
       if (msg.duration < 1000) {
-        TUIGlobal?.global?.showToast({
+        TUIGlobal?.showToast({
           title: "录音时间太短",
           icon: "none",
         });
@@ -173,7 +169,7 @@ const handleTouchEnd = () => {
   isRecording.value = false;
   popupToggle.value = false;
   textValue.value = "按住说话";
-  TUIGlobal?.global?.hideLoading();
+  TUIGlobal?.hideLoading();
   recorderManager.stop();
 };
 </script>

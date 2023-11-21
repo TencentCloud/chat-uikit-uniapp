@@ -1,7 +1,6 @@
 <template></template>
 <script setup lang="ts">
 import {
-  TUIGlobal,
   TUIStore,
   StoreName,
   IConversationModel,
@@ -9,11 +8,13 @@ import {
 } from "@tencentcloud/chat-uikit-engine";
 import { onLoad } from "@dcloudio/uni-app";
 import { ref } from "../../../adapter-vue";
+import { TUIGlobal } from "../../../utils/universal-api/index";
+
 const currentConversation = ref<IConversationModel>();
 const typingStatus = ref(false);
 
 const setChatHeaderContent = (content: string) => {
-  TUIGlobal?.global?.setNavigationBarTitle({
+  TUIGlobal?.setNavigationBarTitle({
     title: content || '云通信 IM',
   });
 };

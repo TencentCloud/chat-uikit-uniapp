@@ -27,9 +27,10 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { TUIGlobal } from "@tencentcloud/chat-uikit-engine";
 import { ref, nextTick, watch } from "../../../adapter-vue";
 import { ISendMessagePayload } from "../../../interface";
+import { isPC } from "../../../utils/env";
+import { TUIGlobal } from "../../../utils/universal-api/index";
 
 const props = defineProps({
   placeholder: {
@@ -67,7 +68,6 @@ const props = defineProps({
   },
 });
 const emits = defineEmits(["sendMessage", "onTyping", "onFocus", "onAt"]);
-const isPC = ref(TUIGlobal.getPlatform() === "pc");
 const inputText = ref("");
 const inputRef = ref();
 const inputBlur = ref(true);
@@ -141,7 +141,7 @@ const onInput = (e: any) => {
   const text = e?.detail?.value;
   isEditorContentEmpty();
   if (props.isGroup && (text.endsWith("@") || text.endsWith("@\n"))) {
-    TUIGlobal?.global?.hideKeyboard();
+    TUIGlobal?.hideKeyboard();
     emits("onAt", true);
   }
 };
