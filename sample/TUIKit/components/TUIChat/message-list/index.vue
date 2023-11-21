@@ -181,7 +181,6 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted, getCurrentInstance } from "../../../adapter-vue";
 import TUIChatEngine, {
-  TUIGlobal,
   IMessageModel,
   TUIStore,
   StoreName,
@@ -212,6 +211,7 @@ import Dialog from "../../common/Dialog/index.vue";
 import ImagePreviewer from "../../common/ImagePreviewer/index.vue";
 import { isCreateGroupCustomMessage } from "../utils/utils";
 import { getBoundingClientRect, getScrollInfo, instanceMapping } from "../../../utils/universal-api/domOperation";
+import { isPC, isH5 } from "../../../utils/env";
 
 const props = defineProps({
   groupID: {
@@ -225,8 +225,6 @@ const props = defineProps({
 });
 
 const thisInstance = getCurrentInstance()?.proxy || getCurrentInstance();
-const isPC = ref(TUIGlobal.getPlatform() === "pc");
-const isH5 = ref(TUIGlobal.getPlatform() === "h5");
 const messageListRef = ref();
 const title = ref("TUIChat");
 const messageList = ref();
@@ -256,7 +254,7 @@ const showImagePreview = ref(false);
 const currentImagePreview = ref<IMessageModel>();
 const imageMessageList = computed(() =>
   messageList?.value?.filter((item: IMessageModel) => {
-    return !item.isRevoked && item.type === TYPES.value.MSG_IMAGE;
+    return !item.isRevoked && !item.hasRiskContent && item.type === TYPES.value.MSG_IMAGE;
   })
 );
 
@@ -416,7 +414,7 @@ const handleH5LongPress = (
   index: number,
   type: string
 ) => {
-  if (!isH5.value) return;
+  if (!isH5) return;
   function longPressHandler() {
     clearTimeout(timer);
     handleToggleMessageItem(e, message, index, true);

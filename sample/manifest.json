@@ -72,6 +72,14 @@
     },
     /* 快应用特有相关 */
     "quickapp" : {},
+    /* H5 特有相关 ：关闭 treeshaking 是为了规避 uni[methond]() is not a function 的问题 */
+    "h5" : {
+        "optimization" : {
+            "treeShaking" : {
+                "enable" : false
+            }
+        }
+    },
     /* 小程序特有相关 */
     "mp-weixin" : {
         "appid" : "wx649acbec87e200b4",

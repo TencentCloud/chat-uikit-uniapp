@@ -135,7 +135,6 @@
 </template>
 <script lang="ts" setup>
 import TUIChatEngine, {
-  TUIGlobal,
   TUITranslateService,
   TUIUserService,
   TUIStore,
@@ -143,6 +142,8 @@ import TUIChatEngine, {
 } from "@tencentcloud/chat-uikit-engine";
 import { TUILogin } from "@tencentcloud/tui-core";
 import { ref, defineProps, onMounted } from "../../TUIKit/adapter-vue";
+import { isPC } from "../../TUIKit/utils/env";
+import { TUIGlobal } from "../../TUIKit/utils/universal-api/index";
 import { Toast, TOAST_TYPE } from "../../TUIKit/components/common/Toast/index";
 import BottomPopup from "../../TUIKit/components/common/BottomPopup/index.vue";
 import Icon from "../../TUIKit/components/common/Icon.vue";
@@ -163,7 +164,6 @@ const props = defineProps({
 
 const settingDomRef = ref();
 const userProfile = ref<IUserProfile>({});
-const isPC = ref(TUIGlobal.getPlatform() === "pc");
 const settingList = ref<{
   [propsName: string]: {
     value: string;
@@ -196,7 +196,7 @@ const settingList = ref<{
     childrenShowType: "bottomPopup",
     showChildren: false,
     onClick: (item: any) => {
-      if (!isPC.value) {
+      if (!isPC) {
         item.showChildren = true;
       }
     },
@@ -229,7 +229,7 @@ const settingList = ref<{
     label: "退出登录",
     onClick: (item: any) => {
       TUILogin.logout().then(() => {
-        TUIGlobal?.global?.reLaunch({
+        TUIGlobal?.reLaunch({
           url: "/pages/views/login",
         });
       });
