@@ -3,43 +3,49 @@
     {
       "path": "pages/views/login",
       "style": {
-        "navigationBarTitleText": "云通信 IM"
+        "navigationBarTitleText": "腾讯云 IM"
       }
     },
     {
       "path": "TUIKit/components/TUIConversation/index",
       "style": {
-        "navigationBarTitleText": "云通信 IM"
+        "navigationBarTitleText": "腾讯云 IM"
       }
     },
     {
       "path": "TUIKit/components/TUIChat/index",
       "style": {
-        "navigationBarTitleText": "云通信 IM"
+        "navigationBarTitleText": "腾讯云 IM"
       }
     },
     {
       "path": "TUIKit/components/TUIContact/index",
       "style": {
-        "navigationBarTitleText": "云通信 IM"
+        "navigationBarTitleText": "腾讯云 IM"
       }
     },
     {
       "path": "pages/views/profile",
       "style": {
-        "navigationBarTitleText": "云通信 IM"
+        "navigationBarTitleText": "腾讯云 IM"
       }
     },
     {
       "path": "TUIKit/components/TUIChat/video-play",
       "style": {
-        "navigationBarTitleText": "云通信 IM"
+        "navigationBarTitleText": "腾讯云 IM"
+      }
+    },
+    {
+      "path": "TUIKit/components/TUIChat/web-view",
+      "style": {
+        "navigationBarTitleText": "腾讯云 IM"
       }
     },
     {
       "path": "TUIKit/components/TUIGroup/index",
       "style": {
-        "navigationBarTitleText": "云通信 IM"
+        "navigationBarTitleText": "腾讯云 IM"
       }
     }
   ],
