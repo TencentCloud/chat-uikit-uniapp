@@ -224,6 +224,34 @@ const settingList = ref<{
       },
     },
   },
+  displayMessageReadReceipt: {
+    value: "displayMessageReadReceipt",
+    label: "启用已读回执",
+    selectedChild: "userLevelReadReceiptOpen",
+    childrenShowType: "bottomPopup",
+    showChildren: false,
+    onClick(item: any) {
+      if (!isPC) {
+        item.showChildren = true;
+      }
+    },
+    children: {
+      userLevelReadReceiptOpen: {
+        value: "userLevelReadReceiptOpen",
+        label: "是",
+        onClick() {
+          switchEnabelUserLevelReadRecript(true);
+        }
+      },
+      userLevelReadReceiptClose: {
+        value: "userLevelReadReceiptClose",
+        label: "否",
+        onClick() {
+          switchEnabelUserLevelReadRecript(false);
+        }
+      }
+    }
+  },
   exit: {
     value: "exit",
     label: "退出登录",
@@ -277,6 +305,10 @@ TUIStore.watch(StoreName.USER, {
       settingList.value.allowType.selectedChild = userProfile?.value?.allowType;
     }
   },
+  displayMessageReadReceipt(isDisplay: boolean) {
+    settingList.value.displayMessageReadReceipt.selectedChild
+      = isDisplay ? "userLevelReadReceiptOpen" : "userLevelReadReceiptClose";
+  }
 });
 
 // 规避TUIStore.watch userProfile 登录后暂时不能及时触发更新
@@ -295,6 +327,10 @@ onHide(() => {
     }
   }
 });
+
+function switchEnabelUserLevelReadRecript(status: boolean) {
+  TUIStore.update(StoreName.USER, "displayMessageReadReceipt", status);
+}
 </script>
 
 <style lang="scss" scoped src="../../styles/profile/index.scss"></style>

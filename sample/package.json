@@ -1,6 +1,6 @@
 {
   "name": "sample-uniapp",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -14,6 +14,7 @@
     "@tencentcloud/chat-uikit-engine": "latest",
     "@tencentcloud/tui-core": "latest",
     "@tencentcloud/chat": "latest",
+    "@tencentcloud/tui-customer-service-plugin": "latest",
     "tim-profanity-filter-plugin": "^0.9.0",
     "tim-upload-plugin": "^1.0.4",
     "unplugin-vue2-script-setup": "^0.11.3",
