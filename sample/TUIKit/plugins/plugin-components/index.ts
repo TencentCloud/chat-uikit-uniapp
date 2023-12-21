@@ -1,5 +1,5 @@
 import TUIChatEngine, { IMessageModel } from "@tencentcloud/chat-uikit-engine";
-import { isCustomerServicePluginMessage } from "../../../tui-customer-service-plugin";
+import { isCustomerServicePluginMessage } from "../../tui-customer-service-plugin";
 
 const isSignalingMessage = (message: IMessageModel):boolean => {
     return !!(message?.type === TUIChatEngine.TYPES.MSG_CUSTOM && message?.getSignalingInfo());

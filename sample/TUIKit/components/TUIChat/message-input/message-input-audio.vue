@@ -41,6 +41,7 @@ import {
 } from "@tencentcloud/chat-uikit-engine";
 import { isH5, isWeChat, isApp } from "../../../utils/env";
 import { TUIGlobal } from "../../../utils/universal-api/index";
+import { isEnabledMessageReadReceiptGlobal } from "../utils/utils";
 import Icon from "../../common/Icon.vue";
 import audio from "../../../assets/icon/audio.svg";
 
@@ -104,6 +105,7 @@ onMounted(() => {
             currentConversation?.value?.userProfile?.userID,
           conversationType: currentConversation?.value?.type,
           payload: { file: msg },
+          needReadReceipt: isEnabledMessageReadReceiptGlobal(),
         } as SendMessageParams;
         TUIChatService?.sendAudioMessage(options);
       }
