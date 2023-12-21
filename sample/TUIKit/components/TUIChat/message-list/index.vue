@@ -62,6 +62,8 @@
             />
             <div
               v-else-if="!item.isRevoked && !isPluginMessage(item)"
+              :id="`msg-bubble-${item.ID}`"
+              class="message-bubble-container"
               @longpress="handleToggleMessageItem($event, item, index, true)"
               @touchstart="handleH5LongPress($event, item, index, 'touchstart')"
               @touchend="handleH5LongPress($event, item, index, 'touchend')"
@@ -241,6 +243,8 @@ const props = defineProps({
 });
 
 let observer: any = null;
+let groupType: string | undefined;
+const sentReceiptMessageID = new Set<string>();
 const thisInstance = getCurrentInstance()?.proxy || getCurrentInstance();
 const messageListRef = ref();
 const title = ref("TUIChat");
@@ -307,6 +311,12 @@ const onCurrentConversationIDUpdated = (conversationID: string) => {
       applicationList.length
     );
   });
+
+  // 开启已读回执的状态 群聊缓存群类型
+  if (isEnabledMessageReadReceiptGlobal()) {
+    const { groupProfile } = TUIStore.getConversationModel(conversationID) || {};
+    groupType = groupProfile?.type;
+  }
 };
 
 // operationType 操作类型 1: 有用户申请加群   23: 普通群成员邀请用户进群
@@ -342,25 +352,8 @@ const onGroupSystemNoticeList = (list: Array<IMessageModel>) => {
 
 // 消息列表监听
 TUIStore.watch(StoreName.CHAT, {
-  messageList: (list: Array<IMessageModel>) => {
-    observer?.disconnect();
-    messageList.value = list
-      .filter(message => !message.isDeleted)
-      .map((message) => {
-        message.vueForRenderKey = `${message.ID}`;
-        return message;
-      });
-    // 点击加载更多的消息不需要滑动到底部
-    if (!isLoadMessage.value) {
-      scrollToBottom();
-    }
-    if (isEnabledMessageReadReceiptGlobal()) {
-      nextTick(() => bindIntersectionObserver());
-    }
-  },
-  isCompleted: (flag: boolean) => {
-    isCompleted.value = flag;
-  },
+  messageList: onMessageListUpdated,
+  isCompleted: onChatCompletedUpdated,
 });
 
 TUIStore.watch(StoreName.CONV, {
@@ -374,9 +367,7 @@ TUIStore.watch(StoreName.GRP, {
 
 // 群系统消息数量
 TUIStore.watch(StoreName.CUSTOM, {
-  groupApplicationCount: (count: Number) => {
-    groupApplicationCount.value = count;
-  },
+  groupApplicationCount: onGroupApplicationCountUpdated,
 });
 
 onMounted(() => {
@@ -385,14 +376,53 @@ onMounted(() => {
 
 // 取消监听
 onUnmounted(() => {
+  TUIStore.unwatch(StoreName.CHAT, {
+    messageList: onMessageListUpdated,
+    isCompleted: onChatCompletedUpdated,
+  });
+
   TUIStore.unwatch(StoreName.CONV, {
     currentConversationID: onCurrentConversationIDUpdated,
   });
+
   // 群系统消息
   TUIStore.unwatch(StoreName.GRP, {
     groupSystemNoticeList: onGroupSystemNoticeList,
   });
+
+  TUIStore.unwatch(StoreName.CUSTOM, {
+    groupApplicationCount: onGroupApplicationCountUpdated,
+  });
+
+  observer?.disconnect();
+  observer = null;
 });
+
+function onMessageListUpdated(list: IMessageModel[]) {
+  observer?.disconnect();
+  messageList.value = list
+    .filter(message => !message.isDeleted)
+    .map((message) => {
+      message.vueForRenderKey = `${message.ID}`;
+      return message;
+    });
+  // 点击加载更多的消息不需要滑动到底部
+  if (!isLoadMessage.value) {
+    scrollToBottom();
+  }
+
+  if (isEnabledMessageReadReceiptGlobal()) {
+    nextTick(() => bindIntersectionObserver());
+  }
+}
+
+function onChatCompletedUpdated(flag: boolean) {
+  isCompleted.value = flag;
+}
+
+function onGroupApplicationCountUpdated (count: number) {
+  groupApplicationCount.value = count;
+}
 
 // 获取历史消息
 const getHistoryMessageList = () => {
@@ -525,9 +555,13 @@ async function scrollToLatestMessage() {
   scrollTop.value = scrollHeight - height;
 }
 
-function bindIntersectionObserver() {
-  // TODO 如果不是旗舰 or 没有scrollListDom return false
+async function bindIntersectionObserver() {
   if (messageList.value.length === 0) {
+    return;
+  }
+
+  if (groupType === TYPES.value.GRP_AVCHATROOM || groupType === TYPES.value.GRP_COMMUNITY) {
+    // 直播群以及社群不进行消息的已读回执监听
     return;
   }
 
@@ -538,9 +572,12 @@ function bindIntersectionObserver() {
     // uni 下会把 safetip 也算进去 需要负 margin 来排除
   }).relativeTo('#messageScrollList', { top: -70 });
 
-  observer?.observe('.message-li.in', (res: any) => {
+  observer?.observe('.message-li.in .message-bubble-container', (res: any) => {
+    if (sentReceiptMessageID.has(res.id)) {
+      return;
+    }
     const matchingMessage = messageList.value.find((message: IMessageModel) => {
-      return message.ID === res.id.split('tui-')[1];
+      return res.id.indexOf(message.ID) > -1;
     });
     if (
       matchingMessage &&
@@ -549,6 +586,7 @@ function bindIntersectionObserver() {
       !matchingMessage.readReceiptInfo?.isPeerRead
     ) {
       TUIChatService.sendMessageReadReceipt([matchingMessage]);
+      sentReceiptMessageID.add(res.id);
     }
   });
 }

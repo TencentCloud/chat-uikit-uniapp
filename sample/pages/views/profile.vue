@@ -39,7 +39,7 @@
               'TUI-profile-basic-info-id-label',
               !isPC && 'TUI-profile-h5-basic-info-id-label',
             ]"
-            >{{ TUITranslateService.t("TUIProfile.用户ID") }}:</label
+            >{{ "用户ID" }}:</label
           >
           <div
             :class="[
@@ -226,7 +226,7 @@ const settingList = ref<{
   },
   displayMessageReadReceipt: {
     value: "displayMessageReadReceipt",
-    label: "启用已读回执",
+    label: "消息阅读状态",
     selectedChild: "userLevelReadReceiptOpen",
     childrenShowType: "bottomPopup",
     showChildren: false,
@@ -238,14 +238,14 @@ const settingList = ref<{
     children: {
       userLevelReadReceiptOpen: {
         value: "userLevelReadReceiptOpen",
-        label: "是",
+        label: "开启",
         onClick() {
           switchEnabelUserLevelReadRecript(true);
         }
       },
       userLevelReadReceiptClose: {
         value: "userLevelReadReceiptClose",
-        label: "否",
+        label: "关闭",
         onClick() {
           switchEnabelUserLevelReadRecript(false);
         }
@@ -287,6 +287,9 @@ const updateMyProfile = (props: object) => {
         type: TOAST_TYPE.SUCCESS,
         duration: 0,
       });
+      if("allowType" in props){
+        settingList.value["allowType"].showChildren = false;
+      }
     })
     .catch((err: any) => {
       console.warn("更新用户资料失败", err);
@@ -330,6 +333,7 @@ onHide(() => {
 
 function switchEnabelUserLevelReadRecript(status: boolean) {
   TUIStore.update(StoreName.USER, "displayMessageReadReceipt", status);
+  settingList.value["displayMessageReadReceipt"].showChildren = false;
 }
 </script>
 

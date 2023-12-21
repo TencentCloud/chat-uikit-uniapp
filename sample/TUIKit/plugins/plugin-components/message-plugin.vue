@@ -53,8 +53,8 @@ import { computed } from "../../adapter-vue";
 import messageBubble from "../../components/TUIChat/message-list/message-elements/message-bubble.vue";
 import MessageCallGroup from "./message-call/message-call-group.vue";
 import MessageCallC2C from "./message-call/message-call-c2c.vue";
-import TUICustomerServicePlugin from "../../../tui-customer-service-plugin/index.vue";
-import { isCustomerServicePluginMessage, isMessageInvisible } from "../../../tui-customer-service-plugin";
+import TUICustomerServicePlugin from "../../tui-customer-service-plugin/index.vue";
+import { isCustomerServicePluginMessage, isMessageInvisible } from "../../tui-customer-service-plugin";
 
 interface IProps {
   message: IMessageModel;
@@ -126,6 +126,7 @@ const handleH5LongPress = (
   align-content: center;
   align-items: center;
   text-align: center;
+  margin: 0px 10px 10px 10px;
 }
 .message-tip-highlight{
   animation: highlight 1000ms infinite;
