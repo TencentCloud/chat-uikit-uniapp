@@ -82,7 +82,7 @@
     },
     /* 小程序特有相关 */
     "mp-weixin" : {
-        "appid" : "wx649acbec87e200b4",
+        "appid" : "",
         "setting" : {
             "urlCheck" : false,
             "es6" : true,

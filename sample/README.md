@@ -11,4 +11,46 @@ chat-uikit-uniapp 界面效果如下图所示：
 - 微信小程序
 - H5
 
-## 【源码集成】[请参考 TUIKit 集成文档](https://cloud.tencent.com/document/product/269/64507)
+## 快速跑通DEMO
+
+### 第一步：下载 chat-uikit-uniapp 项目并安装依赖
+
+下载源码到你当前的工作空间 `${workspace}` 并将项目命名为 `chat-uikit-uniapp`。
+
+切换路径到 `${workspace}/chat-uikit-uniapp/sample` 中，并下载项目依赖。
+
+```bash
+git clone https://github.com/TencentCloud/chat-uikit-uniapp.git && cd chat-uikit-uniapp/sample && npm i
+```
+
+### 第二步：通过 HBuilderX 打开项目
+
+通过 [HBuilderX](https://dcloud.io/hbuilderx.html) 打开项目中的 sample 文件夹 `${workspace}/chat-uikit-uniapp/sample`。
+
+### 第三步：获取 SDKAppID 与 secretKey
+
+设置 App.vue 文件示例代码中的相关参数 SDKAppID 与 secretKey 。
+
+SDKAppID 和 secretKey 等信息，可通过 [即时通信 IM 控制台](https://console.cloud.tencent.com/im) 获取，单击目标应用卡片，进入应用的基础配置页面。例如：  
+![image](https://user-images.githubusercontent.com/57951148/192587785-6577cc5e-acf9-423c-86d0-52c67234ab1f.png)
+
+将获得的SDKAppID和secretKey，赋值给 `${workspace}/chat-uikit-uniapp/sample/App.vue` 文件中第12行和第13行的 `SDKAppID` 和 `secretKey` 参数。
+
+```js
+const SDKAppID = 0; // Your SDKAppID
+const secretKey = "xxx"; //Your secretKey
+```
+
+### 第四步：使用 HBuilderX 运行 sample
+
+打开 HBuilderX 工具栏 -> 运行 -> 运行到小程序模拟器 -> 微信开发者工具 - [sample]。
+
+### 第五步：使用微信开发者工具打开小程序（可选）
+
+在第四步中，HBuilderX 编译之后可能出现无法自动拉起[微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)的情况，您可以手动使用微信开发者工具打开小程序。
+
+使用微信开发者工具打开项目 `${workspace}/chat-uikit-uniapp/sample/unpackage/dist/dev/mp-weixin` 后，手动编译小程序。
+
+## 相关链接
+
+[即时通信 IM 快速入门 chat-uikit-uniapp（uniapp vue2/vue3）](https://cloud.tencent.com/document/product/269/64506)
