@@ -408,7 +408,9 @@ function onMessageListUpdated(list: IMessageModel[]) {
     });
   // 点击加载更多的消息不需要滑动到底部
   if (!isLoadMessage.value) {
-    scrollToBottom();
+    nextTick(() => {
+      scrollToBottom();
+    });
   }
 
   if (isEnabledMessageReadReceiptGlobal()) {

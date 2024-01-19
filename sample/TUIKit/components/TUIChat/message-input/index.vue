@@ -2,15 +2,15 @@
   <div :class="['message-input', !isPC && 'message-input-h5']">
     <div class="flex-row">
       <MessageInputAudio
-        v-if="isAudioEnable"
-        :class="[
-          'message-input-audio',
-          isWeChat && 'message-input-wx-audio',
-          isFunctionShow('audio') && 'message-input-wx-audio-open',
-        ]"
-        :isAudioMainShow="isFunctionShow('audio')"
+        v-if="isWeChat || isApp"
+        :class="{
+          'message-input-audio': true,
+          'message-input-wx-audio': isWeChat,
+          'message-input-wx-audio-open': isFunctionShow('audio'),
+        }"
+        :is-enable-audio="isFunctionShow('audio')"
         @switchAudio="switchAudio"
-      ></MessageInputAudio>
+      />
       <MessageInputEditor
         v-show="!isFunctionShow('audio')"
         class="message-input-editor"
@@ -32,7 +32,7 @@
         ref="messageInputAtRef"
         @insertAt="insertAt"
         @onAtListOpen="onAtListOpen"
-      ></MessageInputAt>
+      />
       <div class="message-input-emoji" @click="switchEmojiAndFeature('emoji')">
         <Icon :file="faceIcon" class="icon icon-face"></Icon>
       </div>
@@ -111,7 +111,6 @@ const replyOrReference = ref();
 const editor = ref();
 const messageInputAtRef = ref();
 const currentConversation = ref<IConversationModel>();
-const isAudioEnable = ref(isWeChat || isApp);
 const currentFunction = ref<string>("");
 const isGroup = ref<boolean>(false);
 

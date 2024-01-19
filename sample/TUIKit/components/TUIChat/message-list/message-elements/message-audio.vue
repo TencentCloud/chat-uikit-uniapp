@@ -73,7 +73,7 @@ const handlePlay = () => {
     margin-left: 0px;
   }
   .time {
-    max-width: 200px;
+    max-width: 165px;
     text-align: start;
   }
 }
