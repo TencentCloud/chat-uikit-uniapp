@@ -107,6 +107,8 @@
                   v-if="item.type === TYPES.MSG_AUDIO"
                   :content="item.getMessageContent()"
                   :messageItem="item"
+                  :broadcastNewAudioSrc="broadcastNewAudioSrc"
+                  @getGlobalAudioContext="getGlobalAudioContext"
                 />
                 <MessageFile
                   v-if="item.type === TYPES.MSG_FILE"
@@ -230,6 +232,8 @@ import { isCreateGroupCustomMessage } from "../utils/utils";
 import { getBoundingClientRect, getScrollInfo, instanceMapping } from "../../../utils/universal-api/domOperation";
 import { isEnabledMessageReadReceiptGlobal } from "../utils/utils";
 import { isPC, isH5 } from "../../../utils/env";
+import { TUIGlobal } from "../../../utils/universal-api";
+import { IAudioContext } from "../../../interface";
 
 const props = defineProps({
   groupID: {
@@ -259,6 +263,11 @@ const listRef = ref();
 const isLoadMessage = ref(false);
 const isLongpressing = ref(false);
 const blinkMessageIDList = ref<string[]>([]);
+
+// audio control
+const globalAudioContext = ref<IAudioContext | null>(null);
+const broadcastNewAudioSrc = ref<string>('');
+
 // 阅读回执状态message
 const readStatusMessage = ref<IMessageModel>();
 const isShowReadUserStatusPanel = ref<boolean>(false);
@@ -397,6 +406,12 @@ onUnmounted(() => {
   observer?.disconnect();
   observer = null;
 });
+
+function getGlobalAudioContext(audioMap: Map<string, IAudioContext>, options?: { newAudioSrc: string }) {
+  if (options?.newAudioSrc) {
+    broadcastNewAudioSrc.value = options.newAudioSrc;
+  }
+}
 
 function onMessageListUpdated(list: IMessageModel[]) {
   observer?.disconnect();

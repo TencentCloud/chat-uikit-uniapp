@@ -33,4 +33,4 @@ TUIKit Demo 登录成功后，如果您已经开通了客服插件，可以直�
 
 
 ## 自定义客服号
-详见: [在线客服插件](https://cloud.tencent.com/document/product/269/98824)
+详见: [在线客服插件](https://cloud.tencent.com/document/product/269/102783)
