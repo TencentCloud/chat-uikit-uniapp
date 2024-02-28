@@ -34,7 +34,10 @@
                 :class="['message-risk-replace', !isPC && 'message-risk-replace-h5']"
                 :src="riskImageReplaceUrl"
               />
-              <slot v-else></slot>
+              <template v-else>
+                <slot></slot>
+              </template>
+
             </div>
             <!-- 敏感信息失败提示 -->
             <div v-if="message.hasRiskContent" class="content-has-risk-tips">
@@ -108,8 +111,7 @@ const props = withDefaults(defineProps<IProps>(), {
 });
 
 const TYPES = TUIChatEngine.TYPES;
-const riskImageReplaceUrl =
-  "https://web.sdk.qcloud.com/component/TUIKit/assets/has_risk_default.png";
+const riskImageReplaceUrl = "https://web.sdk.qcloud.com/component/TUIKit/assets/has_risk_default.png";
 const needLoadingIconMessageType = [
   TYPES.MSG_LOCATION,
   TYPES.MSG_TEXT,
@@ -226,7 +228,6 @@ function openReadUserPanel() {
           word-wrap: break-word;
           word-break: break-all;
           position: relative;
-          overflow: hidden;
           .content-main {
             box-sizing: border-box;
             display: flex;

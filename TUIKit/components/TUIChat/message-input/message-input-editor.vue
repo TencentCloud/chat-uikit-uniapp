@@ -30,6 +30,7 @@
 import { ref, nextTick, watch } from "../../../adapter-vue";
 import { ISendMessagePayload } from "../../../interface";
 import { isPC } from "../../../utils/env";
+import { transformEmojiValueToKey } from '../utils/emojiList';
 import { TUIGlobal } from "../../../utils/universal-api/index";
 
 const props = defineProps({
@@ -73,14 +74,16 @@ const inputRef = ref();
 const inputBlur = ref(true);
 const inputContentEmpty = ref(true);
 const allInsertedAtInfo = new Map();
+const emojiMap = new Map();
 
 const handleSendMessage = () => {
   emits("sendMessage");
 };
 
-const addEmoji = (emoji: any) => {
+const addEmoji = (emojiData: any) => {
+  emojiMap.set(emojiData?.emoji.key, emojiData?.emoji.name);
   nextTick(() => {
-    inputText.value += emoji?.name;
+    inputText.value += emojiData?.emoji?.name;
   });
 };
 
@@ -92,7 +95,8 @@ const insertAt = (atInfo: any) => {
 };
 
 const getEditorContent = () => {
-  const text = inputText.value;
+  let text = inputText.value;
+  text = transformEmojiValueToKey(text);
   const atUserList: Array<string> = [];
   allInsertedAtInfo?.forEach((value: string, key: string) => {
     if (text?.includes("@" + value)) {
@@ -199,7 +203,7 @@ defineExpose({
   height: auto;
   background: #ffffff;
   border-radius: 9.4px;
-  padding: 8px 0px 8px 10px;
+  padding: 7px 0px 7px 10px;
   font-size: 16px !important;
   max-height: 86px;
 }

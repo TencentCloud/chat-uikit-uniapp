@@ -55,9 +55,10 @@
 import TUIChatEngine, {
   TUIStore,
   StoreName,
+  IMessageModel,
   IConversationModel,
 } from "@tencentcloud/chat-uikit-engine";
-import { ref, nextTick } from "../../../adapter-vue";
+import { ref, nextTick, onMounted, onUnmounted } from "../../../adapter-vue";
 import MessageInputEditor from "./message-input-editor.vue";
 import MessageInputAt from "./message-input-at/index.vue";
 import MessageInputAudio from "./message-input-audio.vue";
@@ -114,13 +115,27 @@ const currentConversation = ref<IConversationModel>();
 const currentFunction = ref<string>("");
 const isGroup = ref<boolean>(false);
 
-TUIStore.watch(StoreName.CONV, {
-  currentConversation: (conversation: IConversationModel) => {
-    currentConversation.value = conversation;
-    isGroup.value =
-      currentConversation?.value?.type === TUIChatEngine.TYPES.CONV_GROUP;
-  },
+
+onMounted(() => {
+  TUIStore.watch(StoreName.CONV, {
+    currentConversation: onCurrentConversationUpdated,
+  });
+
+  TUIStore.watch(StoreName.CHAT, {
+    quoteMessage: onQuoteMessageUpdated,
+  });
 });
+
+onUnmounted(() => {
+  TUIStore.unwatch(StoreName.CONV, {
+    currentConversation: onCurrentConversationUpdated,
+  });
+
+  TUIStore.unwatch(StoreName.CHAT, {
+    quoteMessage: onQuoteMessageUpdated,
+  });
+});
+
 
 const switchAudio = (isAudioShow: boolean) => {
   if (isAudioShow) {
@@ -216,6 +231,19 @@ const reEdit = (content: any) => {
   resetReplyOrReference();
   editor?.value?.setEditorContent(content);
 };
+
+function onCurrentConversationUpdated(conversation: IConversationModel) {
+  currentConversation.value = conversation;
+  isGroup.value = currentConversation.value?.type === TUIChatEngine.TYPES.CONV_GROUP;
+}
+
+function onQuoteMessageUpdated(options?: { message: IMessageModel, type: string }) {
+  // 当有引用消息时切换为文字输入模式
+  // switch text input mode when there is a quote message
+  if (options?.message && options?.type === "quote") {
+    switchAudio(false);
+  }
+}
 
 defineExpose({
   insertEmoji,

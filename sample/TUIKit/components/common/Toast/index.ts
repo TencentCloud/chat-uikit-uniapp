@@ -1,19 +1,21 @@
 import { TUIGlobal } from "../../../utils/universal-api/index";
 import TOAST_TYPE from "./type";
 
-const Toast = (options: {
+interface IToast {
   message: string;
-  type: string;
+  type?: string;
   duration?: number;
-}): void => {
+}
+
+const Toast = (options: IToast): void => {
   TUIGlobal.showToast({
     title: options.message || "Toast",
-    duration: options.duration || 2000,
+    duration: options.duration || 1500,
     icon: handleIconType(options.type),
   });
 };
 
-const handleIconType = (type: string) => {
+const handleIconType = (type: string | undefined) => {
   if (!type) {
     return "none";
   }
