@@ -135,15 +135,14 @@
 </template>
 <script lang="ts" setup>
 import TUIChatEngine, {
-  TUITranslateService,
   TUIUserService,
   TUIStore,
   StoreName,
 } from "@tencentcloud/chat-uikit-engine";
 import { TUILogin } from "@tencentcloud/tui-core";
+import { TUIGlobal } from "@tencentcloud/universal-api";
 import { ref, defineProps, onMounted } from "../../TUIKit/adapter-vue";
 import { isPC } from "../../TUIKit/utils/env";
-import { TUIGlobal } from "../../TUIKit/utils/universal-api/index";
 import { Toast, TOAST_TYPE } from "../../TUIKit/components/common/Toast/index";
 import BottomPopup from "../../TUIKit/components/common/BottomPopup/index.vue";
 import Icon from "../../TUIKit/components/common/Icon.vue";

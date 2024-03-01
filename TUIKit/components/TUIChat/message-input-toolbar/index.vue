@@ -3,52 +3,83 @@
     :class="[
       'message-input-toolbar',
       !isPC && 'message-input-toolbar-h5',
-      isUniFrameWork && 'message-input-toolbar-uni',
+      'message-input-toolbar-uni',
     ]"
   >
-    <div
-      :class="[
-        'message-input-toolbar-list',
-        !isPC && 'message-input-toolbar-h5-list',
-        isUniFrameWork && 'message-input-toolbar-uni-list',
-      ]"
+    <swiper
+      :class="['message-input-toolbar-swiper']"
+      :indicator-dots="isSwiperIndicatorDotsEnable"
+      :autoplay="false"
+      :circular="false"
     >
-      <EmojiPicker
-        v-if="!isUniFrameWork"
-        @insertEmoji="insertEmoji"
-        @dialogShowInH5="dialogShowInH5"
-        @dialogCloseInH5="dialogCloseInH5"
-      ></EmojiPicker>
-      <ImageUpload v-if="isUniFrameWork" imageSourceType="camera"></ImageUpload>
-      <ImageUpload imageSourceType="album"></ImageUpload>
-      <FileUpload v-if="!isUniFrameWork"></FileUpload>
-      <VideoUpload videoSourceType="album"></VideoUpload>
-      <VideoUpload v-if="isUniFrameWork" videoSourceType="camera"></VideoUpload>
-      <Evaluate></Evaluate>
-      <Words></Words>
-      <template v-if="extensionListShowInStart[0]">
-        <ToolbarItemContainer
-          v-for="extension in extensionListShowInStart"
-          :iconFile="genExtensionIcon(extension)"
-          :title="genExtensionText(extension)"
-          :iconWidth="isUniFrameWork ? '25px' : '20px'"
-          :iconHeight="isUniFrameWork ? '25px' : '20px'"
-          :needDialog="false"
-          @onIconClick="onExtensionClick(extension)"
+      <swiper-item
+        :class="[
+          'message-input-toolbar-list',
+          !isPC && 'message-input-toolbar-h5-list',
+          'message-input-toolbar-uni-list',
+        ]"
+      >
+        <ImageUpload imageSourceType="camera" />
+        <ImageUpload imageSourceType="album" />
+        <VideoUpload videoSourceType="album" />
+        <VideoUpload videoSourceType="camera" />
+        <template v-if="currentExtensionList[0]">
+          <div
+            v-for="(extension, index) in currentExtensionList.slice(0, 4)"
+            :key="index"
+          >
+            <ToolbarItemContainer
+              v-if="extension"
+              :iconFile="genExtensionIcon(extension)"
+              :title="genExtensionText(extension)"
+              iconWidth="25px"
+              iconHeight="25px"
+              :needDialog="false"
+              @onIconClick="onExtensionClick(extension)"
+            />
+          </div>
+        </template>
+        <Evaluate
+          v-if="currentExtensionList.length < 4"
+          @onDialogPopupShowOrHide="handleSwiperDotShow"
         />
-      </template>
-    </div>
-    <div v-if="extensionListShowInEnd[0] && isPC" :class="['message-input-toolbar-list-end']">
-      <ToolbarItemContainer
-        v-for="extension in extensionListShowInEnd"
-        :iconFile="genExtensionIcon(extension)"
-        :title="genExtensionText(extension)"
-        :iconWidth="isUniFrameWork ? '25px' : '20px'"
-        :iconHeight="isUniFrameWork ? '25px' : '20px'"
-        :needDialog="false"
-        @onIconClick="onExtensionClick(extension)"
-      />
-    </div>
+        <Words
+          v-if="currentExtensionList.length < 3"
+          @onDialogPopupShowOrHide="handleSwiperDotShow"
+        />
+      </swiper-item>
+      <swiper-item
+        v-if="currentExtensionList[2] && currentExtensionList.length >= 3"
+        :class="[
+          'message-input-toolbar-list',
+          !isPC && 'message-input-toolbar-h5-list',
+          'message-input-toolbar-uni-list',
+        ]"
+      >
+        <div
+          v-for="(extension, index) in currentExtensionList.slice(4)"
+          :key="index"
+        >
+          <ToolbarItemContainer
+            v-if="extension"
+            :iconFile="genExtensionIcon(extension)"
+            :title="genExtensionText(extension)"
+            iconWidth="25px"
+            iconHeight="25px"
+            :needDialog="false"
+            @onIconClick="onExtensionClick(extension)"
+          />
+        </div>
+        <Evaluate
+          v-if="currentExtensionList.length >= 4"
+          @onDialogPopupShowOrHide="handleSwiperDotShow"
+        />
+        <Words
+          v-if="currentExtensionList.length >= 3"
+          @onDialogPopupShowOrHide="handleSwiperDotShow"
+        />
+      </swiper-item>
+    </swiper>
     <UserSelector
       ref="userSelectorRef"
       :type="selectorShowType"
@@ -57,69 +88,89 @@
       @submit="onUserSelectorSubmit"
       @cancel="onUserSelectorCancel"
     />
-    <div v-if="isH5" :class="['message-input-toolbar-h5-dialog']" ref="h5Dialog"></div>
+    <div
+      v-if="isH5"
+      ref="h5Dialog"
+      :class="['message-input-toolbar-h5-dialog']"
+    />
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, onUnmounted } from "../../../adapter-vue";
+import { ref, onUnmounted } from '../../../adapter-vue';
 import TUIChatEngine, {
   IConversationModel,
   TUIStore,
   StoreName,
-} from "@tencentcloud/chat-uikit-engine";
-import TUICore, { ExtensionInfo, TUIConstants } from "@tencentcloud/tui-core";
-import EmojiPicker from "./emoji-picker/index.vue";
-import ImageUpload from "./image-upload/index.vue";
-import FileUpload from "./file-upload/index.vue";
-import VideoUpload from "./video-upload/index.vue";
-import Evaluate from "./evaluate/index.vue";
-import Words from "./words/index.vue";
-import ToolbarItemContainer from "./toolbar-item-container/index.vue";
-import UserSelector from "./user-selector/index.vue";
-import { Toast, TOAST_TYPE } from "../../common/Toast/index";
-import { isPC, isH5, isApp, isUniFrameWork } from "../../../utils/env";
-import TUIChatConfig from "../config";
-import { enableSampleTaskStatus } from "../../../utils/enableSampleTaskStatus";
+} from '@tencentcloud/chat-uikit-engine';
+import TUICore, { ExtensionInfo, TUIConstants } from '@tencentcloud/tui-core';
+import ImageUpload from './image-upload/index.vue';
+import VideoUpload from './video-upload/index.vue';
+import Evaluate from './evaluate/index.vue';
+import Words from './words/index.vue';
+import ToolbarItemContainer from './toolbar-item-container/index.vue';
+import UserSelector from './user-selector/index.vue';
+import { isPC, isH5 } from '../../../utils/env';
+import TUIChatConfig from '../config';
+import { enableSampleTaskStatus } from '../../../utils/enableSampleTaskStatus';
 
-const emits = defineEmits(["insertEmoji"]);
+const emits = defineEmits(['insertEmoji']);
 const h5Dialog = ref();
 const currentConversation = ref<IConversationModel>();
 const isGroup = ref<boolean>(false);
 const selectorShowType = ref<string>("");
 const userSelectorRef = ref();
-const currentUserSelectorExtension = ref<ExtensionInfo>();
-const currentExtensionList = ref<ExtensionInfo>([]);
+const currentUserSelectorExtension = ref<ExtensionInfo | null>();
+const currentExtensionList = ref<Array<ExtensionInfo>>([]);
+const isSwiperIndicatorDotsEnable = ref<boolean>(false);
 
-const getExtensionList = (conversationID:string) => {
+// extensions
+const extensionList: Array<ExtensionInfo> = [
+  ...TUICore.getExtensionList(TUIConstants.TUIChat.EXTENSION.INPUT_MORE.EXT_ID),
+];
+
+const getExtensionList = (conversationID: string) => {
   if (!conversationID) {
-    return currentExtensionList.value = extensionList;
+    // uniapp build ios app has null in last index need to filter
+    return (
+      currentExtensionList.value = extensionList.filter(extension => extension)
+    );
   }
   const chatType = TUIChatConfig.getChatType();
-  const options:any = {
+  const options: any = {
     chatType,
-  }
+  };
   // 向下兼容，callkit 没有chatType 判断时，使用 filterVoice、filterVideo 过滤
-  if (chatType === "customerService") {
+  if (chatType === 'customerService') {
     options.filterVoice = true;
     options.filterVideo = true;
-    enableSampleTaskStatus("customerService");
+    enableSampleTaskStatus('customerService');
   }
+  // uniapp build ios app has null in last index need to filter
   currentExtensionList.value = [
-    ...TUICore.getExtensionList(TUIConstants.TUIChat.EXTENSION.INPUT_MORE.EXT_ID, options),
-  ];
-}
+    ...TUICore.getExtensionList(
+      TUIConstants.TUIChat.EXTENSION.INPUT_MORE.EXT_ID,
+      options,
+    ),
+  ].filter(extension => extension);
+};
 
 const onCurrentConversationUpdate = (conversation: IConversationModel) => {
-  if (conversation?.conversationID && currentConversation.value?.conversationID !== conversation?.conversationID) {
-      getExtensionList(conversation?.conversationID);
+  if (
+    conversation?.conversationID &&
+    currentConversation.value?.conversationID !== conversation?.conversationID
+  ) {
+    getExtensionList(conversation?.conversationID);
+    if (currentExtensionList.value.length > 2) {
+      isSwiperIndicatorDotsEnable.value = true;
     }
-    currentConversation.value = conversation;
-    if (currentConversation?.value?.type === TUIChatEngine.TYPES.CONV_GROUP) {
-      isGroup.value = true;
-    } else {
-      isGroup.value = false;
-    }
-}
+  }
+  currentConversation.value = conversation;
+  if (currentConversation?.value?.type === TUIChatEngine.TYPES.CONV_GROUP) {
+    isGroup.value = true;
+  } else {
+    isGroup.value = false;
+  }
+};
 
 TUIStore.watch(StoreName.CONV, {
   currentConversation: onCurrentConversationUpdate,
@@ -131,33 +182,21 @@ onUnmounted(() => {
   });
 });
 
-// extensions
-const extensionList: Array<ExtensionInfo> = [
-  ...TUICore.getExtensionList(TUIConstants.TUIChat.EXTENSION.INPUT_MORE.EXT_ID),
-];
-
-// 按展示位置分类 extensionList （注意：仅 web 端 区分展示位置在 从 start 开始和 从 end 开始，在移动端不生效）
-const extensionListShowInStart = computed(
-  (): Array<ExtensionInfo> =>
-    isPC ? currentExtensionList.value.filter((extension: ExtensionInfo) => extension?.data?.name !== "search") : currentExtensionList.value
-);
-
-const extensionListShowInEnd = computed(
-  (): Array<ExtensionInfo> =>
-    isPC ? [currentExtensionList.value.find((extension: ExtensionInfo) => extension?.data?.name === "search")] : []
-);
-
 // handle extensions onclick
 const onExtensionClick = (extension: ExtensionInfo) => {
-  switch (extension?.data?.name) {
-    case "voiceCall":
-      onCallExtensionClicked(extension, 1);
+  // uniapp vue2 build wx lose listener proto
+  const extensionModel = currentExtensionList.value.find(
+    targetExtension => targetExtension?.data?.name === extension?.data?.name
+  );
+  switch (extensionModel?.data?.name) {
+    case 'voiceCall':
+      onCallExtensionClicked(extensionModel, 1);
       break;
-    case "videoCall":
-      onCallExtensionClicked(extension, 2);
+    case 'videoCall':
+      onCallExtensionClicked(extensionModel, 2);
       break;
-    case "search":
-      extension?.listener?.onClicked();
+    case 'search':
+      extensionModel?.listener?.onClicked?.();
       break;
     default:
       break;
@@ -167,7 +206,7 @@ const onExtensionClick = (extension: ExtensionInfo) => {
 const onCallExtensionClicked = (extension: ExtensionInfo, callType: number) => {
   selectorShowType.value = extension?.data?.name;
   if (currentConversation?.value?.type === TUIChatEngine.TYPES.CONV_C2C) {
-    extension?.listener?.onClicked({
+    extension?.listener?.onClicked?.({
       userIDList: [currentConversation?.value?.conversationID?.slice(3)],
       type: callType,
     });
@@ -185,7 +224,7 @@ const genExtensionText = (extension: any) => {
 };
 
 const onUserSelectorSubmit = (selectedInfo: any) => {
-  currentUserSelectorExtension.value?.listener?.onClicked(selectedInfo);
+  currentUserSelectorExtension.value?.listener?.onClicked?.(selectedInfo);
   currentUserSelectorExtension.value = null;
 };
 
@@ -193,63 +232,19 @@ const onUserSelectorCancel = () => {
   currentUserSelectorExtension.value = null;
 };
 
-const insertEmoji = (emojiObj: object) => {
-  emits("insertEmoji", emojiObj);
-};
-
-const dialogShowInH5 = (dialogDom: any) => {
-  if (!isH5) {
-    return;
-  }
-  h5Dialog?.value?.appendChild && h5Dialog?.value?.appendChild(dialogDom);
-};
-
-const dialogCloseInH5 = (dialogDom: any) => {
-  if (!isH5) {
-    return;
-  }
-  h5Dialog?.value?.removeChild && h5Dialog?.value?.removeChild(dialogDom);
+const handleSwiperDotShow = (showStatus: boolean) => {
+  isSwiperIndicatorDotsEnable.value
+    = currentExtensionList.value.length > 2 ? !showStatus : false;
 };
 </script>
-<style lang="scss" scoped>
-@import "../../../assets/styles/common.scss";
-.message-input-toolbar {
-  border-top: 1px solid #f4f5f9;
-  width: 100%;
-  max-width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  &-list {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    .extension-list {
-      list-style: none;
-      display: flex;
-      &-item {
-        width: 20px;
-        height: 20px;
-        padding: 12px 10px 1px;
-        cursor: pointer;
-      }
-    }
-  }
-}
-.message-input-toolbar-h5 {
-  padding: 5px 10px 5px;
-  box-sizing: border-box;
-  flex-direction: column;
-}
-
-.message-input-toolbar-uni {
-  background-color: #ebf0f6;
-  flex-direction: column;
-  &-list {
-    flex: 1;
-    display: grid;
-    grid-template-columns: repeat(4, 25%);
-    grid-template-rows: repeat(2, 100px);
-  }
-}
+<script lang="ts">
+export default {
+  options: {
+    styleIsolation: 'shared',
+  },
+};
+</script>
+<style lang="scss">
+@import '../../../assets/styles/common.scss';
+@import './style/uni.scss';
 </style>

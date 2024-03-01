@@ -1,6 +1,6 @@
 {
   "name": "@tencentcloud/tui-customer-service-plugin",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "chat uikit tui-customer-service-plugin",
   "main": "index",
   "keywords": [
@@ -16,7 +16,8 @@
     "WebSocket"
   ],
   "dependencies": {
-    "@vue/composition-api": "^1.0.0-rc.1"
+    "@vue/composition-api": "^1.0.0-rc.1",
+    "@tencentcloud/universal-api": "latest"
   },
   "peerDependencies": {
     "@tencentcloud/tui-core": "latest",

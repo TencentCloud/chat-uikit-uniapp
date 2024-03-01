@@ -15,8 +15,8 @@
 import vue from "../../adapter-vue";
 import { JSONToObject } from "../../utils/index";
 import { RATING_TEMPLATE_TYPE } from "../../constant";
-import RatingStar from "../message-rating/message-rating-star.vue";
-import RatingNumber from "../message-rating/message-rating-number.vue";
+import RatingStar from "./message-rating-star.vue";
+import RatingNumber from "./message-rating-number.vue";
 import { IMessageModel } from "../../interface";
 
 const { computed } = vue;
@@ -46,7 +46,8 @@ export default {
 
     return {
       sendCustomMessage,
-      ratingTemplate
+      ratingTemplate,
+      RATING_TEMPLATE_TYPE,
     }
   }
 }

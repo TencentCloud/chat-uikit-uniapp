@@ -3,9 +3,9 @@ import { TUIChatKit } from "./TUIKit";
 // 接入离线推送插件
 // 可实现应用切换到后台和杀死应用的情况，收到消息或接听视频
 // #ifdef APP-PLUS
-const TUIOfflinePush = uni.requireNativePlugin("TencentCloud-TUIOfflinePush");
-console.log(TUIOfflinePush, "---TUIOfflinePush ｜ ok");
-uni.$TUIOfflinePush = TUIOfflinePush;
+const TIMPush = uni.requireNativePlugin("TencentCloud-TIMPush");
+console.log(TIMPush, "---TIMPush ｜ ok");
+uni.$TIMPush = TIMPush;
 // #endif
 
 TUIChatKit.init();
@@ -25,10 +25,10 @@ export default {
  onLaunch: function () {
    // #ifdef APP-PLUS
    // 在 App.vue, 生命钩子 onLaunch 中监听
-   if (typeof uni.$TUIOfflinePush === "undefined") {
-     console.warn("如果您使用离线推送功能，需集成 TUIOfflinePush 插件，使用真机运行并且自定义基座调试，请参考官网文档：https://cloud.tencent.com/document/product/269/79124");
+   if (typeof uni.$TIMPush === "undefined") {
+     console.warn("如果您使用推送功能，需集成 TIMPush 插件，使用真机运行并且自定义基座调试，请参考官网文档：https://cloud.tencent.com/document/product/269/103522");
    } else {
-    uni.$TUIOfflinePush.setOfflinePushListener((data) => {
+    uni.$TIMPush.setOfflinePushListener((data) => {
         // 透传 entity 中的内容，不包含推送的 Message
         console.log('setOfflinePushListener', data);
     });

@@ -31,6 +31,7 @@
         class="TUI-message-list"
         scroll-y="true"
         :scroll-top="scrollTop"
+        @scroll="handelScrollListScroll"
       >
         <p
           v-if="!isCompleted"
@@ -49,10 +50,7 @@
             :currTime="item.time"
             :prevTime="index > 0 ? messageList[index - 1].time : 0"
           ></MessageTimestamp>
-          <div
-            class="message-item"
-            @click.stop="toggleID = ''"
-          >
+          <div class="message-item" @click.stop="toggleID = ''">
             <MessageTip
               v-if="
                 item.type === TYPES.MSG_GRP_TIP ||
@@ -154,6 +152,11 @@
           </div>
         </li>
       </scroll-view>
+      <!-- 滚动按钮 -->
+      <ScrollButton
+        ref="scrollButtonInstanceRef"
+        @scrollToLatestMessage="scrollToLatestMessage"
+      />
       <Dialog
         v-if="reSendDialogShow"
         :show="reSendDialogShow"
@@ -197,7 +200,6 @@ import {
   onUnmounted,
   getCurrentInstance,
 } from "../../../adapter-vue";
-
 import TUIChatEngine, {
   IMessageModel,
   TUIStore,
@@ -206,7 +208,12 @@ import TUIChatEngine, {
   TUIChatService,
   TUIGroupService,
 } from "@tencentcloud/chat-uikit-engine";
-
+import throttle from "lodash/throttle";
+import {
+  setInstanceMapping,
+  getBoundingClientRect,
+  getScrollInfo,
+} from "@tencentcloud/universal-api";
 import Link from "./link";
 import MessageText from "./message-elements/message-text.vue";
 import ProgressMessage from "../../common/ProgressMessage/index.vue";
@@ -225,14 +232,14 @@ import MessageRevoked from "./message-tool/message-revoked.vue";
 import MessageGroupSystem from "./message-elements/message-group-system.vue";
 import MessagePlugin from "../../../plugins/plugin-components/message-plugin.vue";
 import ReadReciptPanel from "./read-receipt-panel/index.vue";
+import ScrollButton from "./scroll-button/index.vue";
 import { isPluginMessage } from "../../../plugins/plugin-components/index";
 import Dialog from "../../common/Dialog/index.vue";
 import ImagePreviewer from "../../common/ImagePreviewer/index.vue";
+import { Toast, TOAST_TYPE } from "../../common/Toast/index";
 import { isCreateGroupCustomMessage } from "../utils/utils";
-import { getBoundingClientRect, getScrollInfo, instanceMapping } from "../../../utils/universal-api/domOperation";
 import { isEnabledMessageReadReceiptGlobal } from "../utils/utils";
 import { isPC, isH5 } from "../../../utils/env";
-import { TUIGlobal } from "../../../utils/universal-api";
 import { IAudioContext } from "../../../interface";
 
 const props = defineProps({
@@ -252,7 +259,7 @@ const sentReceiptMessageID = new Set<string>();
 const thisInstance = getCurrentInstance()?.proxy || getCurrentInstance();
 const messageListRef = ref();
 const title = ref("TUIChat");
-const messageList = ref();
+const messageList = ref<Array<IMessageModel>>();
 const isCompleted = ref(false);
 const currentConversationID = ref("");
 const nextReqMessageID = ref();
@@ -263,10 +270,13 @@ const listRef = ref();
 const isLoadMessage = ref(false);
 const isLongpressing = ref(false);
 const blinkMessageIDList = ref<string[]>([]);
+const messageTarget = ref<IMessageModel>();
+const scrollButtonInstanceRef = ref<InstanceType<typeof ScrollButton>>();
+let selfAddValue = 0;
 
 // audio control
 const globalAudioContext = ref<IAudioContext | null>(null);
-const broadcastNewAudioSrc = ref<string>('');
+const broadcastNewAudioSrc = ref<string>("");
 
 // 阅读回执状态message
 const readStatusMessage = ref<IMessageModel>();
@@ -287,7 +297,11 @@ const showImagePreview = ref(false);
 const currentImagePreview = ref<IMessageModel>();
 const imageMessageList = computed(() =>
   messageList?.value?.filter((item: IMessageModel) => {
-    return !item.isRevoked && !item.hasRiskContent && item.type === TYPES.value.MSG_IMAGE;
+    return (
+      !item.isRevoked &&
+      !item.hasRiskContent &&
+      item.type === TYPES.value.MSG_IMAGE
+    );
   })
 );
 
@@ -323,7 +337,8 @@ const onCurrentConversationIDUpdated = (conversationID: string) => {
 
   // 开启已读回执的状态 群聊缓存群类型
   if (isEnabledMessageReadReceiptGlobal()) {
-    const { groupProfile } = TUIStore.getConversationModel(conversationID) || {};
+    const { groupProfile } =
+      TUIStore.getConversationModel(conversationID) || {};
     groupType = groupProfile?.type;
   }
 };
@@ -359,28 +374,28 @@ const onGroupSystemNoticeList = (list: Array<IMessageModel>) => {
   TUIStore.update(StoreName.CUSTOM, "groupApplicationCount", applicationCount);
 };
 
-// 消息列表监听
-TUIStore.watch(StoreName.CHAT, {
-  messageList: onMessageListUpdated,
-  isCompleted: onChatCompletedUpdated,
-});
-
-TUIStore.watch(StoreName.CONV, {
-  currentConversationID: onCurrentConversationIDUpdated,
-});
-
-// 群系统消息
-TUIStore.watch(StoreName.GRP, {
-  groupSystemNoticeList: onGroupSystemNoticeList,
-});
-
-// 群系统消息数量
-TUIStore.watch(StoreName.CUSTOM, {
-  groupApplicationCount: onGroupApplicationCountUpdated,
-});
-
 onMounted(() => {
-  instanceMapping.set('messageList', thisInstance);
+  // 消息列表监听
+  TUIStore.watch(StoreName.CHAT, {
+    messageList: onMessageListUpdated,
+    messageSource: onMessageSourceUpdated,
+    isCompleted: onChatCompletedUpdated,
+  });
+
+  TUIStore.watch(StoreName.CONV, {
+    currentConversationID: onCurrentConversationIDUpdated,
+  });
+
+  // 群系统消息
+  TUIStore.watch(StoreName.GRP, {
+    groupSystemNoticeList: onGroupSystemNoticeList,
+  });
+
+  // 群系统消息数量
+  TUIStore.watch(StoreName.CUSTOM, {
+    groupApplicationCount: onGroupApplicationCountUpdated,
+  });
+  setInstanceMapping("messageList", thisInstance);
 });
 
 // 取消监听
@@ -407,29 +422,80 @@ onUnmounted(() => {
   observer = null;
 });
 
-function getGlobalAudioContext(audioMap: Map<string, IAudioContext>, options?: { newAudioSrc: string }) {
+const handelScrollListScroll = throttle(
+  function (e: Event) {
+    scrollButtonInstanceRef.value?.judgeScrollOverOneScreen(e);
+  },
+  500,
+  { leading: true }
+);
+
+function getGlobalAudioContext(
+  audioMap: Map<string, IAudioContext>,
+  options?: { newAudioSrc: string }
+) {
   if (options?.newAudioSrc) {
     broadcastNewAudioSrc.value = options.newAudioSrc;
   }
 }
 
-function onMessageListUpdated(list: IMessageModel[]) {
+async function onMessageListUpdated(list: IMessageModel[]) {
   observer?.disconnect();
   messageList.value = list
-    .filter(message => !message.isDeleted)
+    .filter((message) => !message.isDeleted)
     .map((message) => {
       message.vueForRenderKey = `${message.ID}`;
       return message;
     });
-  // 点击加载更多的消息不需要滑动到底部
-  if (!isLoadMessage.value) {
+  if (messageTarget.value) {
+    // 存在需要滚动到该位置的目标消息，滚动到指定位置
+    scrollAndBlinkMessage(messageTarget.value);
+  } else if (!isLoadMessage.value) {
+    // 点击加载更多的消息不需要滑动到底部
     nextTick(() => {
       scrollToBottom();
     });
   }
-
   if (isEnabledMessageReadReceiptGlobal()) {
     nextTick(() => bindIntersectionObserver());
+  }
+}
+
+// 滚动到最新消息
+async function scrollToLatestMessage() {
+  try {
+    const { scrollHeight } = await getScrollInfo(
+      "#messageScrollList",
+      "messageList"
+    );
+    if (scrollHeight) {
+      scrollTop.value === scrollHeight
+        ? (scrollTop.value = scrollHeight + 1)
+        : (scrollTop.value = scrollHeight);
+    } else {
+      scrollToBottom();
+    }
+  } catch (error) {
+    scrollToBottom();
+  }
+}
+
+async function onMessageSourceUpdated(message: IMessageModel) {
+  messageTarget.value = message;
+  scrollAndBlinkMessage(messageTarget.value);
+}
+
+function scrollAndBlinkMessage(message: IMessageModel) {
+  if (
+    messageList.value?.some(
+      (messageListItem) => messageListItem?.ID === message?.ID
+    )
+  ) {
+    nextTick(async () => {
+      await scrollToTargetMessage(message);
+      await blinkMessage(message?.ID);
+      messageTarget.value = undefined;
+    });
   }
 }
 
@@ -437,7 +503,7 @@ function onChatCompletedUpdated(flag: boolean) {
   isCompleted.value = flag;
 }
 
-function onGroupApplicationCountUpdated (count: number) {
+function onGroupApplicationCountUpdated(count: number) {
   groupApplicationCount.value = count;
 }
 
@@ -553,7 +619,10 @@ function blinkMessage(messageID: string): Promise<void> {
     if (index < 0) {
       blinkMessageIDList.value.push(messageID);
       const timer = setTimeout(() => {
-        blinkMessageIDList.value.splice(blinkMessageIDList.value.indexOf(messageID), 1);
+        blinkMessageIDList.value.splice(
+          blinkMessageIDList.value.indexOf(messageID),
+          1
+        );
         clearTimeout(timer);
         resolve();
       }, 3000);
@@ -565,31 +634,29 @@ function scrollTo(scrollHeight: number) {
   scrollTop.value = scrollHeight;
 }
 
-// 滚动到最新消息
-async function scrollToLatestMessage() {
-  const { scrollHeight } = await getScrollInfo('#messageScrollList', 'messageList');
-  const { height } = await getBoundingClientRect('#messageScrollList', 'messageList');
-  scrollTop.value = scrollHeight - height;
-}
-
 async function bindIntersectionObserver() {
   if (messageList.value.length === 0) {
     return;
   }
 
-  if (groupType === TYPES.value.GRP_AVCHATROOM || groupType === TYPES.value.GRP_COMMUNITY) {
+  if (
+    groupType === TYPES.value.GRP_AVCHATROOM ||
+    groupType === TYPES.value.GRP_COMMUNITY
+  ) {
     // 直播群以及社群不进行消息的已读回执监听
     return;
   }
 
   observer?.disconnect();
-  observer = uni.createIntersectionObserver(thisInstance, {
-    threshold: [0.7],
-    observeAll: true,
-    // uni 下会把 safetip 也算进去 需要负 margin 来排除
-  }).relativeTo('#messageScrollList', { top: -70 });
+  observer = uni
+    .createIntersectionObserver(thisInstance, {
+      threshold: [0.7],
+      observeAll: true,
+      // uni 下会把 safetip 也算进去 需要负 margin 来排除
+    })
+    .relativeTo("#messageScrollList", { top: -70 });
 
-  observer?.observe('.message-li.in .message-bubble-container', (res: any) => {
+  observer?.observe(".message-li.in .message-bubble-container", (res: any) => {
     if (sentReceiptMessageID.has(res.id)) {
       return;
     }
@@ -599,7 +666,7 @@ async function bindIntersectionObserver() {
     if (
       matchingMessage &&
       matchingMessage.needReadReceipt &&
-      matchingMessage.flow === 'in' &&
+      matchingMessage.flow === "in" &&
       !matchingMessage.readReceiptInfo?.isPeerRead
     ) {
       TUIChatService.sendMessageReadReceipt([matchingMessage]);
@@ -615,6 +682,43 @@ function setReadReciptPanelVisible(visible: boolean, message?: IMessageModel) {
     readStatusMessage.value = message;
   }
   isShowReadUserStatusPanel.value = visible;
+}
+
+async function scrollToTargetMessage(message: IMessageModel) {
+  let targetMessageID = message.ID;
+  const isTargetMessageInScreen =
+    messageList.value &&
+    messageList.value.some((msg) => msg.ID === targetMessageID);
+  if (targetMessageID && isTargetMessageInScreen) {
+    let timer = setTimeout(async () => {
+      try {
+        const scrollViewRect = await getBoundingClientRect(
+          "#messageScrollList",
+          "messageList"
+        );
+        const originalMessageRect = await getBoundingClientRect(
+          "#tui-" + targetMessageID,
+          "messageList"
+        );
+        const { scrollTop } = await getScrollInfo(
+          "#messageScrollList",
+          "messageList"
+        );
+        const finalScrollTop =
+          originalMessageRect.top +
+          scrollTop -
+          scrollViewRect.top -
+          (selfAddValue++ % 2);
+        scrollTo(finalScrollTop);
+        clearTimeout(timer);
+      } catch (error) {}
+    }, 500);
+  } else {
+    Toast({
+      message: TUITranslateService.t("TUIChat.无法定位到原消息"),
+      type: TOAST_TYPE.WARNING,
+    });
+  }
 }
 </script>
 <style lang="scss" scoped src="./style/index.scss"></style>

@@ -66,6 +66,7 @@ import { genTestUserSig } from "../../TUIKit/debug";
 import { isPC, isH5, isApp } from "../../TUIKit/utils/env";
 import Icon from "../../TUIKit/components/common/Icon.vue";
 import logo from "../../static/logo-back.svg";
+import timpushConfigs from "../../timpush-configs.json";
 const privateAgree = ref(false);
 const inputValue = ref("");
 
@@ -87,28 +88,13 @@ const handleLoginInfo = () => {
     useUploadPlugin: true,
     useProfanityFilterPlugin: true,
     framework: `vue${vueVersion}`,
-    TUIOfflinePush: uni.$TUIOfflinePush, // APP 注册离线推送插件
-    offlinePushConfig: {
-      // huawei
-      huaweiBusinessID: "", // 在腾讯云控制台上传第三方推送证书后分配的证书ID
-      // xiaomi
-      xiaomiBusinessID: "", // 在腾讯云控制台上传第三方推送证书后分配的证书ID
-      xiaomiAppID: "", // 小米开放平台分配的应用APPID
-      xiaomiAppKey: "", // 小米开放平台分配的应用APPKEY
-      // meizu
-      meizuBusinessID: "", // 在腾讯云控制台上传第三方推送证书后分配的证书ID
-      meizuAppID: "", // 魅族开放平台分配的应用APPID
-      meizuAppKey: "", // 魅族开放平台分配的应用APPKEY
-      // vivo
-      vivoBusinessID: "", // 在腾讯云控制台上传第三方推送证书后分配的证书ID
-      // oppo
-      oppoBusinessID: "", // 在腾讯云控制台上传第三方推送证书后分配的证书ID
-      oppoAppKey: "", // oppo开放平台分配的应用APPID
-      oppoAppSecret: "", //
-      // ios
-      iosBusinessID: "",
-      honorBusinessID: "",
-    },
+    TIMPush: uni.$TIMPush, // APP 注册推送插件
+    pushConfig: {
+      androidConfig: timpushConfigs,   // Android 推送配置，如不需要可传空。
+      iOSConfig: {    
+        "iOSBusinessID": "" // iOS 推送配置，如不需要可传空。
+      }    
+    }
   };
   login(loginInfo);
 };

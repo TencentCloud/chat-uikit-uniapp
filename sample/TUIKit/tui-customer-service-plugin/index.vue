@@ -1,14 +1,14 @@
 <template>
   <div class="message-custom">
-    <MessageCustomerService
-      v-if="isCustomerServiceMessage(props.message)"
-      :message="props.message"
-      @sendMessage="sendTextMessage"
-    />
     <MessageRating
-      v-else-if="isMessageRating(props.message)"
+      v-if="isMessageRating(props.message)"
       :message="props.message"
       @sendMessage="sendCustomMessage"
+    />
+    <MessageCustomerService
+      v-else-if="isCustomerServiceMessage(props.message)"
+      :message="props.message"
+      @sendMessage="sendTextMessage"
     />
   </div>
 </template>

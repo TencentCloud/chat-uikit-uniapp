@@ -28,10 +28,10 @@
 </template>
 <script lang="ts" setup>
 import { ref, nextTick, watch } from "../../../adapter-vue";
+import { TUIGlobal } from "@tencentcloud/universal-api";
 import { ISendMessagePayload } from "../../../interface";
 import { isPC } from "../../../utils/env";
 import { transformEmojiValueToKey } from '../utils/emojiList';
-import { TUIGlobal } from "../../../utils/universal-api/index";
 
 const props = defineProps({
   placeholder: {

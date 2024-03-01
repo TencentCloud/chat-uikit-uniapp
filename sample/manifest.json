@@ -54,14 +54,47 @@
             }
         },
         "nativePlugins" : {
+            "TencentCloud-TIMPush" : {
+                "com.hihonor.push.app_id" : "0",
+                "com.vivo.push.api_key" : "0",
+                "com.vivo.push.app_id" : "0",
+                "__plugin_info__" : {
+                    "name" : "【官方】uni-app 推送插件 TencentCloud-TIMPush",
+                    "description" : "腾讯云即时通信 IM Push 插件，目前推送支持小米、华为、荣耀、OPPO、vivo、魅族、APNs、一加、realme、iQOO 和 苹果等厂商通道。",
+                    "platforms" : "Android,iOS",
+                    "url" : "https://ext.dcloud.net.cn/plugin?id=16428",
+                    "android_package_name" : "com.tencent.qcloud.tim.tuikit",
+                    "ios_bundle_id" : "com.tencent.tuikit.demo.xa",
+                    "isCloud" : true,
+                    "bought" : 1,
+                    "pid" : "16428",
+                    "parameters" : {
+                        "com.hihonor.push.app_id" : {
+                            "des" : "Honor推送 app_id",
+                            "key" : "",
+                            "value" : ""
+                        },
+                        "com.vivo.push.api_key" : {
+                            "des" : "VIVO推送 api_key",
+                            "key" : "",
+                            "value" : ""
+                        },
+                        "com.vivo.push.app_id" : {
+                            "des" : "VIVO推送 app_id",
+                            "key" : "",
+                            "value" : ""
+                        }
+                    }
+                }
+            },
             "TencentCloud-TUICallKit" : {
                 "__plugin_info__" : {
                     "name" : "【官方】腾讯云音视频通话插件TencentCloud-TUICallKit",
                     "description" : "TUICallKit 是腾讯云官方推出的音视频通话插件，支持 1v1 通话和群组通话，并提供“类微信\"的 UI 交互，开发者仅需三个 API 就可实现。",
                     "platforms" : "Android,iOS",
                     "url" : "https://ext.dcloud.net.cn/plugin?id=9035",
-                    "android_package_name" : "com.tencent.qcloud.tim.tuikit",
-                    "ios_bundle_id" : "com.tencent.tuikit.demo.xa",
+                    "android_package_name" : "",
+                    "ios_bundle_id" : "",
                     "isCloud" : true,
                     "bought" : 1,
                     "pid" : "9035",

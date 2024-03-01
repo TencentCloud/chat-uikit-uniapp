@@ -13,7 +13,7 @@
 
 <script lang="ts" setup>
 import { ref } from "../../adapter-vue";
-import { TUIGlobal } from "../../utils/universal-api/index";
+import { TUIGlobal } from "@tencentcloud/universal-api";
 import { onLoad, onReady } from "@dcloudio/uni-app";
 const props = defineProps({
   data: {
