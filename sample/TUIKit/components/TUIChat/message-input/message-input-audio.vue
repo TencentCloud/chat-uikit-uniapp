@@ -36,11 +36,11 @@ import {
   IConversationModel,
   TUITranslateService,
 } from "@tencentcloud/chat-uikit-engine";
+import { TUIGlobal } from "@tencentcloud/universal-api";
 import throttle from "lodash/throttle";
 import Icon from "../../common/Icon.vue";
 import audioIcon from "../../../assets/icon/audio.svg";
 import { Toast, TOAST_TYPE } from "../../common/Toast/index";
-import { TUIGlobal } from "../../../utils/universal-api/index";
 import { isEnabledMessageReadReceiptGlobal } from "../utils/utils";
 
 interface IProps {

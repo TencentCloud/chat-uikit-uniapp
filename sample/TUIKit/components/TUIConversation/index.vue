@@ -5,6 +5,7 @@
     @touchstart="handleTouchStart"
     @touchend="handleTouchEnd"
   >
+    <TUISearch searchType="global" />
     <ConversationHeader v-if="isShowConversationHeader" ref="headerRef" />
     <ConversationNetwork />
     <ConversationList
@@ -17,8 +18,9 @@
 </template>
 <script lang="ts" setup>
 import { TUIStore, StoreName } from "@tencentcloud/chat-uikit-engine";
+import { TUIGlobal } from "@tencentcloud/universal-api";
 import { ref } from "../../adapter-vue";
-import { TUIGlobal } from "../../utils/universal-api/index";
+import TUISearch from "../TUISearch/index.vue";
 import ConversationList from "./conversation-list/index.vue";
 import ConversationHeader from "./conversation-header/index.vue";
 import ConversationNetwork from "./conversation-network/index.vue";

@@ -3,7 +3,7 @@
     <FormBranch
       :title="content.header"
       :list="content.items"
-      @item-click="handleContentListItemClick"
+      @input-click="handleContentListItemClick"
     ></FormBranch>
   </div>
   <div v-else class="messageForm">

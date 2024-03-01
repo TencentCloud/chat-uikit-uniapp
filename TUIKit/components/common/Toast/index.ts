@@ -1,4 +1,4 @@
-import { TUIGlobal } from "../../../utils/universal-api/index";
+import { TUIGlobal } from "@tencentcloud/universal-api";
 import TOAST_TYPE from "./type";
 
 interface IToast {

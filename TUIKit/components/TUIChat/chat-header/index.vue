@@ -6,9 +6,9 @@ import {
   IConversationModel,
   TUITranslateService,
 } from "@tencentcloud/chat-uikit-engine";
+import { TUIGlobal } from "@tencentcloud/universal-api";
 import { onLoad } from "@dcloudio/uni-app";
 import { ref } from "../../../adapter-vue";
-import { TUIGlobal } from "../../../utils/universal-api/index";
 
 const currentConversation = ref<IConversationModel>();
 const typingStatus = ref(false);

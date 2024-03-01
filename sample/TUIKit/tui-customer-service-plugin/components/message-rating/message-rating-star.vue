@@ -104,7 +104,7 @@ export default {
             if (hoverValue.value !== -1) {
               return index <= hoverValue.value ? 1 : 0;
             } else {
-              return index <= hoverValue.value ? 1 : 0;
+              return index <= value.value ? 1 : 0;
             }
           });
     })

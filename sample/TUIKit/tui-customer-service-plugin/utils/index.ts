@@ -45,7 +45,7 @@ export const isMessageInvisible = (message: IMessageModel): boolean => {
       CUSTOM_MESSAGE_SRC.FROM_INPUT,
       CUSTOM_MESSAGE_SRC.PRODUCT_CARD,
   ]
-  const isCustomerMessage = message?.type === TYPES.MSG_CUSTOM && Object.values(CUSTOM_MESSAGE_SRC).includes(customerServicePayload?.src);
+  const isCustomerMessage = message?.type === TYPES.MSG_CUSTOM;
   const isExistWhiteList = whiteList.includes(customerServicePayload?.src);
   const isRobot = customerServicePayload?.src === CUSTOM_MESSAGE_SRC.ROBOT && robotCommandArray.indexOf(customerServicePayload?.content?.command) !== -1;
   return isCustomerMessage && (!isExistWhiteList || isRobot);

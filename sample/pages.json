@@ -47,6 +47,12 @@
       "style": {
         "navigationBarTitleText": "腾讯云 IM"
       }
+    },
+    {
+      "path": "TUIKit/components/TUISearch/index",
+      "style": {
+        "navigationBarTitleText": "聊天记录"
+      }
     }
   ],
   "tabBar": {
