@@ -1,0 +1,40 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "overrides": [
+    {
+      "files": ["*.scss", "**/*.scss"],
+      "extends": ["stylelint-config-standard-scss"]
+    },
+    {
+      "files": ["*.vue", "**/*.vue"],
+      "extends": [
+        "stylelint-config-standard-scss",
+        "stylelint-config-standard-vue/scss"
+      ]
+    }
+  ],
+  "rules": {
+    "declaration-block-no-redundant-longhand-properties": [
+      true,
+      {
+        "ignoreShorthands": ["inset"]
+      }
+    ],
+    "font-family-no-missing-generic-family-keyword": [
+      true,
+      {
+        "ignoreFontFamilies": ["PingFangSC-Regular", "PingFangSC-Medium"]
+      }
+    ],
+    "unit-no-unknown": [
+      true,
+      {
+        "ignoreUnits": ["rpx"]
+      }
+    ],
+    "color-function-notation": "legacy",
+    "property-no-vendor-prefix": null,
+    "scss/at-extend-no-missing-placeholder": null,
+    "alpha-value-notation": "number"
+  }
+}

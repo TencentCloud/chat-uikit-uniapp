@@ -13,8 +13,8 @@
       />
       <MessageInputEditor
         v-show="!isFunctionShow('audio')"
-        class="message-input-editor"
         ref="editor"
+        class="message-input-editor"
         :placeholder="props.placeholder"
         :isMuted="props.isMuted"
         :muteText="props.muteText"
@@ -26,27 +26,45 @@
         @onTyping="onTyping"
         @onAt="onAt"
         @onFocus="onFocus"
-      ></MessageInputEditor>
+      />
       <MessageInputAt
         v-if="props.enableAt"
         ref="messageInputAtRef"
         @insertAt="insertAt"
         @onAtListOpen="onAtListOpen"
       />
-      <div class="message-input-emoji" @click="switchEmojiAndFeature('emoji')">
-        <Icon :file="faceIcon" class="icon icon-face"></Icon>
+      <div
+        class="message-input-emoji"
+        @click="switchEmojiAndFeature('emoji')"
+      >
+        <Icon
+          :file="faceIcon"
+          class="icon icon-face"
+        />
       </div>
-      <div class="message-input-more" @click="switchEmojiAndFeature('more')">
-        <Icon :file="moreIcon" class="icon icon-more"></Icon>
+      <div
+        class="message-input-more"
+        @click="switchEmojiAndFeature('more')"
+      >
+        <Icon
+          :file="moreIcon"
+          class="icon icon-more"
+        />
       </div>
     </div>
     <div>
-      <MessageQuote :style="{minWidth: 0}" :currentFunction="currentFunction"/>
-      <div class="message-input-emoji-picker" v-show="isFunctionShow('emoji')">
+      <MessageQuote
+        :style="{minWidth: 0}"
+        :currentFunction="currentFunction"
+      />
+      <div
+        v-show="isFunctionShow('emoji')"
+        class="message-input-emoji-picker"
+      >
         <EmojiPickerDialog
           @insertEmoji="insertEmoji"
           @sendMessage="sendMessage"
-        ></EmojiPickerDialog>
+        />
       </div>
     </div>
   </div>
@@ -57,23 +75,23 @@ import TUIChatEngine, {
   StoreName,
   IMessageModel,
   IConversationModel,
-} from "@tencentcloud/chat-uikit-engine";
-import { ref, nextTick, onMounted, onUnmounted } from "../../../adapter-vue";
-import MessageInputEditor from "./message-input-editor.vue";
-import MessageInputAt from "./message-input-at/index.vue";
-import MessageInputAudio from "./message-input-audio.vue";
-import EmojiPickerDialog from "../message-input-toolbar/emoji-picker/emoji-picker-dialog.vue";
-import MessageQuote from "./message-input-quote/index.vue";
-import Icon from "../../common/Icon.vue";
-import faceIcon from "../../../assets/icon/face-uni.png";
-import moreIcon from "../../../assets/icon/more-uni.png";
-import { isPC, isH5, isWeChat, isApp } from "../../../utils/env";
-import { sendMessages, sendTyping } from "../utils/sendMessage";
+} from '@tencentcloud/chat-uikit-engine';
+import { ref, nextTick, onMounted, onUnmounted } from '../../../adapter-vue';
+import MessageInputEditor from './message-input-editor.vue';
+import MessageInputAt from './message-input-at/index.vue';
+import MessageInputAudio from './message-input-audio.vue';
+import EmojiPickerDialog from '../message-input-toolbar/emoji-picker/emoji-picker-dialog.vue';
+import MessageQuote from './message-input-quote/index.vue';
+import Icon from '../../common/Icon.vue';
+import faceIcon from '../../../assets/icon/face-uni.png';
+import moreIcon from '../../../assets/icon/more-uni.png';
+import { isPC, isH5, isWeChat, isApp } from '../../../utils/env';
+import { sendMessages, sendTyping } from '../utils/sendMessage';
 
 const props = defineProps({
   placeholder: {
     type: String,
-    default: "this is placeholder",
+    default: 'this is placeholder',
   },
   replyOrReference: {
     type: Object,
@@ -86,7 +104,7 @@ const props = defineProps({
   },
   muteText: {
     type: String,
-    default: "",
+    default: '',
   },
   enableInput: {
     type: Boolean,
@@ -103,18 +121,16 @@ const props = defineProps({
 });
 
 const emit = defineEmits([
-  "sendMessage",
-  "resetReplyOrReference",
-  "onTyping",
-  "handleToolbarListShow",
+  'sendMessage',
+  'resetReplyOrReference',
+  'onTyping',
+  'handleToolbarListShow',
 ]);
-const replyOrReference = ref();
 const editor = ref();
 const messageInputAtRef = ref();
 const currentConversation = ref<IConversationModel>();
-const currentFunction = ref<string>("");
+const currentFunction = ref<string>('');
 const isGroup = ref<boolean>(false);
-
 
 onMounted(() => {
   TUIStore.watch(StoreName.CONV, {
@@ -136,31 +152,30 @@ onUnmounted(() => {
   });
 });
 
-
 const switchAudio = (isAudioShow: boolean) => {
   if (isAudioShow) {
-    switchEmojiAndFeature("audio");
+    switchEmojiAndFeature('audio');
   } else {
-    switchEmojiAndFeature("");
+    switchEmojiAndFeature('');
   }
 };
 
 const switchEmojiAndFeature = (funcName: string) => {
   if (currentFunction.value === 'emoji') {
     if (funcName === 'emoji') {
-      currentFunction.value = "";
+      currentFunction.value = '';
     } else {
       currentFunction.value = funcName;
     }
     if (funcName === 'more') {
       nextTick(() => {
-        emit("handleToolbarListShow");
+        emit('handleToolbarListShow');
       });
     }
   } else if (currentFunction.value === 'more') {
-    emit("handleToolbarListShow");
+    emit('handleToolbarListShow');
     if (funcName === 'more') {
-      currentFunction.value = "";
+      currentFunction.value = '';
     } else {
       nextTick(() => {
         currentFunction.value = funcName;
@@ -169,7 +184,7 @@ const switchEmojiAndFeature = (funcName: string) => {
   } else {
     currentFunction.value = funcName;
     if (funcName === 'more') {
-      emit("handleToolbarListShow");
+      emit('handleToolbarListShow');
     }
   }
 };
@@ -189,14 +204,10 @@ const onAt = (show: boolean) => {
   messageInputAtRef?.value?.toggleAtList(show);
 };
 
-const onFocus = (keyboardHeight?: number) => {
+const onFocus = () => {
   if (isH5) {
-    switchEmojiAndFeature("");
+    switchEmojiAndFeature('');
   }
-};
-
-const resetReplyOrReference = () => {
-  console.warn("resetReplyOrReference");
 };
 
 const sendMessage = async () => {
@@ -205,12 +216,8 @@ const sendMessage = async () => {
     messageList = editor?.value?.getEditorContent();
   }
   editor?.value?.resetEditor && editor?.value?.resetEditor();
-  resetReplyOrReference();
-  await sendMessages(
-    messageList,
-    currentConversation.value
-  );
-  emit("sendMessage");
+  await sendMessages(messageList, currentConversation.value!);
+  emit('sendMessage');
 };
 
 const insertEmoji = (emoji: any) => {
@@ -228,7 +235,6 @@ const onAtListOpen = () => {
 // 消息撤回后重新编辑
 const reEdit = (content: any) => {
   editor?.value?.resetEditor();
-  resetReplyOrReference();
   editor?.value?.setEditorContent(content);
 };
 
@@ -237,10 +243,10 @@ function onCurrentConversationUpdated(conversation: IConversationModel) {
   isGroup.value = currentConversation.value?.type === TUIChatEngine.TYPES.CONV_GROUP;
 }
 
-function onQuoteMessageUpdated(options?: { message: IMessageModel, type: string }) {
+function onQuoteMessageUpdated(options?: { message: IMessageModel; type: string }) {
   // 当有引用消息时切换为文字输入模式
   // switch text input mode when there is a quote message
-  if (options?.message && options?.type === "quote") {
+  if (options?.message && options?.type === 'quote') {
     switchAudio(false);
   }
 }
@@ -252,7 +258,8 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-@import url("../../../assets/styles/common.scss");
+@import "../../../assets/styles/common";
+
 .message-input {
   position: relative;
   display: flex;
@@ -264,23 +271,29 @@ defineExpose({
   max-width: 100%;
   overflow: hidden;
   background: #ebf0f6;
+
   &-editor {
     flex: 1;
     display: flex;
   }
+
   &-button {
     width: fit-content;
   }
+
   .icon {
     width: 23px;
     height: 23px;
+
     &-face {
       margin: 7px;
     }
+
     &-more {
-      margin: 7px 0px;
+      margin: 7px 0;
     }
   }
+
   &-wx {
     &-audio {
       &-open {
@@ -288,10 +301,12 @@ defineExpose({
       }
     }
   }
+
   &-emoji-picker {
     padding-top: 10px;
   }
 }
+
 .message-input-h5 {
   display: flex;
   flex-direction: column;

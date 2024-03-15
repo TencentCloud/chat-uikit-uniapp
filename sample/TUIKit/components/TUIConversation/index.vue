@@ -6,31 +6,34 @@
     @touchend="handleTouchEnd"
   >
     <TUISearch searchType="global" />
-    <ConversationHeader v-if="isShowConversationHeader" ref="headerRef" />
+    <ConversationHeader
+      v-if="isShowConversationHeader"
+      ref="headerRef"
+    />
     <ConversationNetwork />
     <ConversationList
-      class="tui-conversation-list"
       ref="conversationListDomRef"
+      class="tui-conversation-list"
       @handleSwitchConversation="handleSwitchConversation"
       @getPassingRef="getPassingRef"
     />
   </div>
 </template>
 <script lang="ts" setup>
-import { TUIStore, StoreName } from "@tencentcloud/chat-uikit-engine";
-import { TUIGlobal } from "@tencentcloud/universal-api";
-import { ref } from "../../adapter-vue";
-import TUISearch from "../TUISearch/index.vue";
-import ConversationList from "./conversation-list/index.vue";
-import ConversationHeader from "./conversation-header/index.vue";
-import ConversationNetwork from "./conversation-network/index.vue";
-import { onHide } from "@dcloudio/uni-app"; // 该方法只能用在父组件内，子组件内不生效
+import { TUIStore, StoreName } from '@tencentcloud/chat-uikit-engine';
+import { TUIGlobal } from '@tencentcloud/universal-api';
+import { ref } from '../../adapter-vue';
+import TUISearch from '../TUISearch/index.vue';
+import ConversationList from './conversation-list/index.vue';
+import ConversationHeader from './conversation-header/index.vue';
+import ConversationNetwork from './conversation-network/index.vue';
+import { onHide } from '@dcloudio/uni-app'; // 该方法只能用在父组件内，子组件内不生效
 
-const emits = defineEmits(["handleSwitchConversation"]);
+const emits = defineEmits(['handleSwitchConversation']);
 
 const totalUnreadCount = ref(0);
-const headerRef = ref<HTMLElement | undefined>();
-const conversationListDomRef = ref<HTMLElement | undefined>();
+const headerRef = ref<typeof ConversationHeader>();
+const conversationListDomRef = ref<typeof ConversationList>();
 const touchX = ref<number>(0);
 const touchY = ref<number>(0);
 const isShowConversationHeader = ref<boolean>(true);
@@ -49,9 +52,9 @@ TUIStore.watch(StoreName.CUSTOM, {
 
 const handleSwitchConversation = (conversationID: string) => {
   TUIGlobal?.navigateTo({
-    url: "/TUIKit/components/TUIChat/index",
+    url: '/TUIKit/components/TUIChat/index',
   });
-  emits("handleSwitchConversation", conversationID);
+  emits('handleSwitchConversation', conversationID);
 };
 
 const closeChildren = () => {
@@ -71,32 +74,32 @@ const handleTouchStart = (e: any) => {
 };
 
 const handleTouchEnd = (e: any) => {
-  let x = e.changedTouches[0].clientX;
-  let y = e.changedTouches[0].clientY;
-  let turn = "";
+  const x = e.changedTouches[0].clientX;
+  const y = e.changedTouches[0].clientY;
+  let turn = '';
   if (x - touchX.value > 50 && Math.abs(y - touchY.value) < 50) {
-    //右滑
-    turn = "right";
+    // 右滑
+    turn = 'right';
   } else if (x - touchX.value < -50 && Math.abs(y - touchY.value) < 50) {
-    //左滑
-    turn = "left";
+    // 左滑
+    turn = 'left';
   }
   if (y - touchY.value > 50 && Math.abs(x - touchX.value) < 50) {
-    //下滑
-    turn = "down";
+    // 下滑
+    turn = 'down';
   } else if (y - touchY.value < -50 && Math.abs(x - touchX.value) < 50) {
-    //上滑
-    turn = "up";
+    // 上滑
+    turn = 'up';
   }
-  //根据方向进行操作
-  if (turn === "down" || turn === "up") {
+  // 根据方向进行操作
+  if (turn === 'down' || turn === 'up') {
     closeChildren();
   }
 };
 
 const getPassingRef = (ref) => {
-	ref.value = conversationListDomRef.value;
-}
+  ref.value = conversationListDomRef.value;
+};
 </script>
 
 <style lang="scss" scoped src="./style/index.scss"></style>

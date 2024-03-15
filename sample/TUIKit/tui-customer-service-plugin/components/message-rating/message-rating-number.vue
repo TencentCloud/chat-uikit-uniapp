@@ -1,24 +1,24 @@
 <template>
-  <div class="messageRatingStar">
-    <p class="ratingHead">
+  <div class="message-rating-star">
+    <p class="rating-head">
       {{ props.ratingTemplate.head }}
     </p>
 
-    <div class="ratingCard">
-      <span class="cardTitle">请对本次服务进行评价</span>
-      <div class="cardWrapper">
+    <div class="rating-card">
+      <span class="card-title">请对本次服务进行评价</span>
+      <div class="card-wrapper">
         <div style="max-width: 250px">
           <div
             v-for="(item, index) in numberList"
+            :key="index"
             :class="{
-              active: !(index !== selectValue && index !== hoverValue),
-              deActive: index !== selectValue && index !== hoverValue,
+              'active': !(index !== selectValue && index !== hoverValue),
+              'de-active': index !== selectValue && index !== hoverValue,
             }"
             :style="{
               marginLeft: index === 0 ? 0 + 'px' : 20 + 'px',
               margin: 5 + 'px',
             }"
-            :key="index"
             @click="setValue(index)"
             @mouseenter="setHoverValue(index)"
             @mouseleave="setHoverValue(-1)"
@@ -37,16 +37,16 @@
         }}
       </div>
       <button
-        class="submitButton"
-        @click="submitRatingStar"
+        class="submit-button"
         :disabled="hasReply || hasExpire"
+        @click="submitRatingStar"
       >
         提交评价
       </button>
     </div>
     <p
       v-if="hasReply"
-      class="ratingTail"
+      class="rating-tail"
       :style="{
         marginTop: 20 + 'px',
       }"
@@ -57,9 +57,9 @@
 </template>
 
 <script lang="ts">
-import vue from "../../adapter-vue";
-import { CUSTOM_MESSAGE_SRC } from "../../constant";
-import { ratingTemplateType } from "../../interface";
+import vue from '../../adapter-vue';
+import { CUSTOM_MESSAGE_SRC } from '../../constant';
+import { ratingTemplateType } from '../../interface';
 
 const { computed, ref, watchEffect } = vue;
 
@@ -68,8 +68,13 @@ interface Props {
 }
 
 export default {
-  props: ["ratingTemplate"],
-  emits: ["sendMessage"],
+  props: {
+    ratingTemplate: {
+      type: Object as () => ratingTemplateType,
+      default: () => ({}),
+    },
+  },
+  emits: ['sendMessage'],
   setup(props: Props, { emit }) {
     const hasReply = ref<boolean>(false);
     const sessionId = ref<string>('');
@@ -78,28 +83,28 @@ export default {
     const hasExpire = ref<boolean>(false);
 
     const desc = computed(() => {
-      return props.ratingTemplate?.menu.map((item) => item.content);
+      return props.ratingTemplate?.menu.map(item => item.content);
     });
 
     const numberList = computed(() => {
       return props.ratingTemplate?.menu.map((item, index) => index);
-    })
+    });
 
     watchEffect(() => {
       sessionId.value = props.ratingTemplate.sessionId || '';
       if (props.ratingTemplate.selected != undefined) {
-          for (let i = 0; i < props.ratingTemplate.menu.length; i++) {
-            if (props.ratingTemplate.menu[i].id == props.ratingTemplate.selected.id) {
-              hasReply.value = true;
-              selectValue.value = i;
-              break;
-            }
+        for (let i = 0; i < props.ratingTemplate.menu.length; i++) {
+          if (props.ratingTemplate.menu[i].id == props.ratingTemplate.selected.id) {
+            hasReply.value = true;
+            selectValue.value = i;
+            break;
           }
         }
-        const timestamp = Math.floor(new Date().getTime() / 1000);
-        if (timestamp > props.ratingTemplate.expireTime) {
-          hasExpire.value = true;
-        }
+      }
+      const timestamp = Math.floor(new Date().getTime() / 1000);
+      if (timestamp > props.ratingTemplate.expireTime) {
+        hasExpire.value = true;
+      }
     });
 
     const setValue = (val: number) => {
@@ -117,7 +122,7 @@ export default {
     const submitRatingStar = () => {
       if (selectValue.value >= 0) {
         const submitData = {
-          data: {
+          data: JSON.stringify({
             src: CUSTOM_MESSAGE_SRC.MENU_SELECTED,
             menuSelected: {
               id: props.ratingTemplate.menu[selectValue.value].id,
@@ -125,10 +130,10 @@ export default {
               sessionId: sessionId.value,
             },
             customerServicePlugin: 0,
-          },
+          }),
         };
         hasReply.value = true;
-        emit("sendMessage", submitData);
+        emit('sendMessage', submitData);
       }
     };
 
@@ -144,29 +149,29 @@ export default {
       setValue,
       setHoverValue,
       submitRatingStar,
-    }
-  }
-}
+    };
+  },
+};
 </script>
 <style lang="scss" scoped>
-.ratingHead {
+.rating-head {
   font-size: 14px;
   font-weight: 400;
-  color: #999999;
+  color: #999;
 }
 
-.ratingTail {
+.rating-tail {
   font-size: 14px;
   font-weight: 400;
-  color: #999999;
+  color: #999;
 }
 
-.cardTitle {
+.card-title {
   font-size: 14px;
   font-weight: 500;
 }
 
-.ratingCard {
+.rating-card {
   min-width: 270px;
   width: 50%;
   background: #fbfbfb;
@@ -175,29 +180,29 @@ export default {
   margin-top: 10px;
   padding-top: 20px;
   padding-bottom: 20px;
+
   button:disabled {
     background: #d8d8d8;
   }
 }
 
-.messageRatingStar {
+.message-rating-star {
   text-align: center;
   display: flex;
-  flex-wrap: wrap;
+  flex-flow: column wrap;
   justify-content: center;
   padding-bottom: 30px;
-  flex-direction: column;
   align-items: center;
 }
 
-.cardWrapper {
+.card-wrapper {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   padding-top: 10px;
 }
 
-.submitButton {
+.submit-button {
   width: 50%;
   height: 50px;
   background-color: #0365f9;
@@ -209,11 +214,11 @@ export default {
   cursor: pointer;
 }
 
-.deActive {
+.de-active {
   height: 34px;
   width: 34px;
   display: inline-block;
-  border: 0px solid #006eff0d;
+  border: 0 solid #006eff0d;
   border-radius: 5px;
   color: #006eff;
   font-weight: 400;
@@ -236,7 +241,7 @@ export default {
   color: white;
   font-weight: 400;
   font-size: 16px;
-  border: 0px solid #0a7cff;
+  border: 0 solid #0a7cff;
   text-align: center;
   line-height: 34px;
 }

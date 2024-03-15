@@ -1,23 +1,23 @@
 <template>
   <div>
-    <p v-if="props.title" class="cardTitle">
+    <p
+      v-if="props.title"
+      class="card-title"
+    >
       {{ props.title }}
     </p>
     <div
-      class="formBranchItem"
-      @click="listItemClick(item)"
       v-for="(item, index) in props.list"
       :key="index"
+      class="form-branch-item"
+      @click="listItemClick(item)"
     >
       {{ item.content }}
     </div>
   </div>
 </template>
- 
-<script lang="ts">
-import vue from "../../adapter-vue";
 
-const { defineEmits, defineProps, withDefaults } = vue;
+<script lang="ts">
 
 interface branchItem {
   content: string;
@@ -30,24 +30,34 @@ interface Props {
 }
 
 export default {
-  props: ["title", "list"],
-  emits: ["input-click"],
+  props: {
+    title: {
+      type: String,
+      default: '',
+    },
+    list: {
+      type: Array,
+      default: () => ([]),
+    },
+  },
+  emits: ['input-click'],
   setup(props: Props, { emit }) {
     const listItemClick = (branch: branchItem): void => {
-      emit("input-click", branch);
+      emit('input-click', branch);
     };
     return {
       props,
-      listItemClick
-    }
-  }
-}
+      listItemClick,
+    };
+  },
+};
 </script>
 <style lang="scss">
-.cardTitle {
+.card-title {
   margin-bottom: 8px;
 }
-.formBranchItem {
+
+.form-branch-item {
   font-weight: 400;
   color: rgba(54, 141, 255, 1);
   padding-top: 5px;

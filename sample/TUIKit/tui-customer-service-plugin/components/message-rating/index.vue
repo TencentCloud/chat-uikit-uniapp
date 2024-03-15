@@ -3,21 +3,21 @@
     v-if="ratingTemplate.type === RATING_TEMPLATE_TYPE.STAR"
     :ratingTemplate="ratingTemplate"
     @sendMessage="sendCustomMessage"
-  ></RatingStar>
+  />
   <RatingNumber
     v-else
     :ratingTemplate="ratingTemplate"
     @sendMessage="sendCustomMessage"
-  ></RatingNumber>
+  />
 </template>
 
 <script lang="ts">
-import vue from "../../adapter-vue";
-import { JSONToObject } from "../../utils/index";
-import { RATING_TEMPLATE_TYPE } from "../../constant";
-import RatingStar from "./message-rating-star.vue";
-import RatingNumber from "./message-rating-number.vue";
-import { IMessageModel } from "../../interface";
+import vue from '../../adapter-vue';
+import { JSONToObject } from '../../utils/index';
+import { RATING_TEMPLATE_TYPE } from '../../constant';
+import RatingStar from './message-rating-star.vue';
+import RatingNumber from './message-rating-number.vue';
+import { IMessageModel } from '../../interface';
 
 const { computed } = vue;
 
@@ -26,14 +26,17 @@ interface Props {
 }
 
 export default {
-  props: {
-    message: Object,
-  },
-  emits: ["sendMessage"],
   components: {
     RatingStar,
     RatingNumber,
   },
+  props: {
+    message: {
+      type: Object as () => IMessageModel,
+      default: () => ({}),
+    },
+  },
+  emits: ['sendMessage'],
   setup(props: Props, { emit }) {
     const ratingTemplate = computed(() => {
       const data = props.message && JSONToObject(props.message.payload.data);
@@ -41,16 +44,14 @@ export default {
     });
 
     const sendCustomMessage = (data: any) => {
-      emit("sendMessage", data);
+      emit('sendMessage', data);
     };
 
     return {
       sendCustomMessage,
       ratingTemplate,
       RATING_TEMPLATE_TYPE,
-    }
-  }
-}
+    };
+  },
+};
 </script>
-<style lang="scss" scoped>
-</style>

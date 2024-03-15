@@ -1,5 +1,5 @@
-import TUICustomerPluginServer from "./server";
-import { isMessageInvisible } from "./utils/index";
+import TUICustomerPluginServer from './server';
+import { isMessageInvisible } from './utils/index';
 
 const TUICustomerServer = TUICustomerPluginServer.getInstance();
 
@@ -14,5 +14,5 @@ export {
   isCustomerServicePluginMessage,
   isMessageInvisible,
   setCustomerServiceAccounts,
-  getCustomerServiceAccounts
-}
+  getCustomerServiceAccounts,
+};

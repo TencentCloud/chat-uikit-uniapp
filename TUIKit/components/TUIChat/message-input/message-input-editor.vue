@@ -1,20 +1,27 @@
 <template>
   <div
-    :class="['message-input-container', !isPC && 'message-input-container-h5']"
+    :class="{
+      'message-input-container': true,
+      'message-input-container-h5': !isPC,
+    }"
   >
-    <div class="message-input-mute" v-if="props.isMuted">
+    <div
+      v-if="props.isMuted"
+      class="message-input-mute"
+    >
       {{ props.muteText }}
     </div>
     <input
-      :adjust-position="true"
+      id="editor"
+      ref="inputRef"
       v-model="inputText"
+      :adjust-position="true"
       cursor-spacing="20"
       confirm-type="send"
       :confirm-hold="true"
       maxlength="140"
       type="text"
       placeholder-class="input-placeholder"
-      id="editor"
       class="message-input-area"
       :placeholder="props.placeholder"
       auto-blur
@@ -22,21 +29,20 @@
       @input="onInput"
       @blur="onBlur"
       @focus="onFocus"
-      ref="inputRef"
-    />
+    >
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, nextTick, watch } from "../../../adapter-vue";
-import { TUIGlobal } from "@tencentcloud/universal-api";
-import { ISendMessagePayload } from "../../../interface";
-import { isPC } from "../../../utils/env";
+import { ref, nextTick, watch } from '../../../adapter-vue';
+import { TUIGlobal } from '@tencentcloud/universal-api';
+import { ISendMessagePayload } from '../../../interface';
+import { isPC } from '../../../utils/env';
 import { transformEmojiValueToKey } from '../utils/emojiList';
 
 const props = defineProps({
   placeholder: {
     type: String,
-    default: "this is placeholder",
+    default: 'this is placeholder',
   },
   replayOrReferenceMessage: {
     type: Object,
@@ -49,7 +55,7 @@ const props = defineProps({
   },
   muteText: {
     type: String,
-    default: "",
+    default: '',
   },
   enableInput: {
     type: Boolean,
@@ -68,8 +74,8 @@ const props = defineProps({
     default: false,
   },
 });
-const emits = defineEmits(["sendMessage", "onTyping", "onFocus", "onAt"]);
-const inputText = ref("");
+const emits = defineEmits(['sendMessage', 'onTyping', 'onFocus', 'onAt']);
+const inputText = ref('');
 const inputRef = ref();
 const inputBlur = ref(true);
 const inputContentEmpty = ref(true);
@@ -77,7 +83,7 @@ const allInsertedAtInfo = new Map();
 const emojiMap = new Map();
 
 const handleSendMessage = () => {
-  emits("sendMessage");
+  emits('sendMessage');
 };
 
 const addEmoji = (emojiData: any) => {
@@ -99,7 +105,7 @@ const getEditorContent = () => {
   text = transformEmojiValueToKey(text);
   const atUserList: Array<string> = [];
   allInsertedAtInfo?.forEach((value: string, key: string) => {
-    if (text?.includes("@" + value)) {
+    if (text?.includes('@' + value)) {
       atUserList.push(key);
     }
   });
@@ -111,14 +117,14 @@ const getEditorContent = () => {
   }
   return [
     {
-      type: "text",
+      type: 'text',
       payload,
     },
   ];
 };
 
 const resetEditor = () => {
-  inputText.value = "";
+  inputText.value = '';
   inputContentEmpty.value = true;
   allInsertedAtInfo?.clear();
 };
@@ -133,7 +139,7 @@ const onBlur = () => {
 
 const onFocus = (e: any) => {
   inputBlur.value = false;
-  emits("onFocus", e?.detail?.height);
+  emits('onFocus', e?.detail?.height);
 };
 
 const isEditorContentEmpty = () => {
@@ -144,9 +150,9 @@ const onInput = (e: any) => {
   // uniapp 识别 @ 消息
   const text = e?.detail?.value;
   isEditorContentEmpty();
-  if (props.isGroup && (text.endsWith("@") || text.endsWith("@\n"))) {
+  if (props.isGroup && (text.endsWith('@') || text.endsWith('@\n'))) {
     TUIGlobal?.hideKeyboard();
-    emits("onAt", true);
+    emits('onAt', true);
   }
 };
 
@@ -154,13 +160,13 @@ watch(
   () => [inputContentEmpty.value, inputBlur.value],
   (newVal: any, oldVal: any) => {
     if (newVal !== oldVal) {
-      emits("onTyping", inputContentEmpty.value, inputBlur.value);
+      emits('onTyping', inputContentEmpty.value, inputBlur.value);
     }
   },
   {
     immediate: true,
     deep: true,
-  }
+  },
 );
 
 defineExpose({
@@ -172,44 +178,41 @@ defineExpose({
 });
 </script>
 <style lang="scss" scoped>
-@import url("../../../assets/styles/common.scss");
-.message-input {
-  &-container {
-    display: flex;
-    flex-direction: column;
+@import "../../../assets/styles/common";
+
+.message-input-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: calc(100% - 13px);
+  width: calc(100% - 20px);
+  padding: 3px 10px 10px;
+  overflow: hidden;
+
+  &-h5 {
     flex: 1;
-    height: calc(100% - 13px);
-    width: calc(100% - 20px);
-    padding: 3px 10px 10px 10px;
-    overflow: hidden;
+    height: auto;
+    background: #fff;
+    border-radius: 9.4px;
+    padding: 7px 0 7px 10px;
+    font-size: 16px !important;
+    max-height: 86px;
   }
-  &-area {
+
+  .message-input-mute{
     flex: 1;
     display: flex;
-    overflow-y: scroll;
-    min-height: 20px;
-  }
-  &-mute {
-    flex: 1;
-    display: flex;
-    color: #999999;
+    color: #999;
     font-size: 14px;
     justify-content: center;
     align-items: center;
   }
-}
-.message-input-container-h5 {
-  flex: 1;
-  height: auto;
-  background: #ffffff;
-  border-radius: 9.4px;
-  padding: 7px 0px 7px 10px;
-  font-size: 16px !important;
-  max-height: 86px;
-}
-.ql-container {
-  ::v-deep .ql-blank:before {
-    font-style: initial;
+
+  .message-input-area {
+    flex: 1;
+    display: flex;
+    overflow-y: scroll;
+    min-height: 20px;
   }
 }
 </style>

@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    // Type Checking
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitAny": false,
+    // Language and Environment
+    "target": "ESNext",
+    // Modules
+    "moduleResolution": "node",
+    // Completeness
+    "skipLibCheck": true,
+    // Interop Constraints
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    // Emit
+    "sourceMap": true,
+    // "strictFunctionTypes": false,
+    "isolatedModules": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["components/*"],
+    },
+    "lib": ["esnext", "dom"]
+  },
+  "include": [
+    "**/*.js",
+    "**/*.d.ts",
+    "**/*.ts",
+    "**/*.vue",
+    "typings"
+  ],
+  "exclude": ["node_modules"]
+}
