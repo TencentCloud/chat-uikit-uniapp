@@ -7,7 +7,7 @@
     @click="toggleClick"
   >
     <div class="audio-icon-container">
-      <div :class="{ 'mask': true, 'play': isAudioPlaying }"></div>
+      <div :class="{ 'mask': true, 'play': isAudioPlaying }" />
       <Icon
         class="icon"
         width="15px"
@@ -15,19 +15,22 @@
         :file="audioIcon"
       />
     </div>
-    <div class="time" :style="{ width: `${props.content.second * 5}px` }">
+    <div
+      class="time"
+      :style="{ width: `${props.content.second * 5}px` }"
+    >
       {{ props.content.second || 1 }} "
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onUnmounted, ref, watch } from "../../../../adapter-vue";
-import { IMessageModel } from "@tencentcloud/chat-uikit-engine";
-import Icon from "../../../common/Icon.vue";
-import { Toast } from "../../../common/Toast/index";
-import audioIcon from "../../../../assets/icon/msg-audio.svg";
-import { IAudioMessageContent, IAudioContext } from "../../../../interface";
+import { onUnmounted, ref, watch } from '../../../../adapter-vue';
+import { IMessageModel } from '@tencentcloud/chat-uikit-engine';
+import Icon from '../../../common/Icon.vue';
+import { Toast } from '../../../common/Toast/index';
+import audioIcon from '../../../../assets/icon/msg-audio.svg';
+import { IAudioMessageContent, IAudioContext } from '../../../../interface';
 
 interface IProps {
   broadcastNewAudioSrc: string;
@@ -37,7 +40,7 @@ interface IProps {
 
 interface IEmits {
   (
-    e: "getGlobalAudioContext",
+    e: 'getGlobalAudioContext',
     map: Map<string, IAudioContext>,
     options?: { newAudioSrc: string }
   ): void;
@@ -70,11 +73,11 @@ watch(() => props.broadcastNewAudioSrc, (newSrc) => {
   }
 });
 
-function toggleClick(e: MouseEvent) {
-  emits("getGlobalAudioContext", audioMap, { newAudioSrc: props.content.url });
+function toggleClick() {
+  emits('getGlobalAudioContext', audioMap, { newAudioSrc: props.content.url });
   if (props.messageItem.hasRiskContent || !props.content.url) {
     Toast({
-      message: "暂不支持播放",
+      message: '暂不支持播放',
     });
     return;
   }
@@ -85,7 +88,7 @@ function toggleClick(e: MouseEvent) {
     audioMap.set('audio', uni.createInnerAudioContext() as IAudioContext);
     // #ifdef MP
     uni.setInnerAudioOption({
-      obeyMuteSwitch: false
+      obeyMuteSwitch: false,
     });
     // #endif
     initAudioSrc();
@@ -131,7 +134,9 @@ function stopAudio() {
     // audiocontext 的内存对象还在 但可能播放实例已被销毁
     // The memory of the audiocontext is in memory. But The play instance may have been destroyed.
     audioContext.stop();
-  } catch {}
+  } catch {
+    // ignore
+  }
 }
 
 function onAudioPlay() {
@@ -147,7 +152,7 @@ function onAudioEnded() {
 }
 
 function onAudioError() {
-  console.warn("audio played error");
+  console.warn('audio played error');
 }
 
 function getAudio(): IAudioContext | undefined {
@@ -173,27 +178,6 @@ $flow-out-bg-color: #dceafd;
   -webkit-tap-highlight-color: transparent;
   overflow: hidden;
 
-  &.reserve {
-    flex-direction: row-reverse;
-
-    .time {
-      text-align: end;
-    }
-
-    .audio-icon-container {
-      margin: 0 0 0 7px;
-      
-      .mask {
-        transform-origin: left;
-        background-color: $flow-out-bg-color;
-      }
-    }
-
-    .icon {
-      transform: rotate(180deg);
-    }
-  }
-
   .audio-icon-container {
     // uniapp中会有一些偏差 这里 width 要比图标略宽
     width: 16px;
@@ -217,32 +201,57 @@ $flow-out-bg-color: #dceafd;
       background-color: $flow-in-bg-color;
 
       &.play {
-        animation: audioPlay 2s steps(1, end) infinite;
+        animation: audio-play 2s steps(1, end) infinite;
       }
     }
   }
 
-  @keyframes audioPlay {
+  @keyframes audio-play {
     0% {
       transform: scaleX(0.7056);
     }
+
     50% {
       transform: scaleX(0.3953);
     }
+
     75% {
       transform: scaleX(0);
       visibility: hidden;
     }
+
     100% {
       transform: scaleX(0);
       visibility: hidden;
     }
   }
+
   .time {
     max-width: 165px;
     min-width: 20px;
     text-align: start;
     white-space: nowrap;
+  }
+
+  &.reserve {
+    flex-direction: row-reverse;
+
+    .time {
+      text-align: end;
+    }
+
+    .audio-icon-container {
+      margin: 0 0 0 7px;
+
+      .mask {
+        transform-origin: left;
+        background-color: $flow-out-bg-color;
+      }
+    }
+
+    .icon {
+      transform: rotate(180deg);
+    }
   }
 }
 </style>

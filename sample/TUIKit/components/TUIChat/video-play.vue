@@ -2,25 +2,19 @@
   <div class="dialog-video">
     <video
       v-if="show"
+      id="videoEle"
       class="video-box"
       :src="videoData"
-      id="videoEle"
       controls
       autoplay
-    ></video>
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "../../adapter-vue";
-import { TUIGlobal } from "@tencentcloud/universal-api";
-import { onLoad, onReady } from "@dcloudio/uni-app";
-const props = defineProps({
-  data: {
-    type: String,
-    default: () => "",
-  },
-});
+import { ref } from '../../adapter-vue';
+import { TUIGlobal } from '@tencentcloud/universal-api';
+import { onLoad, onReady } from '@dcloudio/uni-app';
 
 const videoData = ref();
 const show = ref(false);
@@ -32,7 +26,7 @@ onLoad((option: any) => {
 
 onReady(() => {
   show.value = true;
-  videoContext.value = TUIGlobal.createVideoContext("videoEle");
+  videoContext.value = TUIGlobal.createVideoContext('videoEle');
 });
 </script>
 <style lang="scss" scoped>
@@ -41,7 +35,7 @@ onReady(() => {
   z-index: 999;
   width: 100vw;
   height: 100vh;
-  background: rgba(#000000, 0.6);
+  background: rgba(#000, 0.6);
   top: 0;
   left: 0;
   right: 0;
@@ -49,6 +43,7 @@ onReady(() => {
   display: flex;
   justify-content: center;
   align-items: center;
+
   .video-box {
     position: absolute;
     width: 100vw;

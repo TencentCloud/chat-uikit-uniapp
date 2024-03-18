@@ -1,24 +1,24 @@
-import TUICore, { TUIConstants } from "@tencentcloud/tui-core";
+import TUICore, { TUIConstants } from '@tencentcloud/tui-core';
 import {
   isCustomerServiceMessage,
   isMessageInvisible,
   isMessageRating,
-} from "./utils/index";
-import { IMessageModel } from "./interface";
+} from './utils/index';
+import { IMessageModel } from './interface';
 
 export default class TUICustomerServer {
   static instance: TUICustomerServer;
   private customerServiceAccounts: Array<string>;
   constructor() {
-    console.log("TUICustomerServer.init ok");
+    console.log('TUICustomerServer.init ok');
     TUICore.registerService(TUIConstants.TUICustomerServicePlugin.SERVICE.NAME, this);
     TUICore.registerExtension(TUIConstants.TUIContact.EXTENSION.CONTACT_LIST.EXT_ID, this);
-    this.customerServiceAccounts = ["@im_agent#online_shopping_mall", "@im_agent#online_doctor"];
+    this.customerServiceAccounts = ['@im_agent#online_shopping_mall', '@im_agent#online_doctor'];
   }
 
   static getInstance(): TUICustomerServer {
     if (!TUICustomerServer.instance) {
-        TUICustomerServer.instance = new TUICustomerServer();
+      TUICustomerServer.instance = new TUICustomerServer();
     }
     return TUICustomerServer.instance;
   }
@@ -35,27 +35,27 @@ export default class TUICustomerServer {
 
   // 判断当前会话是不是客服会话
   private isCustomerConversation(conversationID: string) {
-    const userID = conversationID && conversationID.slice(3) || '';
+    const userID = (conversationID && conversationID.slice(3)) || '';
     return this.customerServiceAccounts.indexOf(userID) > -1;
   }
 
   // 判断当前消息是不是客服消息
-  public isCustomerServicePluginMessage(message:IMessageModel) {
+  public isCustomerServicePluginMessage(message: IMessageModel) {
     if (!message || !this.isCustomerConversation(message.conversationID)) {
       return false;
     }
     return isCustomerServiceMessage(message) || isMessageRating(message) || isMessageInvisible(message);
   }
 
-  public onGetExtension(extensionID: string, params: Object) {
+  public onGetExtension(extensionID: string) {
     if (extensionID === TUIConstants.TUIContact.EXTENSION.CONTACT_LIST.EXT_ID) {
       return [
         {
           weight: 0,
-          icon: "",
-          text: "客服号",
+          icon: '',
+          text: '客服号',
           data: {
-            name: "customer",
+            name: 'customer',
             accountList: this.customerServiceAccounts,
           },
         },
@@ -63,26 +63,26 @@ export default class TUICustomerServer {
     }
   }
 
-  public onCall(method: string, params: any, callback: any) {
+  public onCall(method: string, params: any) {
     switch (method) {
       case TUIConstants.TUICustomerServicePlugin.SERVICE.METHOD.ACTIVE_CONVERSATION:
         if (this.isCustomerConversation(params.conversationID)) {
           TUICore.callService({
-            serviceName: TUIConstants.TUIChat.SERVICE.NAME, 
+            serviceName: TUIConstants.TUIChat.SERVICE.NAME,
             method: TUIConstants.TUIChat.SERVICE.METHOD.SET_CHAT_TYPE,
-            params: { chatType: "customerService"},
-          })
+            params: { chatType: 'customerService' },
+          });
           TUICore.callService({
-            serviceName: TUIConstants.TUIChat.SERVICE.NAME, 
+            serviceName: TUIConstants.TUIChat.SERVICE.NAME,
             method: TUIConstants.TUIChat.SERVICE.METHOD.SEND_CUSTOM_MESSAGE,
             params: {
               to: params.conversationID.slice(3),
-              conversationType: "C2C",
+              conversationType: 'C2C',
               payload: {
-                data: JSON.stringify({ src: "7" }),
+                data: JSON.stringify({ src: '7' }),
               },
             },
-          })
+          });
         }
         break;
     }

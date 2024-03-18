@@ -1,7 +1,7 @@
 export interface customerServicePayloadType {
-  customerServicePlugin: number,
-  src: string,
-  content: any,
+  customerServicePlugin: number;
+  src: string;
+  content: any;
 }
 
 export interface ratingTemplateType {
@@ -56,11 +56,11 @@ export interface IMessageModel {
   sequence: number;
   progress: number;
   revokerInfo: {
-      userID: string;
-      nick: string;
-      avatar: string;
+    userID: string;
+    nick: string;
+    avatar: string;
   };
   revokeReason: string;
   hasRiskContent: boolean;
-  [key:string]: any;
+  [key: string]: any;
 }

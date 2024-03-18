@@ -113,11 +113,10 @@ import { isPC, isH5 } from '../../../utils/env';
 import TUIChatConfig from '../config';
 import { enableSampleTaskStatus } from '../../../utils/enableSampleTaskStatus';
 
-const emits = defineEmits(['insertEmoji']);
 const h5Dialog = ref();
 const currentConversation = ref<IConversationModel>();
 const isGroup = ref<boolean>(false);
-const selectorShowType = ref<string>("");
+const selectorShowType = ref<string>('');
 const userSelectorRef = ref();
 const currentUserSelectorExtension = ref<ExtensionInfo | null>();
 const currentExtensionList = ref<Array<ExtensionInfo>>([]);
@@ -156,8 +155,8 @@ const getExtensionList = (conversationID: string) => {
 
 const onCurrentConversationUpdate = (conversation: IConversationModel) => {
   if (
-    conversation?.conversationID &&
-    currentConversation.value?.conversationID !== conversation?.conversationID
+    conversation?.conversationID
+    && currentConversation.value?.conversationID !== conversation?.conversationID
   ) {
     getExtensionList(conversation?.conversationID);
     if (currentExtensionList.value.length > 2) {
@@ -186,7 +185,7 @@ onUnmounted(() => {
 const onExtensionClick = (extension: ExtensionInfo) => {
   // uniapp vue2 build wx lose listener proto
   const extensionModel = currentExtensionList.value.find(
-    targetExtension => targetExtension?.data?.name === extension?.data?.name
+    targetExtension => targetExtension?.data?.name === extension?.data?.name,
   );
   switch (extensionModel?.data?.name) {
     case 'voiceCall':
@@ -245,6 +244,6 @@ export default {
 };
 </script>
 <style lang="scss">
-@import '../../../assets/styles/common.scss';
-@import './style/uni.scss';
+@import '../../../assets/styles/common';
+@import './style/uni';
 </style>

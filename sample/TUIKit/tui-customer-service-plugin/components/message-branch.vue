@@ -1,14 +1,17 @@
 <template>
-  <div class="branchCard">
-    <p v-if="content.header" class="branchTitle">
+  <div class="branch-card">
+    <p
+      v-if="content.header"
+      class="branch-title"
+    >
       {{ content.header }}
     </p>
     <div
-      @click="handleContentListItemClick(item)"
-      class="branchItem"
       v-for="(item, index) in content.items"
       :key="index"
+      class="branch-item"
       :style="{ borderWidth: content.header ? '1px 0 0px 0' : '0px 0 1px 0' }"
+      @click="handleContentListItemClick(item)"
     >
       {{ item.content }}
       <Icon :src="iconRight" />
@@ -16,12 +19,11 @@
   </div>
 </template>
 
-
 <script lang="ts">
-import vue from "../adapter-vue";
-import { customerServicePayloadType } from "../interface";
-import iconRight from "../assets/iconRight.svg";
-import Icon from "./Icon.vue";
+import vue from '../adapter-vue';
+import { customerServicePayloadType } from '../interface';
+import iconRight from '../assets/iconRight.svg';
+import Icon from './customer-icon.vue';
 
 const { computed } = vue;
 
@@ -35,42 +37,48 @@ interface branchItem {
 }
 
 export default {
-  props: ["payload"],
-  emits: ["sendMessage"],
   components: {
     Icon,
   },
-  setup(props:Props, { emit }) {
+  props: {
+    payload: {
+      type: Object as () => customerServicePayloadType,
+      default: () => ({}),
+    },
+  },
+  emits: ['sendMessage'],
+  setup(props: Props, { emit }) {
     const content = computed(() => {
       return props?.payload?.content || {
         header: undefined,
         items: [],
       };
-    })
+    });
 
     const handleContentListItemClick = (branch: branchItem) => {
-      emit("sendMessage", { text: branch.content });
+      emit('sendMessage', { text: branch.content });
     };
 
     return {
       content,
       handleContentListItemClick,
       iconRight,
-    }
-
-  }
-}
+    };
+  },
+};
 </script>
 
 <style lang="scss">
-.branchCard {
+.branch-card {
   min-width: 250px;
   max-width: 350px;
-  .branchTitle {
+
+  .branch-title {
     margin-bottom: 8px;
-    border-radius: 0px 10px 10px 10px;
+    border-radius: 0 10px 10px;
   }
-  .branchItem {
+
+  .branch-item {
     display: flex;
     justify-content: space-between;
     border-style: dotted;

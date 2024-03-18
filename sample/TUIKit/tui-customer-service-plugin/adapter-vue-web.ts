@@ -1,10 +1,11 @@
-import * as VueBasic from "vue";
-import * as VueApi from "@vue/composition-api";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import * as VueBasic from 'vue';
+import * as VueApi from '@vue/composition-api';
 
 let vueVersion: number;
 let createVNode = (
   arg1: any,
-  arg2: any
+  arg2: any,
 ): { component: any; props: any; data: any } => {
   return {} as { component: any; props: any; data: any };
 };
@@ -18,22 +19,22 @@ let defineProps = () => {
 
 let defineEmits = () => {
   return;
-}
+};
 
 let withDefaults = (arg: any) => {
   return arg;
-}
+};
 
 try {
   if (
-    (VueBasic as any)?.default?.version &&
-    (VueBasic as any)?.default?.version?.startsWith("2.7.")
+    (VueBasic as any)?.default?.version
+    && (VueBasic as any)?.default?.version?.startsWith('2.7.')
   ) {
     // >= Vue 2.7.0
     vueVersion = 2.7;
   } else if (
-    (VueBasic as any)?.default?.version &&
-    (VueBasic as any)?.default?.version?.startsWith("2.")
+    (VueBasic as any)?.default?.version
+    && (VueBasic as any)?.default?.version?.startsWith('2.')
   ) {
     // < Vue 2.7.0
     vueVersion = 2;
@@ -66,4 +67,3 @@ if (vueVersion === 2) {
 
 export { vueVersion, render, createVNode, defineProps, defineEmits, withDefaults };
 export { vue };
-

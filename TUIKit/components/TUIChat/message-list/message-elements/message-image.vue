@@ -1,33 +1,42 @@
 <template>
-  <div class="imageContainer" @click="handleImagePreview">
+  <div
+    class="image-container"
+    @click="handleImagePreview"
+  >
     <image
-      class="messageImage"
+      class="message-image"
       mode="aspectFit"
       :src="props.content.url"
-      @load="imageLoad"
       :style="{ width: imageStyles.width, height: imageStyles.height }"
-    ></image>
+      @load="imageLoad"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { watchEffect, ref } from "../../../../adapter-vue";
-import type { IMessageModel } from "@tencentcloud/chat-uikit-engine";
-import type { IImageMessageContent } from "../../../../interface";
-const DEFAULT_MAX_SIZE = 155;
+import { watchEffect, ref } from '../../../../adapter-vue';
+import type { IMessageModel } from '@tencentcloud/chat-uikit-engine';
+import type { IImageMessageContent } from '../../../../interface';
+
+interface IProps {
+  content: IImageMessageContent;
+  messageItem: IMessageModel;
+}
+interface IEmit {
+  (key: 'previewImage'): void;
+}
+
+const emits = defineEmits<IEmit>();
 const props = withDefaults(
-  defineProps<{
-    content: IImageMessageContent,
-    messageItem: IMessageModel,
-  }>(),
+  defineProps<IProps>(),
   {
     content: () => ({}),
     messageItem: () => ({} as IMessageModel),
-  }
+  },
 );
 
-const emits = defineEmits(["uploading", "previewImage"]);
-const imageStyles = ref({ width: "auto", height: "auto" });
+const DEFAULT_MAX_SIZE = 155;
+const imageStyles = ref({ width: 'auto', height: 'auto' });
 
 const genImageStyles = (value: { width?: any; height?: any }) => {
   const { width, height } = value;
@@ -44,34 +53,36 @@ const genImageStyles = (value: { width?: any; height?: any }) => {
     imageWidth = (DEFAULT_MAX_SIZE * width) / height;
     imageHeight = DEFAULT_MAX_SIZE;
   }
-  imageStyles.value.width = imageWidth + "px";
-  imageStyles.value.height = imageHeight + "px";
+  imageStyles.value.width = imageWidth + 'px';
+  imageStyles.value.height = imageHeight + 'px';
 };
 
 watchEffect(() => {
   genImageStyles(props.content);
 });
 
-const imageLoad = (event: any) => {
+const imageLoad = (event: Event) => {
   genImageStyles(event.detail);
 };
 
 // 预览
 const handleImagePreview = () => {
   if (props.messageItem?.status === 'success' || props.messageItem.progress === 1) {
-    emits("previewImage", props.messageItem);
+    emits('previewImage');
   }
 };
 </script>
+
 <style lang="scss" scoped>
-.imageContainer {
+.image-container {
   position: relative;
   background-color: #f4f4f4;
+
   // 防止div被撑高
   font-size: 0;
-  .messageImage {
+
+  .message-image {
     max-width: 150px;
-    will-change: transform;
   }
 }
 </style>
