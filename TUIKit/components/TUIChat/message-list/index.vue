@@ -16,23 +16,17 @@
           TUITranslateService.t("TUIChat.点此投诉")
         }}</a>
       </div>
-      <div
-        v-if="isGroup && groupApplicationCount > 0"
-        class="tui-chat-application-tips"
-        @click="toggleApplicationList()"
-      >
-        <span>{{ groupApplicationCount }}
-          {{ TUITranslateService.t("TUIChat.条入群申请") }}
-          <span class="application-tips-btn">{{
-            TUITranslateService.t("TUIChat.点击处理")
-          }}</span>
-        </span>
-      </div>
+      <MessageGroupApplication
+        v-if="isGroup"
+        :key="props.groupID"
+        :groupID="props.groupID"
+      />
       <scroll-view
         id="messageScrollList"
         class="tui-message-list"
         scroll-y="true"
         :scroll-top="scrollTop"
+        :scroll-into-view="`tui-${historyFirstMessageID}`"
         @scroll="handelScrollListScroll"
       >
         <p
@@ -57,9 +51,8 @@
             @click.stop="toggleID = ''"
           >
             <MessageTip
-              v-if="
-                item.type === TYPES.MSG_GRP_TIP ||
-                  isCreateGroupCustomMessage(item)
+              v-if="item.type === TYPES.MSG_GRP_TIP ||
+                isCreateGroupCustomMessage(item)
               "
               :content="item.getMessageContent()"
             />
@@ -175,12 +168,6 @@
           {{ TUITranslateService.t("TUIChat.确认重发该消息？") }}
         </p>
       </Dialog>
-      <MessageGroupSystem
-        v-if="showGroupApplication"
-        :groupID="groupID"
-        @toggleApplicationList="toggleApplicationList"
-        @handleGroupApplication="handleGroupApplication"
-      />
       <!-- 已读回执用户列表面板 -->
       <ReadReceiptPanel
         v-if="isShowReadUserStatusPanel"
@@ -205,7 +192,6 @@ import TUIChatEngine, {
   StoreName,
   TUITranslateService,
   TUIChatService,
-  TUIGroupService,
 } from '@tencentcloud/chat-uikit-engine';
 import throttle from 'lodash/throttle';
 import {
@@ -214,6 +200,7 @@ import {
   getScrollInfo,
 } from '@tencentcloud/universal-api';
 import Link from './link';
+import MessageGroupApplication from './message-group-application/index.vue';
 import MessageText from './message-elements/message-text.vue';
 import ProgressMessage from '../../common/ProgressMessage/index.vue';
 import MessageImage from './message-elements/message-image.vue';
@@ -228,7 +215,6 @@ import MessageTimestamp from './message-elements/message-timestamp.vue';
 import MessageVideo from './message-elements/message-video.vue';
 import MessageTool from './message-tool/index.vue';
 import MessageRevoked from './message-tool/message-revoked.vue';
-import MessageGroupSystem from './message-elements/message-group-system.vue';
 import MessagePlugin from '../../../plugins/plugin-components/message-plugin.vue';
 import ReadReceiptPanel from './read-receipt-panel/index.vue';
 import ScrollButton from './scroll-button/index.vue';
@@ -255,18 +241,18 @@ let observer: any = null;
 let groupType: string | undefined;
 const sentReceiptMessageID = new Set<string>();
 const thisInstance = getCurrentInstance()?.proxy || getCurrentInstance();
-const messageList = ref<Array<IMessageModel>>();
+const messageList = ref<IMessageModel[]>();
 const isCompleted = ref(false);
 const currentConversationID = ref('');
-const nextReqMessageID = ref();
 const toggleID = ref('');
 const scrollTop = ref(5000); // 首次是 15 条消息，最大消息高度为300
 const TYPES = ref(TUIChatEngine.TYPES);
-const isLoadMessage = ref(false);
+const isLoadingMessage = ref(false);
 const isLongpressing = ref(false);
 const blinkMessageIDList = ref<string[]>([]);
 const messageTarget = ref<IMessageModel>();
 const scrollButtonInstanceRef = ref<InstanceType<typeof ScrollButton>>();
+const historyFirstMessageID = ref<string>('');
 let selfAddValue = 0;
 
 // audio control
@@ -275,11 +261,6 @@ const broadcastNewAudioSrc = ref<string>('');
 // 阅读回执状态message
 const readStatusMessage = ref<IMessageModel>();
 const isShowReadUserStatusPanel = ref<boolean>(false);
-
-// 加群申请系统消息
-const groupApplicationCount = ref(0);
-const showGroupApplication = ref(false);
-const applicationUserIDList = ref([]);
 
 // 消息重发 Dialog
 const reSendDialogShow = ref(false);
@@ -300,21 +281,6 @@ const scrollToBottom = () => {
 // 监听回调函数
 const onCurrentConversationIDUpdated = (conversationID: string) => {
   currentConversationID.value = conversationID;
-  TUIGroupService.getGroupApplicationList().then((res: any) => {
-    const applicationList = res.data.applicationList.filter(
-      (application: any) => application.groupID === props.groupID,
-    );
-    applicationUserIDList.value = applicationList.map((application: any) => {
-      return application.applicationType === 0
-        ? application.applicant
-        : application.userID;
-    });
-    TUIStore.update(
-      StoreName.CUSTOM,
-      'groupApplicationCount',
-      applicationList.length,
-    );
-  });
 
   // 开启已读回执的状态 群聊缓存群类型
   if (isEnabledMessageReadReceiptGlobal()) {
@@ -322,37 +288,6 @@ const onCurrentConversationIDUpdated = (conversationID: string) => {
       = TUIStore.getConversationModel(conversationID) || {};
     groupType = groupProfile?.type;
   }
-};
-
-// operationType 操作类型 1: 有用户申请加群   23: 普通群成员邀请用户进群
-const onGroupSystemNoticeList = (list: Array<IMessageModel>) => {
-  const systemNoticeList = list.filter((message) => {
-    const { operationType } = message.payload;
-    return (
-      (operationType === 1 || operationType === 23)
-      && message.to === props.groupID
-    );
-  });
-
-  systemNoticeList.forEach((systemNotice) => {
-    const { operationType } = systemNotice.payload;
-    if (operationType === 1) {
-      const { operatorID } = systemNotice.payload;
-      if (!applicationUserIDList.value.includes(operatorID)) {
-        applicationUserIDList.value.push(operatorID);
-      }
-    }
-    if (operationType === 23) {
-      const { inviteeList } = systemNotice.payload;
-      inviteeList.forEach((invitee) => {
-        if (!applicationUserIDList.value.includes(invitee)) {
-          applicationUserIDList.value.push(invitee);
-        }
-      });
-    }
-  });
-  const applicationCount = applicationUserIDList.value.length;
-  TUIStore.update(StoreName.CUSTOM, 'groupApplicationCount', applicationCount);
 };
 
 onMounted(() => {
@@ -367,15 +302,6 @@ onMounted(() => {
     currentConversationID: onCurrentConversationIDUpdated,
   });
 
-  // 群系统消息
-  TUIStore.watch(StoreName.GRP, {
-    groupSystemNoticeList: onGroupSystemNoticeList,
-  });
-
-  // 群系统消息数量
-  TUIStore.watch(StoreName.CUSTOM, {
-    groupApplicationCount: onGroupApplicationCountUpdated,
-  });
   setInstanceMapping('messageList', thisInstance);
 });
 
@@ -388,15 +314,6 @@ onUnmounted(() => {
 
   TUIStore.unwatch(StoreName.CONV, {
     currentConversationID: onCurrentConversationIDUpdated,
-  });
-
-  // 群系统消息
-  TUIStore.unwatch(StoreName.GRP, {
-    groupSystemNoticeList: onGroupSystemNoticeList,
-  });
-
-  TUIStore.unwatch(StoreName.CUSTOM, {
-    groupApplicationCount: onGroupApplicationCountUpdated,
   });
 
   observer?.disconnect();
@@ -428,11 +345,12 @@ async function onMessageListUpdated(list: IMessageModel[]) {
       message.vueForRenderKey = `${message.ID}`;
       return message;
     });
+  const newLastMessage = messageList.value?.[messageList.value?.length - 1];
   if (messageTarget.value) {
-    // 存在需要滚动到该位置的目标消息，滚动到指定位置
+    // scroll to target message
     scrollAndBlinkMessage(messageTarget.value);
-  } else if (!isLoadMessage.value) {
-    // 点击加载更多的消息不需要滑动到底部
+  } else if (!isLoadingMessage.value && !(scrollButtonInstanceRef.value?.isScrollButtonVisible && newLastMessage?.flow === 'in')) {
+    // scroll to bottom
     nextTick(() => {
       scrollToBottom();
     });
@@ -484,32 +402,24 @@ function onChatCompletedUpdated(flag: boolean) {
   isCompleted.value = flag;
 }
 
-function onGroupApplicationCountUpdated(count: number) {
-  groupApplicationCount.value = count;
-}
-
 // 获取历史消息
 const getHistoryMessageList = () => {
-  isLoadMessage.value = true;
-  TUIChatService.getMessageList().then((res: any) => {
-    const { nextReqMessageID: ID } = res.data;
-    nextReqMessageID.value = ID;
-    isLoadMessage.value = false;
+  isLoadingMessage.value = true;
+  const currentFirstMessageID = messageList.value?.[0]?.ID || '';
+  TUIChatService.getMessageList().then(() => {
+    nextTick(() => {
+      historyFirstMessageID.value = currentFirstMessageID;
+      const timer = setTimeout(() => {
+        historyFirstMessageID.value = '';
+        isLoadingMessage.value = false;
+        clearTimeout(timer);
+      }, 500);
+    });
   });
 };
 
-const toggleApplicationList = () => {
-  showGroupApplication.value = !showGroupApplication.value;
-};
-
-const handleGroupApplication = (userID: string) => {
-  const index = applicationUserIDList.value.indexOf(userID);
-  if (index !== -1) {
-    applicationUserIDList.value.splice(index, 1);
-  }
-};
 // todo: webview 跳转
-const openComplaintLink = () => {};
+const openComplaintLink = () => { };
 
 // 消息操作
 const handleToggleMessageItem = (
