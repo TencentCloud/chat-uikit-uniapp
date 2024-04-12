@@ -138,6 +138,7 @@ import TUIChatEngine, {
   TUIUserService,
   TUIStore,
   StoreName,
+  TUIChatService,
 } from "@tencentcloud/chat-uikit-engine";
 import { TUILogin } from "@tencentcloud/tui-core";
 import { TUIGlobal } from "@tencentcloud/universal-api";
@@ -149,6 +150,8 @@ import Icon from "../../TUIKit/components/common/Icon.vue";
 import rightArrowIcon from "../../TUIKit/assets/icon/right-icon.svg";
 import { IUserProfile } from "../../TUIKit/interface";
 import { onHide } from "@dcloudio/uni-app";
+import { Translator } from "../../TUIKit/components/TUIChat/utils/translation";
+
 
 const props = defineProps({
   displayType: {
@@ -279,6 +282,48 @@ const settingList = ref<{
       }
     }
   },
+  translateLanguage: {
+    value: "translateLanguage",
+    label: "翻译语言",
+    selectedChild: "zh",
+    childrenShowType: "bottomPopup",
+    showChildren: false,
+    onClick(item: any) {
+      if (!isPC) {
+        item.showChildren = true;
+      }
+    },
+    children: {
+      zh: {
+        value: "zh",
+        label: "中文",
+        onClick() {
+          switchTranslationTargetLanguage('zh');
+        },
+      },
+      en: {
+        value: "en",
+        label: "English",
+        onClick() {
+          switchTranslationTargetLanguage('en');
+        },
+      },
+      jp: {
+        value: "jp",
+        label: "日本語",
+        onClick() {
+          switchTranslationTargetLanguage('jp');
+        },
+      },
+      kr: {
+        value: "kr",
+        label: "한국인",
+        onClick() {
+          switchTranslationTargetLanguage('kr');
+        },
+      },
+    },
+  },
   exit: {
     value: "exit",
     label: "退出登录",
@@ -371,6 +416,12 @@ function switchEnabelUserLevelReadRecript(status: boolean) {
 function switchUserLevelOnlineStatus(status: boolean) {
   TUIUserService.switchUserStatus({ displayOnlineStatus: status });
   settingList.value["displayOnlineStatus"].showChildren = false;
+}
+
+function switchTranslationTargetLanguage(lang: string) {
+  Translator.clear();
+  TUIChatService.setTranslationLanguage(lang);
+  settingList.value.translateLanguage.selectedChild = lang;
 }
 </script>
 

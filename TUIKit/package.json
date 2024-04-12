@@ -1,6 +1,6 @@
 {
   "name": "@tencentcloud/chat-uikit-uniapp",
-  "version": "2.0.9",
+  "version": "2.1.0",
   "repository": "https://github.com/TencentCloud/chat-uikit-uniapp",
   "description": "TUIKit 是基于 IM SDK 实现的一套 UI 组件，其包含会话、聊天、群组、个人资料等功能，基于这些精心设计的 UI 组件，您可以快速构建优雅的、可靠的、可扩展的 Chat 应用。",
   "scripts": {},
