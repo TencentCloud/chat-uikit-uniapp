@@ -150,7 +150,7 @@ import Icon from "../../TUIKit/components/common/Icon.vue";
 import rightArrowIcon from "../../TUIKit/assets/icon/right-icon.svg";
 import { IUserProfile } from "../../TUIKit/interface";
 import { onHide } from "@dcloudio/uni-app";
-import { Translator } from "../../TUIKit/components/TUIChat/utils/translation";
+import { translator } from "../../TUIKit/components/TUIChat/utils/translation";
 
 
 const props = defineProps({
@@ -419,9 +419,10 @@ function switchUserLevelOnlineStatus(status: boolean) {
 }
 
 function switchTranslationTargetLanguage(lang: string) {
-  Translator.clear();
+  translator.clear();
   TUIChatService.setTranslationLanguage(lang);
   settingList.value.translateLanguage.selectedChild = lang;
+  settingList.value.translateLanguage.showChildren = false;
 }
 </script>
 
