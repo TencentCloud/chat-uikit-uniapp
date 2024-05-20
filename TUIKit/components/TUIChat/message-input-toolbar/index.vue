@@ -2,30 +2,66 @@
   <div
     :class="[
       'message-input-toolbar',
-      !isPC && 'message-input-toolbar-h5',
+      'message-input-toolbar-h5',
       'message-input-toolbar-uni',
     ]"
   >
-    <swiper
-      :class="['message-input-toolbar-swiper']"
-      :indicator-dots="isSwiperIndicatorDotsEnable"
-      :autoplay="false"
-      :circular="false"
-    >
-      <swiper-item
-        :class="[
-          'message-input-toolbar-list',
-          !isPC && 'message-input-toolbar-h5-list',
-          'message-input-toolbar-uni-list',
-        ]"
+    <div v-if="props.displayType === 'emojiPicker'">
+      <EmojiPickerDialog />
+    </div>
+    <div v-else>
+      <swiper
+        :class="['message-input-toolbar-swiper']"
+        :indicator-dots="isSwiperIndicatorDotsEnable"
+        :autoplay="false"
+        :circular="false"
       >
-        <ImageUpload imageSourceType="camera" />
-        <ImageUpload imageSourceType="album" />
-        <VideoUpload videoSourceType="album" />
-        <VideoUpload videoSourceType="camera" />
-        <template v-if="currentExtensionList[0]">
+        <swiper-item
+          :class="[
+            'message-input-toolbar-list',
+            'message-input-toolbar-h5-list',
+            'message-input-toolbar-uni-list',
+          ]"
+        >
+          <ImageUpload imageSourceType="camera" />
+          <ImageUpload imageSourceType="album" />
+          <VideoUpload videoSourceType="album" />
+          <VideoUpload videoSourceType="camera" />
+          <template v-if="currentExtensionList[0]">
+            <div
+              v-for="(extension, index) in currentExtensionList.slice(0, 4)"
+              :key="index"
+            >
+              <ToolbarItemContainer
+                v-if="extension"
+                :iconFile="genExtensionIcon(extension)"
+                :title="genExtensionText(extension)"
+                iconWidth="25px"
+                iconHeight="25px"
+                :needDialog="false"
+                @onIconClick="onExtensionClick(extension)"
+              />
+            </div>
+          </template>
+          <Evaluate
+            v-if="currentExtensionList.length < 4"
+            @onDialogPopupShowOrHide="handleSwiperDotShow"
+          />
+          <Words
+            v-if="currentExtensionList.length < 3"
+            @onDialogPopupShowOrHide="handleSwiperDotShow"
+          />
+        </swiper-item>
+        <swiper-item
+          v-if="currentExtensionList[2] && currentExtensionList.length >= 3"
+          :class="[
+            'message-input-toolbar-list',
+            'message-input-toolbar-h5-list',
+            'message-input-toolbar-uni-list',
+          ]"
+        >
           <div
-            v-for="(extension, index) in currentExtensionList.slice(0, 4)"
+            v-for="(extension, index) in currentExtensionList.slice(4)"
             :key="index"
           >
             <ToolbarItemContainer
@@ -38,48 +74,17 @@
               @onIconClick="onExtensionClick(extension)"
             />
           </div>
-        </template>
-        <Evaluate
-          v-if="currentExtensionList.length < 4"
-          @onDialogPopupShowOrHide="handleSwiperDotShow"
-        />
-        <Words
-          v-if="currentExtensionList.length < 3"
-          @onDialogPopupShowOrHide="handleSwiperDotShow"
-        />
-      </swiper-item>
-      <swiper-item
-        v-if="currentExtensionList[2] && currentExtensionList.length >= 3"
-        :class="[
-          'message-input-toolbar-list',
-          !isPC && 'message-input-toolbar-h5-list',
-          'message-input-toolbar-uni-list',
-        ]"
-      >
-        <div
-          v-for="(extension, index) in currentExtensionList.slice(4)"
-          :key="index"
-        >
-          <ToolbarItemContainer
-            v-if="extension"
-            :iconFile="genExtensionIcon(extension)"
-            :title="genExtensionText(extension)"
-            iconWidth="25px"
-            iconHeight="25px"
-            :needDialog="false"
-            @onIconClick="onExtensionClick(extension)"
+          <Evaluate
+            v-if="currentExtensionList.length >= 4"
+            @onDialogPopupShowOrHide="handleSwiperDotShow"
           />
-        </div>
-        <Evaluate
-          v-if="currentExtensionList.length >= 4"
-          @onDialogPopupShowOrHide="handleSwiperDotShow"
-        />
-        <Words
-          v-if="currentExtensionList.length >= 3"
-          @onDialogPopupShowOrHide="handleSwiperDotShow"
-        />
-      </swiper-item>
-    </swiper>
+          <Words
+            v-if="currentExtensionList.length >= 3"
+            @onDialogPopupShowOrHide="handleSwiperDotShow"
+          />
+        </swiper-item>
+      </swiper>
+    </div>
     <UserSelector
       ref="userSelectorRef"
       :type="selectorShowType"
@@ -88,15 +93,10 @@
       @submit="onUserSelectorSubmit"
       @cancel="onUserSelectorCancel"
     />
-    <div
-      v-if="isH5"
-      ref="h5Dialog"
-      :class="['message-input-toolbar-h5-dialog']"
-    />
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onUnmounted } from '../../../adapter-vue';
+import { ref, onUnmounted, onMounted } from '../../../adapter-vue';
 import TUIChatEngine, {
   IConversationModel,
   TUIStore,
@@ -108,22 +108,29 @@ import VideoUpload from './video-upload/index.vue';
 import Evaluate from './evaluate/index.vue';
 import Words from './words/index.vue';
 import ToolbarItemContainer from './toolbar-item-container/index.vue';
+import EmojiPickerDialog from './emoji-picker/emoji-picker-dialog.vue';
 import UserSelector from './user-selector/index.vue';
-import { isPC, isH5 } from '../../../utils/env';
 import TUIChatConfig from '../config';
 import { enableSampleTaskStatus } from '../../../utils/enableSampleTaskStatus';
+import { ToolbarDisplayType } from '../../../interface';
 
-const h5Dialog = ref();
+interface IProps {
+  displayType: ToolbarDisplayType;
+}
+
+const props = withDefaults(defineProps<IProps>(), {
+});
+
 const currentConversation = ref<IConversationModel>();
 const isGroup = ref<boolean>(false);
 const selectorShowType = ref<string>('');
 const userSelectorRef = ref();
 const currentUserSelectorExtension = ref<ExtensionInfo | null>();
-const currentExtensionList = ref<Array<ExtensionInfo>>([]);
+const currentExtensionList = ref<ExtensionInfo[]>([]);
 const isSwiperIndicatorDotsEnable = ref<boolean>(false);
 
 // extensions
-const extensionList: Array<ExtensionInfo> = [
+const extensionList: ExtensionInfo[] = [
   ...TUICore.getExtensionList(TUIConstants.TUIChat.EXTENSION.INPUT_MORE.EXT_ID),
 ];
 
@@ -171,8 +178,10 @@ const onCurrentConversationUpdate = (conversation: IConversationModel) => {
   }
 };
 
-TUIStore.watch(StoreName.CONV, {
-  currentConversation: onCurrentConversationUpdate,
+onMounted(() => {
+  TUIStore.watch(StoreName.CONV, {
+    currentConversation: onCurrentConversationUpdate,
+  });
 });
 
 onUnmounted(() => {

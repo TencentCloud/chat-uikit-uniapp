@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import * as VueBasic from 'vue';
+import * as _Vue from 'vue';
 import * as VueApi from '@vue/composition-api';
 
+let VueBasic: any = {
+  default: {},
+};
+VueBasic = _Vue ? _Vue : VueBasic;
 let vueVersion: number;
 let createVNode = (
   arg1: any,

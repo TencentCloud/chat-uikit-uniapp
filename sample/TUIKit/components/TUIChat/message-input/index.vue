@@ -6,13 +6,13 @@
         :class="{
           'message-input-audio': true,
           'message-input-wx-audio': isWeChat,
-          'message-input-wx-audio-open': isFunctionShow('audio'),
+          'message-input-wx-audio-open': displayType === 'audio',
         }"
-        :is-enable-audio="isFunctionShow('audio')"
-        @switchAudio="switchAudio"
+        :isEnableAudio="displayType === 'audio'"
+        @changeDisplayType="changeDisplayType"
       />
       <MessageInputEditor
-        v-show="!isFunctionShow('audio')"
+        v-show="displayType === 'editor'"
         ref="editor"
         class="message-input-editor"
         :placeholder="props.placeholder"
@@ -22,7 +22,6 @@
         :enableAt="props.enableAt"
         :enableTyping="props.enableTyping"
         :isGroup="isGroup"
-        @sendMessage="sendMessage"
         @onTyping="onTyping"
         @onAt="onAt"
         @onFocus="onFocus"
@@ -35,7 +34,7 @@
       />
       <div
         class="message-input-emoji"
-        @click="switchEmojiAndFeature('emoji')"
+        @click="changeToolbarDisplayType('emojiPicker')"
       >
         <Icon
           :file="faceIcon"
@@ -44,7 +43,7 @@
       </div>
       <div
         class="message-input-more"
-        @click="switchEmojiAndFeature('more')"
+        @click="changeToolbarDisplayType('tools')"
       >
         <Icon
           :file="moreIcon"
@@ -55,17 +54,8 @@
     <div>
       <MessageQuote
         :style="{minWidth: 0}"
-        :currentFunction="currentFunction"
+        :displayType="displayType"
       />
-      <div
-        v-show="isFunctionShow('emoji')"
-        class="message-input-emoji-picker"
-      >
-        <EmojiPickerDialog
-          @insertEmoji="insertEmoji"
-          @sendMessage="sendMessage"
-        />
-      </div>
     </div>
   </div>
 </template>
@@ -76,61 +66,49 @@ import TUIChatEngine, {
   IMessageModel,
   IConversationModel,
 } from '@tencentcloud/chat-uikit-engine';
-import { ref, nextTick, onMounted, onUnmounted } from '../../../adapter-vue';
+import { ref, watch, onMounted, onUnmounted } from '../../../adapter-vue';
 import MessageInputEditor from './message-input-editor.vue';
 import MessageInputAt from './message-input-at/index.vue';
 import MessageInputAudio from './message-input-audio.vue';
-import EmojiPickerDialog from '../message-input-toolbar/emoji-picker/emoji-picker-dialog.vue';
 import MessageQuote from './message-input-quote/index.vue';
 import Icon from '../../common/Icon.vue';
 import faceIcon from '../../../assets/icon/face-uni.png';
 import moreIcon from '../../../assets/icon/more-uni.png';
 import { isPC, isH5, isWeChat, isApp } from '../../../utils/env';
-import { sendMessages, sendTyping } from '../utils/sendMessage';
+import { sendTyping } from '../utils/sendMessage';
+import { ToolbarDisplayType, InputDisplayType } from '../../../interface';
 
-const props = defineProps({
-  placeholder: {
-    type: String,
-    default: 'this is placeholder',
-  },
-  replyOrReference: {
-    type: Object,
-    default: () => ({}),
-    required: false,
-  },
-  isMuted: {
-    type: Boolean,
-    default: true,
-  },
-  muteText: {
-    type: String,
-    default: '',
-  },
-  enableInput: {
-    type: Boolean,
-    default: true,
-  },
-  enableAt: {
-    type: Boolean,
-    default: true,
-  },
-  enableTyping: {
-    type: Boolean,
-    default: true,
-  },
+interface IProps {
+  placeholder: string;
+  isMuted?: boolean;
+  muteText?: string;
+  enableInput?: boolean;
+  enableAt?: boolean;
+  enableTyping?: boolean;
+  replyOrReference?: Record<string, any>;
+  inputToolbarDisplayType: ToolbarDisplayType;
+}
+interface IEmits {
+  (e: 'changeToolbarDisplayType', displayType: ToolbarDisplayType): void;
+}
+
+const emits = defineEmits<IEmits>();
+const props = withDefaults(defineProps<IProps>(), {
+  placeholder: 'this is placeholder',
+  replyOrReference: () => ({}),
+  isMuted: true,
+  muteText: '',
+  enableInput: true,
+  enableAt: true,
+  enableTyping: true,
+  inputToolbarDisplayType: 'none',
 });
 
-const emit = defineEmits([
-  'sendMessage',
-  'resetReplyOrReference',
-  'onTyping',
-  'handleToolbarListShow',
-]);
 const editor = ref();
 const messageInputAtRef = ref();
 const currentConversation = ref<IConversationModel>();
-const currentFunction = ref<string>('');
 const isGroup = ref<boolean>(false);
+const displayType = ref<InputDisplayType>('editor');
 
 onMounted(() => {
   TUIStore.watch(StoreName.CONV, {
@@ -152,49 +130,22 @@ onUnmounted(() => {
   });
 });
 
-const switchAudio = (isAudioShow: boolean) => {
-  if (isAudioShow) {
-    switchEmojiAndFeature('audio');
-  } else {
-    switchEmojiAndFeature('');
+watch(() => props.inputToolbarDisplayType, (newVal: ToolbarDisplayType) => {
+  if (newVal !== 'none') {
+    changeDisplayType('editor');
   }
-};
+});
 
-const switchEmojiAndFeature = (funcName: string) => {
-  if (currentFunction.value === 'emoji') {
-    if (funcName === 'emoji') {
-      currentFunction.value = '';
-    } else {
-      currentFunction.value = funcName;
-    }
-    if (funcName === 'more') {
-      nextTick(() => {
-        emit('handleToolbarListShow');
-      });
-    }
-  } else if (currentFunction.value === 'more') {
-    emit('handleToolbarListShow');
-    if (funcName === 'more') {
-      currentFunction.value = '';
-    } else {
-      nextTick(() => {
-        currentFunction.value = funcName;
-      });
-    }
-  } else {
-    currentFunction.value = funcName;
-    if (funcName === 'more') {
-      emit('handleToolbarListShow');
-    }
+function changeDisplayType(display: InputDisplayType) {
+  displayType.value = display;
+  if (display === 'audio') {
+    emits('changeToolbarDisplayType', 'none');
   }
-};
+}
 
-const isFunctionShow = (funcName: string) => {
-  if (currentFunction.value === funcName) {
-    return true;
-  }
-  return false;
-};
+function changeToolbarDisplayType(displayType: ToolbarDisplayType) {
+  emits('changeToolbarDisplayType', displayType);
+}
 
 const onTyping = (inputContentEmpty: boolean, inputBlur: boolean) => {
   sendTyping(inputContentEmpty, inputBlur);
@@ -206,18 +157,8 @@ const onAt = (show: boolean) => {
 
 const onFocus = () => {
   if (isH5) {
-    switchEmojiAndFeature('');
+    emits('changeToolbarDisplayType', 'none');
   }
-};
-
-const sendMessage = async () => {
-  let messageList;
-  if (editor?.value?.getEditorContent) {
-    messageList = editor?.value?.getEditorContent();
-  }
-  editor?.value?.resetEditor && editor?.value?.resetEditor();
-  await sendMessages(messageList, currentConversation.value!);
-  emit('sendMessage');
 };
 
 const insertEmoji = (emoji: any) => {
@@ -247,7 +188,7 @@ function onQuoteMessageUpdated(options?: { message: IMessageModel; type: string 
   // 当有引用消息时切换为文字输入模式
   // switch text input mode when there is a quote message
   if (options?.message && options?.type === 'quote') {
-    switchAudio(false);
+    changeDisplayType('editor');
   }
 }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="dialog-video">
     <video
-      v-if="show"
+      v-if="isShow"
       id="videoEle"
       class="video-box"
       :src="videoData"
@@ -17,15 +17,16 @@ import { TUIGlobal } from '@tencentcloud/universal-api';
 import { onLoad, onReady } from '@dcloudio/uni-app';
 
 const videoData = ref();
-const show = ref(false);
+const isShow = ref(false);
 const videoContext = ref();
 onLoad((option: any) => {
-  videoData.value = option && option.videoUrl;
-  show.value = true;
+  const decodedUrl = decodeURIComponent(option?.videoUrl);
+  videoData.value = decodedUrl;
+  isShow.value = true;
 });
 
 onReady(() => {
-  show.value = true;
+  isShow.value = true;
   videoContext.value = TUIGlobal.createVideoContext('videoEle');
 });
 </script>

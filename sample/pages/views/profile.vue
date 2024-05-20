@@ -11,9 +11,9 @@
         ]"
         :src="
           userProfile.avatar ||
-          'https://web.sdk.qcloud.com/component/TUIKit/assets/avatar_21.png'
+            'https://web.sdk.qcloud.com/component/TUIKit/assets/avatar_21.png'
         "
-      />
+      >
       <div
         :class="[
           'TUI-profile-basic-info',
@@ -39,8 +39,7 @@
               'TUI-profile-basic-info-id-label',
               !isPC && 'TUI-profile-h5-basic-info-id-label',
             ]"
-            >{{ "用户ID" }}:</label
-          >
+          >{{ "用户ID" }}:</label>
           <div
             :class="[
               'TUI-profile-basic-info-id-value',
@@ -67,21 +66,21 @@
         ]"
       >
         <div
-          @click="handleSettingListItemOnClick(item)"
           :class="[
             'TUI-profile-setting-item-label',
             !isPC && 'TUI-profile-h5-setting-item-label',
           ]"
+          @click="handleSettingListItemOnClick(item)"
         >
           <div :class="['label-left']">
             <div :class="['label-title']">
               {{ item.label }}
             </div>
             <div
-              :class="['label-desc']"
               v-if="
                 item.children && !isPC && item.childrenShowType === 'switch'
               "
+              :class="['label-desc']"
             >
               {{ item.value }}
             </div>
@@ -90,9 +89,9 @@
             <div
               v-if="
                 !isPC &&
-                item.children &&
-                item.selectedChild &&
-                item.childrenShowType === 'bottomPopup'
+                  item.children &&
+                  item.selectedChild &&
+                  item.childrenShowType === 'bottomPopup'
               "
               :class="[
                 'TUI-profile-setting-item-label-value',
@@ -107,7 +106,7 @@
               width="14px"
               height="14px"
               style="width: 14px; height: 14px; display: flex"
-            ></Icon>
+            />
           </div>
         </div>
         <!-- 移动端 children显示，分多个类型 -->
@@ -119,11 +118,11 @@
           @onClose="bottomPopupOnClose(item)"
         >
           <div
+            v-for="child in item.children"
             :class="[
               'TUI-profile-setting-item-bottom-popup',
               !isPC && 'TUI-profile-h5-setting-item-bottom-popup',
             ]"
-            v-for="child in item.children"
             @click="handleSettingListItemOnClick(child)"
           >
             {{ child.label }}
@@ -139,24 +138,24 @@ import TUIChatEngine, {
   TUIStore,
   StoreName,
   TUIChatService,
-} from "@tencentcloud/chat-uikit-engine";
-import { TUILogin } from "@tencentcloud/tui-core";
-import { TUIGlobal } from "@tencentcloud/universal-api";
-import { ref, defineProps, onMounted } from "../../TUIKit/adapter-vue";
-import { isPC } from "../../TUIKit/utils/env";
-import { Toast, TOAST_TYPE } from "../../TUIKit/components/common/Toast/index";
-import BottomPopup from "../../TUIKit/components/common/BottomPopup/index.vue";
-import Icon from "../../TUIKit/components/common/Icon.vue";
-import rightArrowIcon from "../../TUIKit/assets/icon/right-icon.svg";
-import { IUserProfile } from "../../TUIKit/interface";
-import { onHide } from "@dcloudio/uni-app";
-import { translator } from "../../TUIKit/components/TUIChat/utils/translation";
-
+} from '@tencentcloud/chat-uikit-engine';
+import { TUILogin } from '@tencentcloud/tui-core';
+import { TUIGlobal } from '@tencentcloud/universal-api';
+import { ref, defineProps, onMounted } from '../../TUIKit/adapter-vue';
+import { isPC } from '../../TUIKit/utils/env';
+import { Toast, TOAST_TYPE } from '../../TUIKit/components/common/Toast/index';
+import BottomPopup from '../../TUIKit/components/common/BottomPopup/index.vue';
+import Icon from '../../TUIKit/components/common/Icon.vue';
+import rightArrowIcon from '../../TUIKit/assets/icon/right-icon.svg';
+import { IUserProfile } from '../../TUIKit/interface';
+import { onHide } from '@dcloudio/uni-app';
+import { translator } from '../../TUIKit/components/TUIChat/utils/translation';
+import { removeTokenStorage } from '../../utils/token';
 
 const props = defineProps({
   displayType: {
     type: String,
-    default: "all", // "profile"/"setting"/"all"
+    default: 'all', // "profile"/"setting"/"all"
   },
   showSetting: {
     type: Boolean,
@@ -185,17 +184,17 @@ const settingList = ref<{
   };
 }>({
   editProfile: {
-    value: "editProfile",
-    label: "编辑资料（暂未开放）",
+    value: 'editProfile',
+    label: '编辑资料（暂未开放）',
     onClick: (item: any) => {
-      console.warn("编辑资料功能努力开发中，敬请期待");
+      console.warn('编辑资料功能努力开发中，敬请期待');
     },
   },
   allowType: {
-    value: "allowType",
-    label: "加我为好友时",
-    selectedChild: "",
-    childrenShowType: "bottomPopup",
+    value: 'allowType',
+    label: '加我为好友时',
+    selectedChild: '',
+    childrenShowType: 'bottomPopup',
     showChildren: false,
     onClick: (item: any) => {
       if (!isPC) {
@@ -205,21 +204,21 @@ const settingList = ref<{
     children: {
       [TUIChatEngine.TYPES.ALLOW_TYPE_ALLOW_ANY]: {
         value: TUIChatEngine.TYPES.ALLOW_TYPE_ALLOW_ANY,
-        label: "同意任何用户加好友",
+        label: '同意任何用户加好友',
         onClick: (item: any) => {
           updateMyProfile({ allowType: item.value });
         },
       },
       [TUIChatEngine.TYPES.ALLOW_TYPE_NEED_CONFIRM]: {
         value: TUIChatEngine.TYPES.ALLOW_TYPE_NEED_CONFIRM,
-        label: "需要验证",
+        label: '需要验证',
         onClick: (item: any) => {
           updateMyProfile({ allowType: item.value });
         },
       },
       [TUIChatEngine.TYPES.ALLOW_TYPE_DENY_ANY]: {
         value: TUIChatEngine.TYPES.ALLOW_TYPE_DENY_ANY,
-        label: "拒绝任何人加好友",
+        label: '拒绝任何人加好友',
         onClick: (item: any) => {
           updateMyProfile({ allowType: item.value });
         },
@@ -227,10 +226,10 @@ const settingList = ref<{
     },
   },
   displayMessageReadReceipt: {
-    value: "displayMessageReadReceipt",
-    label: "消息阅读状态",
-    selectedChild: "userLevelReadReceiptOpen",
-    childrenShowType: "bottomPopup",
+    value: 'displayMessageReadReceipt',
+    label: '消息阅读状态',
+    selectedChild: 'userLevelReadReceiptOpen',
+    childrenShowType: 'bottomPopup',
     showChildren: false,
     onClick(item: any) {
       if (!isPC) {
@@ -239,26 +238,26 @@ const settingList = ref<{
     },
     children: {
       userLevelReadReceiptOpen: {
-        value: "userLevelReadReceiptOpen",
-        label: "开启",
+        value: 'userLevelReadReceiptOpen',
+        label: '开启',
         onClick() {
           switchEnabelUserLevelReadRecript(true);
-        }
+        },
       },
       userLevelReadReceiptClose: {
-        value: "userLevelReadReceiptClose",
-        label: "关闭",
+        value: 'userLevelReadReceiptClose',
+        label: '关闭',
         onClick() {
           switchEnabelUserLevelReadRecript(false);
-        }
-      }
-    }
+        },
+      },
+    },
   },
   displayOnlineStatus: {
-    value: "displayOnlineStatus",
-    label: "显示在线状态",
-    selectedChild: "userLevelOnlineStatusOpen",
-    childrenShowType: "bottomPopup",
+    value: 'displayOnlineStatus',
+    label: '显示在线状态',
+    selectedChild: 'userLevelOnlineStatusOpen',
+    childrenShowType: 'bottomPopup',
     showChildren: false,
     onClick(item: any) {
       if (!isPC) {
@@ -267,26 +266,26 @@ const settingList = ref<{
     },
     children: {
       userLevelOnlineStatusOpen: {
-        value: "userLevelOnlineStatusOpen",
-        label: "开启",
+        value: 'userLevelOnlineStatusOpen',
+        label: '开启',
         onClick() {
           switchUserLevelOnlineStatus(true);
-        }
+        },
       },
       userLevelOnlineStatusClose: {
-        value: "userLevelOnlineStatusClose",
-        label: "关闭",
+        value: 'userLevelOnlineStatusClose',
+        label: '关闭',
         onClick() {
           switchUserLevelOnlineStatus(false);
-        }
-      }
-    }
+        },
+      },
+    },
   },
   translateLanguage: {
-    value: "translateLanguage",
-    label: "翻译语言",
-    selectedChild: "zh",
-    childrenShowType: "bottomPopup",
+    value: 'translateLanguage',
+    label: '翻译语言',
+    selectedChild: 'zh',
+    childrenShowType: 'bottomPopup',
     showChildren: false,
     onClick(item: any) {
       if (!isPC) {
@@ -295,29 +294,29 @@ const settingList = ref<{
     },
     children: {
       zh: {
-        value: "zh",
-        label: "中文",
+        value: 'zh',
+        label: '中文',
         onClick() {
           switchTranslationTargetLanguage('zh');
         },
       },
       en: {
-        value: "en",
-        label: "English",
+        value: 'en',
+        label: 'English',
         onClick() {
           switchTranslationTargetLanguage('en');
         },
       },
       jp: {
-        value: "jp",
-        label: "日本語",
+        value: 'jp',
+        label: '日本語',
         onClick() {
           switchTranslationTargetLanguage('jp');
         },
       },
       kr: {
-        value: "kr",
-        label: "한국인",
+        value: 'kr',
+        label: '한국인',
         onClick() {
           switchTranslationTargetLanguage('kr');
         },
@@ -325,12 +324,16 @@ const settingList = ref<{
     },
   },
   exit: {
-    value: "exit",
-    label: "退出登录",
+    value: 'exit',
+    label: '退出登录',
     onClick: (item: any) => {
       TUILogin.logout().then(() => {
+        uni.removeStorage({
+          key: 'userInfo',
+        });
+        removeTokenStorage();
         TUIGlobal?.reLaunch({
-          url: "/pages/views/login",
+          url: '/pages/views/login',
         });
       });
     },
@@ -338,7 +341,7 @@ const settingList = ref<{
 });
 
 const handleSettingListItemOnClick = (item: any) => {
-  if (item?.onClick && typeof item?.onClick === "function") {
+  if (item?.onClick && typeof item?.onClick === 'function') {
     item.onClick(item);
   }
 };
@@ -355,18 +358,18 @@ const updateMyProfile = (props: object) => {
   TUIUserService.updateMyProfile(props)
     .then((res: any) => {
       Toast({
-        message: "更新用户资料成功",
+        message: '更新用户资料成功',
         type: TOAST_TYPE.SUCCESS,
         duration: 0,
       });
-      if("allowType" in props){
-        settingList.value["allowType"].showChildren = false;
+      if ('allowType' in props) {
+        settingList.value['allowType'].showChildren = false;
       }
     })
     .catch((err: any) => {
-      console.warn("更新用户资料失败", err);
+      console.warn('更新用户资料失败', err);
       Toast({
-        message: "更新用户资料失败",
+        message: '更新用户资料失败',
         type: TOAST_TYPE.ERROR,
         duration: 0,
       });
@@ -382,13 +385,13 @@ TUIStore.watch(StoreName.USER, {
   },
   displayMessageReadReceipt(isDisplay: boolean) {
     settingList.value.displayMessageReadReceipt.selectedChild
-      = isDisplay ? "userLevelReadReceiptOpen" : "userLevelReadReceiptClose";
+      = isDisplay ? 'userLevelReadReceiptOpen' : 'userLevelReadReceiptClose';
   },
   displayOnlineStatus(isOnlineStatusDisplay: boolean) {
     settingList.value.displayOnlineStatus.selectedChild = isOnlineStatusDisplay
-      ? "userLevelOnlineStatusOpen"
-      : "userLevelOnlineStatusClose";
-  }
+      ? 'userLevelOnlineStatusOpen'
+      : 'userLevelOnlineStatusClose';
+  },
 });
 
 // 规避TUIStore.watch userProfile 登录后暂时不能及时触发更新
@@ -401,21 +404,21 @@ onMounted(() => {
 
 // tabbar 切换其他tab，关闭profile已经打开的设置弹窗
 onHide(() => {
-  for (let settingItemKey in settingList.value) {
-    if (settingList?.value[settingItemKey]?.hasOwnProperty("showChildren")) {
+  for (const settingItemKey in settingList.value) {
+    if (settingList?.value[settingItemKey]?.hasOwnProperty('showChildren')) {
       settingList.value[settingItemKey].showChildren = false;
     }
   }
 });
 
 function switchEnabelUserLevelReadRecript(status: boolean) {
-  TUIStore.update(StoreName.USER, "displayMessageReadReceipt", status);
-  settingList.value["displayMessageReadReceipt"].showChildren = false;
+  TUIStore.update(StoreName.USER, 'displayMessageReadReceipt', status);
+  settingList.value['displayMessageReadReceipt'].showChildren = false;
 }
 
 function switchUserLevelOnlineStatus(status: boolean) {
   TUIUserService.switchUserStatus({ displayOnlineStatus: status });
-  settingList.value["displayOnlineStatus"].showChildren = false;
+  settingList.value['displayOnlineStatus'].showChildren = false;
 }
 
 function switchTranslationTargetLanguage(lang: string) {

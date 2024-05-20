@@ -49,9 +49,14 @@ import Icon from '../../common/Icon.vue';
 import audioIcon from '../../../assets/icon/audio.svg';
 import { Toast, TOAST_TYPE } from '../../common/Toast/index';
 import { isEnabledMessageReadReceiptGlobal } from '../utils/utils';
+import { InputDisplayType } from '../../../interface';
 
 interface IProps {
   isEnableAudio: boolean;
+}
+
+interface IEmits {
+  (e: 'changeDisplayType', type: InputDisplayType): void;
 }
 
 interface RecordResult {
@@ -63,7 +68,7 @@ interface RecordResult {
 type TouchBarText = '按住说话' | '抬起发送' | '抬起取消';
 type ModalText = '正在录音' | '继续上滑可取消' | '松开手指 取消发送';
 
-const emits = defineEmits(['switchAudio']);
+const emits = defineEmits<IEmits>();
 const props = withDefaults(defineProps<IProps>(), {
   isEnableAudio: false,
 });
@@ -96,7 +101,7 @@ const recordConfig = {
 };
 
 function switchAudio() {
-  emits('switchAudio', !props.isEnableAudio);
+  emits('changeDisplayType', props.isEnableAudio ? 'editor' : 'audio');
 }
 
 onMounted(() => {

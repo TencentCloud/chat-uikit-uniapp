@@ -36,8 +36,9 @@ const props = withDefaults(
 );
 
 function handlerVideoPlay() {
+  const encodedUrl = encodeURIComponent(props.content.url);
   uni.navigateTo({
-    url: `/TUIKit/components/TUIChat/video-play?videoUrl=${props.content.url}`,
+    url: `/TUIKit/components/TUIChat/video-play?videoUrl=${encodedUrl}`,
   });
 }
 </script>
