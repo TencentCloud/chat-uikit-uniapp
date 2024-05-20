@@ -97,14 +97,13 @@
 
 <script lang="ts" setup>
 import { ref, vueVersion } from '../../TUIKit/adapter-vue';
-import { TUILogin } from '@tencentcloud/tui-core';
-import { TUITranslateService, TUIUserService } from '@tencentcloud/chat-uikit-engine';
+import { TUITranslateService } from '@tencentcloud/chat-uikit-engine';
 import Link from '../../utils/link';
 import { genTestUserSig } from '../../TUIKit/debug';
 import { isPC, isH5, isApp } from '../../TUIKit/utils/env';
 import Icon from '../../TUIKit/components/common/Icon.vue';
 import logo from '../../static/logo-back.svg';
-import timpushConfigs from '../../timpush-configs.json';
+import { loginChat } from '../../loginChat';
 const privateAgree = ref(false);
 const inputValue = ref('');
 
@@ -118,18 +117,17 @@ const handleLoginInfo = () => {
     secretKey: uni.$chat_secretKey,
     userID: inputValue.value,
   });
-  // 登录所需要的参数
   const loginInfo = {
     SDKAppID: uni.$chat_SDKAppID,
     userID: inputValue.value,
     userSig: options.userSig,
     useUploadPlugin: true,
     framework: `vue${vueVersion}`,
-    TIMPush: uni.$TIMPush, // APP 注册推送插件
+    TIMPush: uni.$TIMPush, // register TencentCloud-TIMPush
     pushConfig: {
-      androidConfig: timpushConfigs, // Android 推送配置，如不需要可传空。
+      androidConfig: uni.$TIMPushConfigs, // Android timpush-configs.json
       iOSConfig: {
-        iOSBusinessID: '', // iOS 推送配置，如不需要可传空。
+        iOSBusinessID: '', // iOS Certificate ID
       },
     },
   };
@@ -139,32 +137,21 @@ const handleLoginInfo = () => {
 const login = (loginInfo: any) => {
   if (!inputValue.value) {
     uni.showToast({
-      title: '请输入 userID！',
+      title: TUITranslateService.t('Login.请输入userID'),
       icon: 'none',
     });
   } else if (!privateAgree.value) {
     uni.showToast({
-      title: '请同意相关条例及协议！',
+      title: TUITranslateService.t('Login.请先勾选用户协议'),
       icon: 'none',
     });
   } else {
-    TUILogin.login(loginInfo)
-      .then((res: any) => {
-        uni.switchTab({
-          url: '/TUIKit/components/TUIConversation/index',
-        });
-        TUIUserService.switchUserStatus({ displayOnlineStatus: true });
-        uni.showToast({
-          title: '登录成功！',
-          icon: 'success',
-        });
-      })
-      .catch((error: any) => {
-        uni.showToast({
-          title: '登录失败！',
-          icon: 'none',
-        });
+    loginChat(loginInfo).catch(() => {
+      uni.showToast({
+        title: TUITranslateService.t('Login.登录失败'),
+        icon: 'none',
       });
+    });
   }
 };
 
@@ -178,7 +165,7 @@ const openFullPlatformLink = (link: string) => {
 </script>
 
 <style lang="scss" scoped>
-@import "../../styles/login.scss";
+@import "../../styles/login";
 
 .icon {
   display: inline;
@@ -193,8 +180,8 @@ const openFullPlatformLink = (link: string) => {
   display: inline-block;
   width: 12px;
   height: 12px;
-  background: #ffffff;
-  border: 1px solid #dddddd;
+  background: #fff;
+  border: 1px solid #ddd;
   border-radius: 8px;
 }
 
@@ -204,7 +191,7 @@ const openFullPlatformLink = (link: string) => {
 }
 
 .icon-default {
-  margin: 7px 6px 0px 0px;
+  margin: 7px 6px 0 0;
 }
 
 .login-input-uniapp {

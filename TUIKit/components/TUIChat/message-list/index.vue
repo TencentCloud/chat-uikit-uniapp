@@ -1,8 +1,12 @@
 <template>
   <div
-    class="tui-chat"
-    :class="[!isPC ? 'tui-chat-h5' : '']"
+    :class="{
+      'tui-chat': true,
+      'tui-chat-h5': isMobile,
+    }"
+    @click="onMessageListBackgroundClick"
   >
+    <!-- <JoinGroupCard /> -->
     <div class="tui-chat-main">
       <div class="tui-chat-safe-tips">
         <span>
@@ -48,7 +52,7 @@
           />
           <div
             class="message-item"
-            @click.stop="toggleID = ''"
+            @click="toggleID = ''"
           >
             <MessageTip
               v-if="item.type === TYPES.MSG_GRP_TIP ||
@@ -199,6 +203,7 @@ import {
   getBoundingClientRect,
   getScrollInfo,
 } from '@tencentcloud/universal-api';
+// import { JoinGroupCard } from '@tencentcloud/call-uikit-wechat';
 import Link from './link';
 import MessageGroupApplication from './message-group-application/index.vue';
 import MessageText from './message-elements/message-text.vue';
@@ -223,9 +228,15 @@ import Dialog from '../../common/Dialog/index.vue';
 import { Toast, TOAST_TYPE } from '../../common/Toast/index';
 import { isCreateGroupCustomMessage } from '../utils/utils';
 import { isEnabledMessageReadReceiptGlobal } from '../utils/utils';
-import { isPC, isH5 } from '../../../utils/env';
+import { isPC, isH5, isMobile } from '../../../utils/env';
 import { IAudioContext } from '../../../interface';
 
+interface IEmits {
+  (e: 'closeInputToolBar'): void;
+  (e: 'handleEditor', message: IMessageModel, type: string): void;
+}
+
+const emits = defineEmits<IEmits>();
 const props = defineProps({
   groupID: {
     type: String,
@@ -265,7 +276,6 @@ const isShowReadUserStatusPanel = ref<boolean>(false);
 // 消息重发 Dialog
 const reSendDialogShow = ref(false);
 const resendMessageData = ref();
-const emits = defineEmits(['handleEditor']);
 
 // 消息滑动到底部，建议搭配 nextTick 使用
 const scrollToBottom = () => {
@@ -303,6 +313,8 @@ onMounted(() => {
   });
 
   setInstanceMapping('messageList', thisInstance);
+
+  uni.$on('scroll-to-bottom', scrollToLatestMessage);
 });
 
 // 取消监听
@@ -318,6 +330,8 @@ onUnmounted(() => {
 
   observer?.disconnect();
   observer = null;
+
+  uni.$off('scroll-to-bottom');
 });
 
 const handelScrollListScroll = throttle(
@@ -618,6 +632,10 @@ async function scrollToTargetMessage(message: IMessageModel) {
       type: TOAST_TYPE.WARNING,
     });
   }
+}
+
+function onMessageListBackgroundClick() {
+  emits('closeInputToolBar');
 }
 </script>
 <style lang="scss" scoped src="./style/index.scss"></style>

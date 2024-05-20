@@ -1,52 +1,73 @@
 <script lang="ts">
-import { TUIChatKit } from "./TUIKit";
-// 接入离线推送插件
-// 可实现应用切换到后台和杀死应用的情况，收到消息或接听视频
+import { TUIChatKit } from './TUIKit';
+import { TUITranslateService } from '@tencentcloud/chat-uikit-engine';
+import { locales } from './locales';
+import TIMPushConfigs from './timpush-configs.json';
 // #ifdef APP-PLUS
-const TIMPush = uni.requireNativePlugin("TencentCloud-TIMPush");
-console.log(TIMPush, "---TIMPush ｜ ok");
+// register TencentCloud-TIMPush
+import { IEnterChatConfig, loginFromStorage, openChat } from './loginChat';
+import TUIChatEngine from '@tencentcloud/chat-uikit-engine';
+import { getNotificationAuth } from './utils/getNotificationAuth';
+const TIMPush = uni.requireNativePlugin('TencentCloud-TIMPush');
+console.warn(`TencentCloud-TIMPush: uni.requireNativePlugin ${TIMPush ? 'success' : 'fail'}`);
 uni.$TIMPush = TIMPush;
+uni.$TIMPushConfigs = TIMPushConfigs;
+const enterChatConfig: IEnterChatConfig = {
+  isLoginChat: false,
+  conversationID: '',
+};
+// register TencentCloud-TUICallKit
+const TUICallKit = uni.requireNativePlugin('TencentCloud-TUICallKit');
+console.warn(`TencentCloud-TUICallKit: uni.requireNativePlugin ${TUICallKit ? 'success' : 'fail'}`);
+uni.$TUICallKit = TUICallKit;
 // #endif
+
+TUITranslateService.provideLanguages(locales);
+TUITranslateService.useI18n();
 
 TUIChatKit.init();
 const SDKAppID = 0; // Your SDKAppID
-const secretKey = "xxx"; //Your secretKey
+const secretKey = 'xxx'; // Your secretKey
 
 uni.$chat_SDKAppID = SDKAppID;
 uni.$chat_secretKey = secretKey;
 
-// #ifdef APP-PLUS
-// 接入音视频通话插件 TUICallkit,这里是客户后续需要添加的，记得删除
-uni.$TUICallKit = uni.requireNativePlugin("TencentCloud-TUICallKit");
-console.log(uni.$TUICallKit, "TUICallKit ｜ ok");
-// #endif
-
 export default {
- onLaunch: function () {
-   // #ifdef APP-PLUS
-   // 在 App.vue, 生命钩子 onLaunch 中监听
-   if (typeof uni.$TIMPush === "undefined") {
-     console.warn("如果您使用推送功能，需集成 TIMPush 插件，使用真机运行并且自定义基座调试，请参考官网文档：https://cloud.tencent.com/document/product/269/103522");
-   } else {
-    uni.$TIMPush.setOfflinePushListener((data) => {
-        // 透传 entity 中的内容，不包含推送的 Message
-        console.log('setOfflinePushListener', data);
-    });
-   }
-   // #endif
- },
- 
-  onShow: function () {
-    console.log("App Show");
+  onLaunch: function () {
+    // #ifdef APP-PLUS
+    // 在 App.vue, 生命钩子 onLaunch 中监听
+    if (typeof uni.$TIMPush === 'undefined') {
+      console.warn('如果您使用推送功能，需集成 TIMPush 插件，使用真机运行并且自定义基座调试，请参考官网文档：https://cloud.tencent.com/document/product/269/103522');
+    } else {
+      getNotificationAuth();
+      uni.$on('uikitLogin', () => {
+        enterChatConfig.isLoginChat = true;
+        openChat(enterChatConfig);
+      });
+      uni.$TIMPush.setOfflinePushListener((data) => {
+        const { notification = '' } = data?.data || {};
+        if (!notification) {
+          return;
+        }
+        const { entity } = JSON.parse(notification);
+        const type = entity.chatType === 1 ? TUIChatEngine.TYPES.CONV_C2C : TUIChatEngine.TYPES.CONV_GROUP;
+        enterChatConfig.conversationID = `${type}${entity.sender}`;
+        if (enterChatConfig.isLoginChat && entity.sender) {
+          openChat(enterChatConfig);
+        }
+      });
+      loginFromStorage();
+    }
+    // #endif
   },
-  onHide: function () {
-    console.log("App Hide");
-  },
+
+  onShow: function () {},
+  onHide: function () {},
 };
 
 </script>
 <style>
-/*每个页面公共css */
+/* 每个页面公共css */
 uni-page-body,
 html,
 body,

@@ -57,7 +57,7 @@ interface IEmits {
   (key: 'onError', e: Event): void;
 }
 
-const defaultAvatarUrl = 'https://web.sdk.qcloud.com/component/TUIKit/assets/avatar_21.png';
+const defaultAvatarUrl = ref('https://web.sdk.qcloud.com/component/TUIKit/assets/avatar_21.png');
 const emits = defineEmits<IEmits>();
 const props = withDefaults(defineProps<IProps>(), {
   // uniapp vue2 不支持在defineProps中使用常量
@@ -74,6 +74,7 @@ const {
   useSkeletonAnimation: useAvatarSkeletonAnimation,
 } = toRefs(props);
 
+let reloadAvatarTime = 0;
 const isImgLoaded = ref<boolean>(false);
 const loadErrorInUniapp = ref<boolean>(false);
 
@@ -83,10 +84,14 @@ function avatarLoadSuccess(e: Event) {
 }
 
 function avatarLoadFailed(e: Event) {
+  reloadAvatarTime += 1;
+  if (reloadAvatarTime > 3) {
+    return;
+  }
   if (isUniFrameWork) {
     loadErrorInUniapp.value = true;
   } else {
-    (e.currentTarget as HTMLImageElement).src = defaultAvatarUrl;
+    (e.currentTarget as HTMLImageElement).src = defaultAvatarUrl.value;
   }
   emits('onError', e);
 }

@@ -33,11 +33,13 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, nextTick, watch } from '../../../adapter-vue';
+import { ref, watch, onMounted, onUnmounted } from '../../../adapter-vue';
+import { TUIStore, StoreName, IConversationModel } from '@tencentcloud/chat-uikit-engine';
 import { TUIGlobal } from '@tencentcloud/universal-api';
-import { ISendMessagePayload } from '../../../interface';
-import { isPC } from '../../../utils/env';
 import { transformEmojiValueToKey } from '../utils/emojiList';
+import { isPC } from '../../../utils/env';
+import { sendMessages } from '../utils/sendMessage';
+import { ISendMessagePayload } from '../../../interface';
 
 const props = defineProps({
   placeholder: {
@@ -74,23 +76,42 @@ const props = defineProps({
     default: false,
   },
 });
-const emits = defineEmits(['sendMessage', 'onTyping', 'onFocus', 'onAt']);
+
+const emits = defineEmits(['onTyping', 'onFocus', 'onAt']);
 const inputText = ref('');
 const inputRef = ref();
 const inputBlur = ref(true);
 const inputContentEmpty = ref(true);
 const allInsertedAtInfo = new Map();
-const emojiMap = new Map();
+const currentConversation = ref<IConversationModel>();
+
+onMounted(() => {
+  TUIStore.watch(StoreName.CONV, {
+    currentConversation: onCurrentConversationUpdated,
+  });
+
+  uni.$on('insert-emoji', (data) => {
+    inputText.value += data?.emoji?.name;
+  });
+
+  uni.$on('send-message-in-emoji-picker', () => {
+    handleSendMessage();
+  });
+});
+
+onUnmounted(() => {
+  uni.$off('insertEmoji');
+  uni.$off('send-message-in-emoji-picker');
+
+  TUIStore.unwatch(StoreName.CONV, {
+    currentConversation: onCurrentConversationUpdated,
+  });
+});
 
 const handleSendMessage = () => {
-  emits('sendMessage');
-};
-
-const addEmoji = (emojiData: any) => {
-  emojiMap.set(emojiData?.emoji.key, emojiData?.emoji.name);
-  nextTick(() => {
-    inputText.value += emojiData?.emoji?.name;
-  });
+  const messageList = getEditorContent();
+  resetEditor();
+  sendMessages(messageList as any, currentConversation.value!);
 };
 
 const insertAt = (atInfo: any) => {
@@ -103,7 +124,7 @@ const insertAt = (atInfo: any) => {
 const getEditorContent = () => {
   let text = inputText.value;
   text = transformEmojiValueToKey(text);
-  const atUserList: Array<string> = [];
+  const atUserList: string[] = [];
   allInsertedAtInfo?.forEach((value: string, key: string) => {
     if (text?.includes('@' + value)) {
       atUserList.push(key);
@@ -169,14 +190,18 @@ watch(
   },
 );
 
+function onCurrentConversationUpdated(conversation: IConversationModel) {
+  currentConversation.value = conversation;
+}
+
 defineExpose({
-  getEditorContent,
-  addEmoji,
   insertAt,
   resetEditor,
   setEditorContent,
+  getEditorContent,
 });
 </script>
+
 <style lang="scss" scoped>
 @import "../../../assets/styles/common";
 

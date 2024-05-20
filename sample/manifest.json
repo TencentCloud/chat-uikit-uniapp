@@ -1,6 +1,6 @@
 {
     "name" : "云通信 IM",
-    "appid" : "__UNI__FF6E584",
+    "appid" : "",
     "description" : "",
     "versionName" : "1.0.0",
     "versionCode" : "100",
@@ -20,7 +20,8 @@
         "modules" : {
             "Push" : {},
             "Record" : {},
-            "VideoPlayer" : {}
+            "VideoPlayer" : {},
+            "Camera" : {}
         },
         /* 应用发布信息 */
         "distribute" : {
@@ -46,6 +47,11 @@
             },
             /* ios打包配置 */
             "ios" : {
+                "capabilities" : {
+                    "entitlements" : {
+                        "com.apple.security.application-groups" : [ "" ]
+                    }
+                },
                 "dSYMs" : false
             },
             /* SDK配置 */
@@ -56,6 +62,7 @@
         },
         "nativePlugins" : {
             "TencentCloud-TIMPush" : {
+                "TIMPushAppGroupID" : "0",
                 "com.hihonor.push.app_id" : "0",
                 "com.vivo.push.api_key" : "0",
                 "com.vivo.push.app_id" : "0",
@@ -64,15 +71,20 @@
                     "description" : "腾讯云即时通信 IM Push 插件，目前推送支持小米、华为、荣耀、OPPO、vivo、魅族、APNs、一加、realme、iQOO 和 苹果等厂商通道。",
                     "platforms" : "Android,iOS",
                     "url" : "https://ext.dcloud.net.cn/plugin?id=16428",
-                    "android_package_name" : "com.tencent.qcloud.tim.tuikit",
-                    "ios_bundle_id" : "com.tencent.tuikit.demo.xa",
+                    "android_package_name" : "",
+                    "ios_bundle_id" : "",
                     "isCloud" : true,
                     "bought" : 1,
                     "pid" : "16428",
                     "parameters" : {
+                        "TIMPushAppGroupID" : {
+                            "des" : "iOS平台的AppGroupID",
+                            "key" : "TIMPushAppGroupID",
+                            "value" : ""
+                        },
                         "com.hihonor.push.app_id" : {
                             "des" : "Honor推送 app_id",
-                            "key" : "",
+                            "key" : "com.hihonor.push.app_id",
                             "value" : ""
                         },
                         "com.vivo.push.api_key" : {
@@ -116,6 +128,7 @@
     },
     /* 小程序特有相关 */
     "mp-weixin" : {
+		    "libVersion": "latest",
         "appid" : "",
         "setting" : {
             "urlCheck" : false,
