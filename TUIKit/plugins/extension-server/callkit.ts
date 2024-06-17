@@ -3,16 +3,16 @@ import { TUIGlobal } from '@tencentcloud/universal-api';
 
 export default class CallkitPluginServer {
   constructor() {
-    // 监听登录成功
+    // Listen for successful login
     TUICore.registerEvent(TUIConstants.TUILogin.EVENT.LOGIN_STATE_CHANGED, TUIConstants.TUILogin.EVENT_SUB_KEY.USER_LOGIN_SUCCESS, this);
-    // 原生插件 callkit 注册通话服务
+    // Native plugin callkit registers call service
     TUICore.registerService(TUIConstants.TUICalling.SERVICE.NAME, this);
-    // 原生插件 callkit 注册扩展
+    // Native plugin callkit registration extension
     TUICore.registerExtension(TUIConstants.TUIChat.EXTENSION.INPUT_MORE.EXT_ID, this);
   }
 
   /**
-   * 监听 TUILogin.login 的成功通知后进行 callkit 登录
+   * Listen for the successful notification of TUILogin.login and then log in with callkit
    */
   public onNotifyEvent(eventName: string, subKey: string) {
     if (eventName === TUIConstants.TUILogin.EVENT.LOGIN_STATE_CHANGED) {
@@ -30,7 +30,7 @@ export default class CallkitPluginServer {
           }, (res: any) => {
             if (res.code === 0) {
               console.log('TUICallkit login success!');
-              // 悬浮窗功能
+              // Floating window function
               TUIGlobal.$TUICallKit.enableFloatWindow(true);
             } else {
               console.error(`TUICallkit login failed,${res.msg}`);
@@ -42,7 +42,7 @@ export default class CallkitPluginServer {
   }
 
   /**
-   * 原生插件 callkit 实现 onGetExtension 方法
+   * Native plugin callkit implements onGetExtension method
    */
   public onGetExtension(extensionID: string, params: Record<string, any>) {
     if (!TUIGlobal.$TUICallKit) {
@@ -88,7 +88,7 @@ export default class CallkitPluginServer {
   }
 
   /**
-   * 原生插件 callkit 实现 onCall 方法
+   * Native plugin callkit implements onCall method
    */
   public onCall(method: string, params: any) {
     if (!TUIGlobal.$TUICallKit) {
@@ -96,12 +96,13 @@ export default class CallkitPluginServer {
       return;
     }
     if (method === TUIConstants.TUICalling.SERVICE.METHOD.START_CALL) {
-      const { groupID = undefined, userIDList = [], type } = params;
+      const { groupID = undefined, userIDList = [], type, callParams } = params;
       if (groupID) {
         TUIGlobal.$TUICallKit.groupCall({
           groupID,
           userIDList,
           callMediaType: type,
+          callParams,
         }, (res: any) => {
           if (res.code === 0) {
             console.log('TUICallkit groupCall success');
@@ -114,6 +115,7 @@ export default class CallkitPluginServer {
           {
             userID: userIDList[0],
             callMediaType: type,
+            callParams,
           },
           (res: any) => {
             if (res.code === 0) {
@@ -127,15 +129,15 @@ export default class CallkitPluginServer {
   }
 
   public setCallExtension(options: any) {
-    const { groupID = undefined, userIDList = [], type } = options;
-    // 点击时发起通话
+    const { groupID = undefined, userIDList = [], type, callParams } = options;
     try {
       if (groupID) {
-        // 群通话
+        // group call
         TUIGlobal.$TUICallKit.groupCall({
           groupID,
           userIDList,
           callMediaType: type,
+          callParams,
         }, (res: any) => {
           if (res.code === 0) {
             console.log('TUICallkit groupCall success');
@@ -144,11 +146,12 @@ export default class CallkitPluginServer {
           }
         });
       } else if (userIDList.length === 1) {
-        // 1v1 通话
+        // 1v1 call
         TUIGlobal.$TUICallKit.call(
           {
             userID: userIDList[0],
             callMediaType: type,
+            callParams,
           },
           (res: any) => {
             if (res.code === 0) {

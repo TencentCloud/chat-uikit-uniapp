@@ -28,6 +28,8 @@ export const CUSTOM_MESSAGE_SRC = {
   ROBOT: '13',
   // 分支消息
   BRANCH: '15',
+  // 分支消息, 兼容后台返回数据
+  BRANCH_NUMBER: 15,
 
   MEMBER: '17',
   // 没有客服在线

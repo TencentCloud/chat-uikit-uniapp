@@ -2,13 +2,12 @@ import TUICore, { TUIConstants } from '@tencentcloud/tui-core';
 import {
   isCustomerServiceMessage,
   isMessageInvisible,
-  isMessageRating,
 } from './utils/index';
 import { IMessageModel } from './interface';
 
 export default class TUICustomerServer {
   static instance: TUICustomerServer;
-  private customerServiceAccounts: Array<string>;
+  private customerServiceAccounts: any[];
   constructor() {
     console.log('TUICustomerServer.init ok');
     TUICore.registerService(TUIConstants.TUICustomerServicePlugin.SERVICE.NAME, this);
@@ -24,7 +23,7 @@ export default class TUICustomerServer {
   }
 
   // 设置 客服号
-  public setCustomerServiceAccounts(accounts: Array<string>) {
+  public setCustomerServiceAccounts(accounts: any[]) {
     this.customerServiceAccounts = accounts;
   }
 
@@ -44,7 +43,7 @@ export default class TUICustomerServer {
     if (!message || !this.isCustomerConversation(message.conversationID)) {
       return false;
     }
-    return isCustomerServiceMessage(message) || isMessageRating(message) || isMessageInvisible(message);
+    return isCustomerServiceMessage(message) || isMessageInvisible(message);
   }
 
   public onGetExtension(extensionID: string) {

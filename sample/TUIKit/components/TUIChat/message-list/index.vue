@@ -73,9 +73,12 @@
                 :messageItem="item"
                 :content="item.getMessageContent()"
                 :blinkMessageIDList="blinkMessageIDList"
+                :isMultipleSelectMode="isMultipleSelectMode"
+                :multipleSelectedMessageIDList="multipleSelectedMessageIDList"
                 @resendMessage="resendMessage(item)"
                 @blinkMessage="blinkMessage"
                 @scrollTo="scrollTo"
+                @changeSelectMessageIDList="changeSelectMessageIDList"
                 @setReadReceiptPanelVisible="setReadReceiptPanelVisible"
               >
                 <MessageText
@@ -83,7 +86,7 @@
                   :content="item.getMessageContent()"
                 />
                 <ProgressMessage
-                  v-if="item.type === TYPES.MSG_IMAGE"
+                  v-else-if="item.type === TYPES.MSG_IMAGE"
                   :content="item.getMessageContent()"
                   :messageItem="item"
                 >
@@ -94,7 +97,7 @@
                   />
                 </ProgressMessage>
                 <ProgressMessage
-                  v-if="item.type === TYPES.MSG_VIDEO"
+                  v-else-if="item.type === TYPES.MSG_VIDEO"
                   :content="item.getMessageContent()"
                   :messageItem="item"
                 >
@@ -104,27 +107,32 @@
                   />
                 </ProgressMessage>
                 <MessageAudio
-                  v-if="item.type === TYPES.MSG_AUDIO"
+                  v-else-if="item.type === TYPES.MSG_AUDIO"
                   :content="item.getMessageContent()"
                   :messageItem="item"
                   :broadcastNewAudioSrc="broadcastNewAudioSrc"
                   @getGlobalAudioContext="getGlobalAudioContext"
                 />
+                <MessageRecord
+                  v-else-if="item.type === TYPES.MSG_MERGER"
+                  :renderData="item.payload"
+                  :messageItem="item"
+                  @assignMessageIDInUniapp="assignMessageIDInUniapp"
+                />
                 <MessageFile
-                  v-if="item.type === TYPES.MSG_FILE"
+                  v-else-if="item.type === TYPES.MSG_FILE"
                   :content="item.getMessageContent()"
                 />
                 <MessageFace
-                  v-if="item.type === TYPES.MSG_FACE"
+                  v-else-if="item.type === TYPES.MSG_FACE"
                   :content="item.getMessageContent()"
-                  :isPC="isPC"
                 />
                 <MessageLocation
-                  v-if="item.type === TYPES.MSG_LOCATION"
+                  v-else-if="item.type === TYPES.MSG_LOCATION"
                   :content="item.getMessageContent()"
                 />
                 <MessageCustom
-                  v-if="item.type === TYPES.MSG_CUSTOM"
+                  v-else-if="item.type === TYPES.MSG_CUSTOM"
                   :content="item.getMessageContent()"
                   :messageItem="item"
                 />
@@ -143,18 +151,22 @@
               :messageItem="item"
               @messageEdit="handleEdit(item)"
             />
+            <!-- message tool -->
             <MessageTool
               v-if="item.ID === toggleID"
-              :class="[
-                'message-tool',
-                item.flow === 'out' ? 'message-tool-out' : 'message-tool-in',
-              ]"
+              :class="{
+                'message-tool': true,
+                'message-tool-out': item.flow === 'out',
+                'message-tool-in': item.flow === 'in',
+              }"
               :messageItem="item"
+              :isMultipleSelectMode="isMultipleSelectMode"
+              @toggleMultipleSelectMode="() => emits('toggleMultipleSelectMode')"
             />
           </div>
         </li>
       </scroll-view>
-      <!-- 滚动按钮 -->
+      <!-- scroll button -->
       <ScrollButton
         ref="scrollButtonInstanceRef"
         @scrollToLatestMessage="scrollToLatestMessage"
@@ -172,12 +184,25 @@
           {{ TUITranslateService.t("TUIChat.确认重发该消息？") }}
         </p>
       </Dialog>
-      <!-- 已读回执用户列表面板 -->
+      <!-- read receipt panel -->
       <ReadReceiptPanel
         v-if="isShowReadUserStatusPanel"
         :message="Object.assign({}, readStatusMessage)"
         @setReadReceiptPanelVisible="setReadReceiptPanelVisible"
       />
+      <!-- simple message list -->
+      <Drawer
+        :visible="isShowSimpleMessageList"
+        :overlayColor="'transparent'"
+        :popDirection="'right'"
+      >
+        <SimpleMessageList
+          :style="{height: '100%'}"
+          :isMounted="isShowSimpleMessageList"
+          :messageID="simpleMessageListRenderMessageID"
+          @closeOverlay="isShowSimpleMessageList = false"
+        />
+      </Drawer>
     </div>
   </div>
 </template>
@@ -185,6 +210,7 @@
 <script lang="ts" setup>
 import {
   ref,
+  watch,
   nextTick,
   onMounted,
   onUnmounted,
@@ -205,11 +231,12 @@ import {
 } from '@tencentcloud/universal-api';
 // import { JoinGroupCard } from '@tencentcloud/call-uikit-wechat';
 import Link from './link';
+import SimpleMessageList from './message-elements/simple-message-list/index.vue';
 import MessageGroupApplication from './message-group-application/index.vue';
 import MessageText from './message-elements/message-text.vue';
-import ProgressMessage from '../../common/ProgressMessage/index.vue';
 import MessageImage from './message-elements/message-image.vue';
 import MessageAudio from './message-elements/message-audio.vue';
+import MessageRecord from './message-elements/message-record/index.vue';
 import MessageFile from './message-elements/message-file.vue';
 import MessageFace from './message-elements/message-face.vue';
 import MessageCustom from './message-elements/message-custom.vue';
@@ -225,7 +252,9 @@ import ReadReceiptPanel from './read-receipt-panel/index.vue';
 import ScrollButton from './scroll-button/index.vue';
 import { isPluginMessage } from '../../../plugins/plugin-components/index';
 import Dialog from '../../common/Dialog/index.vue';
+import Drawer from '../../common/Drawer/index.vue';
 import { Toast, TOAST_TYPE } from '../../common/Toast/index';
+import ProgressMessage from '../../common/ProgressMessage/index.vue';
 import { isCreateGroupCustomMessage } from '../utils/utils';
 import { isEnabledMessageReadReceiptGlobal } from '../utils/utils';
 import { isPC, isH5, isMobile } from '../../../utils/env';
@@ -234,29 +263,33 @@ import { IAudioContext } from '../../../interface';
 interface IEmits {
   (e: 'closeInputToolBar'): void;
   (e: 'handleEditor', message: IMessageModel, type: string): void;
+  (key: 'toggleMultipleSelectMode'): void;
+}
+
+interface IProps {
+  isGroup: boolean;
+  groupID: string;
+  isMultipleSelectMode: boolean;
 }
 
 const emits = defineEmits<IEmits>();
-const props = defineProps({
-  groupID: {
-    type: String,
-    default: '',
-  },
-  isGroup: {
-    type: Boolean,
-    default: false,
-  },
+const props = withDefaults(defineProps<IProps>(), {
+  isGroup: false,
+  groupID: '',
+  isMultipleSelectMode: false,
 });
 
+let selfAddValue = 0;
 let observer: any = null;
 let groupType: string | undefined;
 const sentReceiptMessageID = new Set<string>();
 const thisInstance = getCurrentInstance()?.proxy || getCurrentInstance();
 const messageList = ref<IMessageModel[]>();
+const multipleSelectedMessageIDList = ref<string[]>([]);
 const isCompleted = ref(false);
 const currentConversationID = ref('');
 const toggleID = ref('');
-const scrollTop = ref(5000); // 首次是 15 条消息，最大消息高度为300
+const scrollTop = ref(5000); // The initial number of messages is 15, and the maximum message height is 300.
 const TYPES = ref(TUIChatEngine.TYPES);
 const isLoadingMessage = ref(false);
 const isLongpressing = ref(false);
@@ -264,35 +297,31 @@ const blinkMessageIDList = ref<string[]>([]);
 const messageTarget = ref<IMessageModel>();
 const scrollButtonInstanceRef = ref<InstanceType<typeof ScrollButton>>();
 const historyFirstMessageID = ref<string>('');
-let selfAddValue = 0;
+const isShowSimpleMessageList = ref<boolean>(false);
+const simpleMessageListRenderMessageID = ref<string>();
 
 // audio control
 const broadcastNewAudioSrc = ref<string>('');
 
-// 阅读回执状态message
 const readStatusMessage = ref<IMessageModel>();
 const isShowReadUserStatusPanel = ref<boolean>(false);
 
-// 消息重发 Dialog
+// Resend Message Dialog
 const reSendDialogShow = ref(false);
 const resendMessageData = ref();
 
-// 消息滑动到底部，建议搭配 nextTick 使用
 const scrollToBottom = () => {
-  // 文本消息高度：60, 最大消息高度 280
   scrollTop.value += 300;
-  // 解决 uniapp 打包到 app 首次进入滑动到底部，300 可设置
+  // Solve the issue where swiping to the bottom for the first time after packaging Uniapp into an app has a delay,
+  // which can be set to 300 ms.
   const timer = setTimeout(() => {
     scrollTop.value += 1;
     clearTimeout(timer);
   }, 300);
 };
 
-// 监听回调函数
 const onCurrentConversationIDUpdated = (conversationID: string) => {
   currentConversationID.value = conversationID;
-
-  // 开启已读回执的状态 群聊缓存群类型
   if (isEnabledMessageReadReceiptGlobal()) {
     const { groupProfile }
       = TUIStore.getConversationModel(conversationID) || {};
@@ -301,7 +330,6 @@ const onCurrentConversationIDUpdated = (conversationID: string) => {
 };
 
 onMounted(() => {
-  // 消息列表监听
   TUIStore.watch(StoreName.CHAT, {
     messageList: onMessageListUpdated,
     messageSource: onMessageSourceUpdated,
@@ -317,7 +345,6 @@ onMounted(() => {
   uni.$on('scroll-to-bottom', scrollToLatestMessage);
 });
 
-// 取消监听
 onUnmounted(() => {
   TUIStore.unwatch(StoreName.CHAT, {
     messageList: onMessageListUpdated,
@@ -374,7 +401,6 @@ async function onMessageListUpdated(list: IMessageModel[]) {
   }
 }
 
-// 滚动到最新消息
 async function scrollToLatestMessage() {
   try {
     const { scrollHeight } = await getScrollInfo(
@@ -416,7 +442,6 @@ function onChatCompletedUpdated(flag: boolean) {
   isCompleted.value = flag;
 }
 
-// 获取历史消息
 const getHistoryMessageList = () => {
   isLoadingMessage.value = true;
   const currentFirstMessageID = messageList.value?.[0]?.ID || '';
@@ -432,16 +457,18 @@ const getHistoryMessageList = () => {
   });
 };
 
-// todo: webview 跳转
 const openComplaintLink = () => { };
 
-// 消息操作
+// toggle message
 const handleToggleMessageItem = (
   e: any,
   message: IMessageModel,
   index: number,
   isLongpress = false,
 ) => {
+  if (props.isMultipleSelectMode) {
+    return;
+  }
   if (isLongpress) {
     isLongpressing.value = true;
   }
@@ -456,6 +483,9 @@ const handleH5LongPress = (
   index: number,
   type: string,
 ) => {
+  if (props.isMultipleSelectMode) {
+    return;
+  }
   if (!isH5) return;
   function longPressHandler() {
     clearTimeout(timer);
@@ -480,19 +510,16 @@ const handleH5LongPress = (
   }
 };
 
-// 消息撤回后，编辑消息
+// reedit message
 const handleEdit = (message: IMessageModel) => {
   emits('handleEditor', message, 'reedit');
 };
 
-// 重发消息
 const resendMessage = (message: IMessageModel) => {
   reSendDialogShow.value = true;
   resendMessageData.value = message;
 };
 
-// 图片预览
-// 开启图片预览
 const handleImagePreview = (index: number) => {
   if (!messageList.value) {
     return;
@@ -554,7 +581,7 @@ async function bindIntersectionObserver() {
     groupType === TYPES.value.GRP_AVCHATROOM
     || groupType === TYPES.value.GRP_COMMUNITY
   ) {
-    // 直播群以及社群不进行消息的已读回执监听
+    // AVCHATROOM and COMMUNITY chats do not monitor read receipts for messages.
     return;
   }
 
@@ -563,7 +590,7 @@ async function bindIntersectionObserver() {
     .createIntersectionObserver(thisInstance, {
       threshold: [0.7],
       observeAll: true,
-      // uni 下会把 safetip 也算进去 需要负 margin 来排除
+      // In Uni-app, the `safetip` is also included, so a negative margin is needed to exclude it.
     })
     .relativeTo('#messageScrollList', { top: -70 });
 
@@ -637,5 +664,50 @@ async function scrollToTargetMessage(message: IMessageModel) {
 function onMessageListBackgroundClick() {
   emits('closeInputToolBar');
 }
+
+watch(() => props.isMultipleSelectMode, (newValue) => {
+  if (!newValue) {
+    changeSelectMessageIDList({
+      type: 'clearAll',
+      messageID: '',
+    });
+  }
+});
+
+function changeSelectMessageIDList({ type, messageID }: { type: 'add' | 'remove' | 'clearAll'; messageID: string }) {
+  // TODO need to delete this
+  if (type === 'clearAll') {
+    multipleSelectedMessageIDList.value = [];
+  } else if (type === 'add' && !multipleSelectedMessageIDList.value.includes(messageID)) {
+    multipleSelectedMessageIDList.value.push(messageID);
+  } else if (type === 'remove') {
+    multipleSelectedMessageIDList.value = multipleSelectedMessageIDList.value.filter(id => id !== messageID);
+  }
+}
+
+function mergeForwardMessage() {
+  TUIStore.update(StoreName.CUSTOM, 'multipleForwardMessageID', {
+    isMergeForward: true,
+    messageIDList: multipleSelectedMessageIDList.value,
+  });
+}
+
+function oneByOneForwardMessage() {
+  TUIStore.update(StoreName.CUSTOM, 'multipleForwardMessageID', {
+    isMergeForward: false,
+    messageIDList: multipleSelectedMessageIDList.value,
+  });
+}
+
+function assignMessageIDInUniapp(messageID: string) {
+  simpleMessageListRenderMessageID.value = messageID;
+  isShowSimpleMessageList.value = true;
+}
+
+defineExpose({
+  oneByOneForwardMessage,
+  mergeForwardMessage,
+  scrollToLatestMessage,
+});
 </script>
 <style lang="scss" scoped src="./style/index.scss"></style>

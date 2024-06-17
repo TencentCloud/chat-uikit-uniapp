@@ -1,3 +1,13 @@
+## [2.2.0] (2024-06-17)
+
+### Features
+- 支持消息多选、消息逐条转发、消息合并转发
+- 优化 TUIKit 集成流程
+- 支持表情包自定义
+- uniapp callkit 支持 offlinePushInfo
+- uniapp callkit 支持自定义铃音
+- 被引用消息撤回时隐藏原始消息内容并提醒已撤回
+
 ## [2.1.3] (2024-05-17)
 
 ### Features

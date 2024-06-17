@@ -1,7 +1,13 @@
 export interface customerServicePayloadType {
-  customerServicePlugin: number;
-  src: string;
+  chatbotPlugin?: number | string;
+  customerServicePlugin?: number | string;
+  src: string | number;
   content: any;
+}
+
+interface IMenuItem {
+  content: string;
+  id: string;
 }
 
 export interface ratingTemplateType {
@@ -10,9 +16,9 @@ export interface ratingTemplateType {
   head: string;
   tail: string;
   type: number;
-  menu: { content: string; id: string }[];
+  menu: IMenuItem[];
   expireTime: number;
-  selected?: { content: string; id: string };
+  selected?: IMenuItem;
   sessionId?: string;
 }
 
@@ -43,7 +49,7 @@ export interface IMessageModel {
   avatar: string;
   isPeerRead: boolean;
   nameCard: string;
-  atUserList: Array<string>;
+  atUserList: string[];
   cloudCustomData: string;
   isDeleted: boolean;
   isModified: boolean;
@@ -51,7 +57,7 @@ export interface IMessageModel {
   readReceiptInfo: any;
   isBroadcastMessage: boolean;
   isSupportExtension: boolean;
-  receiverList?: Array<string>;
+  receiverList?: string[];
   revoker: string;
   sequence: number;
   progress: number;

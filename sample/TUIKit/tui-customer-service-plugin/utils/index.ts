@@ -28,11 +28,13 @@ export function JSONToObject(str: string) {
 
 export function isCustomerServiceMessage(message: IMessageModel): boolean {
   const customerServicePayload: customerServicePayloadType = JSONToObject(message?.payload?.data);
-  if (customerServicePayload?.customerServicePlugin == 0) {
-    return true;
-  }
-  return false;
+  return Number(customerServicePayload?.customerServicePlugin) === 0 || Number(customerServicePayload?.chatbotPlugin) === 1;
 }
+
+export const isMessageRating = (message: IMessageModel): boolean => {
+  const customerServicePayload: customerServicePayloadType = JSONToObject(message?.payload?.data);
+  return isCustomerServiceMessage(message) && customerServicePayload.src === CUSTOM_MESSAGE_SRC.MENU;
+};
 
 export const isMessageInvisible = (message: IMessageModel): boolean => {
   const customerServicePayload: customerServicePayloadType = JSONToObject(message?.payload?.data);
@@ -40,6 +42,7 @@ export const isMessageInvisible = (message: IMessageModel): boolean => {
   const whiteList = [
     CUSTOM_MESSAGE_SRC.MENU,
     CUSTOM_MESSAGE_SRC.BRANCH,
+    CUSTOM_MESSAGE_SRC.BRANCH_NUMBER,
     CUSTOM_MESSAGE_SRC.FROM_INPUT,
     CUSTOM_MESSAGE_SRC.PRODUCT_CARD,
   ];
@@ -47,35 +50,4 @@ export const isMessageInvisible = (message: IMessageModel): boolean => {
   const isExistWhiteList = whiteList.includes(customerServicePayload?.src);
   const isRobot = customerServicePayload?.src === CUSTOM_MESSAGE_SRC.ROBOT && robotCommandArray.indexOf(customerServicePayload?.content?.command) !== -1;
   return isCustomerMessage && (!isExistWhiteList || isRobot);
-};
-
-export const isMessageRating = (message: IMessageModel): boolean => {
-  const customerServicePayload: customerServicePayloadType = JSONToObject(message?.payload?.data);
-  if (
-    (message?.type === TYPES.MSG_CUSTOM && customerServicePayload?.customerServicePlugin == 0
-    && customerServicePayload.src === CUSTOM_MESSAGE_SRC.MENU)
-  ) {
-    return true;
-  }
-  return false;
-};
-
-export const isRenderMessage = (message: IMessageModel): boolean => {
-  if (!message.isRevoked) {
-    if (message?.type !== TYPES.MSG_CUSTOM) {
-      return true;
-    }
-    if (message?.type === TYPES.MSG_CUSTOM && isCustomerServiceMessage(message) && !isMessageInvisible(message)) {
-      return true;
-    }
-    if (message?.type === TYPES.MSG_CUSTOM && isCustomerServiceMessage(message) && isMessageInvisible(message)) {
-      return false;
-    }
-    if (message?.type === TYPES.MSG_CUSTOM && !isCustomerServiceMessage(message)) {
-      return true;
-    }
-  } else {
-    return false;
-  }
-  return false;
 };

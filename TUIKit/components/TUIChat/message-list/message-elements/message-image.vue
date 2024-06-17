@@ -65,7 +65,6 @@ const imageLoad = (event: Event) => {
   genImageStyles(event.detail);
 };
 
-// 预览
 const handleImagePreview = () => {
   if (props.messageItem?.status === 'success' || props.messageItem.progress === 1) {
     emits('previewImage');
@@ -77,8 +76,6 @@ const handleImagePreview = () => {
 .image-container {
   position: relative;
   background-color: #f4f4f4;
-
-  // 防止div被撑高
   font-size: 0;
 
   .message-image {

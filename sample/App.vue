@@ -1,7 +1,9 @@
 <script lang="ts">
 import { TUIChatKit } from './TUIKit';
 import { TUITranslateService } from '@tencentcloud/chat-uikit-engine';
+// #ifndef MP-WEIXIN
 import { locales } from './locales';
+// #endif
 import TIMPushConfigs from './timpush-configs.json';
 // #ifdef APP-PLUS
 // register TencentCloud-TIMPush
@@ -22,8 +24,10 @@ console.warn(`TencentCloud-TUICallKit: uni.requireNativePlugin ${TUICallKit ? 's
 uni.$TUICallKit = TUICallKit;
 // #endif
 
+// #ifndef MP-WEIXIN
 TUITranslateService.provideLanguages(locales);
 TUITranslateService.useI18n();
+// #endif
 
 TUIChatKit.init();
 const SDKAppID = 0; // Your SDKAppID

@@ -1,18 +1,18 @@
 <template>
   <div class="custom">
-    <div v-if="payload.src == CUSTOM_MESSAGE_SRC.BRANCH">
+    <div v-if="payload.src === CUSTOM_MESSAGE_SRC.BRANCH || payload.src === CUSTOM_MESSAGE_SRC.BRANCH_NUMBER">
       <MessageBranch
         :payload="payload"
         @sendMessage="sendTextMessage"
       />
     </div>
-    <div v-if="payload.src == CUSTOM_MESSAGE_SRC.FROM_INPUT">
+    <div v-if="payload.src === CUSTOM_MESSAGE_SRC.FROM_INPUT">
       <MessageForm
         :payload="payload"
         @sendMessage="sendTextMessage"
       />
     </div>
-    <div v-if="payload.src == CUSTOM_MESSAGE_SRC.PRODUCT_CARD">
+    <div v-if="payload.src === CUSTOM_MESSAGE_SRC.PRODUCT_CARD">
       <MessageProductCard :payload="payload" />
     </div>
   </div>

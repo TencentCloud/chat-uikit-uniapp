@@ -67,7 +67,6 @@ onUnmounted(() => {
 watch(() => props.broadcastNewAudioSrc, (newSrc) => {
   if (newSrc !== props.content.url && isAudioPlaying.value) {
     stopAudio();
-    // 这一步的 audioContext 大概率已被销毁 手动执行一下暂停
     // The audioContext may have been destroyed. Manually execute the pause
     isAudioPlaying.value = false;
   }
@@ -81,7 +80,6 @@ function toggleClick() {
     });
     return;
   }
-  // audioContext 会被缓存 必须拉取一次
   // audioContext will be cached, it must be get first
   const audioContext = getAudio();
   if (!audioContext) {
@@ -131,7 +129,6 @@ function stopAudio() {
     return;
   }
   try {
-    // audiocontext 的内存对象还在 但可能播放实例已被销毁
     // The memory of the audiocontext is in memory. But The play instance may have been destroyed.
     audioContext.stop();
   } catch {
@@ -179,7 +176,6 @@ $flow-out-bg-color: #dceafd;
   overflow: hidden;
 
   .audio-icon-container {
-    // uniapp中会有一些偏差 这里 width 要比图标略宽
     width: 16px;
     height: 20px;
     position: relative;

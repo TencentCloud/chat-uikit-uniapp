@@ -1,6 +1,6 @@
 {
   "name": "@tencentcloud/tui-customer-service-plugin",
-  "version": "2.1.4",
+  "version": "2.2.0",
   "description": "chat uikit tui-customer-service-plugin",
   "main": "index",
   "keywords": [
