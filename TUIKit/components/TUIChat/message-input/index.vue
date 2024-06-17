@@ -1,11 +1,9 @@
 <template>
   <div :class="['message-input', !isPC && 'message-input-h5']">
-    <div class="flex-row">
+    <div class="audio-main-content-line">
       <MessageInputAudio
         v-if="isWeChat || isApp"
         :class="{
-          'message-input-audio': true,
-          'message-input-wx-audio': isWeChat,
           'message-input-wx-audio-open': displayType === 'audio',
         }"
         :isEnableAudio="displayType === 'audio'"
@@ -32,24 +30,20 @@
         @insertAt="insertAt"
         @onAtListOpen="onAtListOpen"
       />
-      <div
-        class="message-input-emoji"
-        @click="changeToolbarDisplayType('emojiPicker')"
-      >
-        <Icon
-          :file="faceIcon"
-          class="icon icon-face"
-        />
-      </div>
-      <div
-        class="message-input-more"
-        @click="changeToolbarDisplayType('tools')"
-      >
-        <Icon
-          :file="moreIcon"
-          class="icon icon-more"
-        />
-      </div>
+      <Icon
+        class="icon icon-face"
+        :file="faceIcon"
+        :size="'23px'"
+        :hotAreaSize="'3px'"
+        @onClick="changeToolbarDisplayType('emojiPicker')"
+      />
+      <Icon
+        class="icon icon-more"
+        :file="moreIcon"
+        :size="'23px'"
+        :hotAreaSize="'3px'"
+        @onClick="changeToolbarDisplayType('tools')"
+      />
     </div>
     <div>
       <MessageQuote
@@ -173,7 +167,6 @@ const onAtListOpen = () => {
   editor?.value?.blur && editor?.value?.blur();
 };
 
-// 消息撤回后重新编辑
 const reEdit = (content: any) => {
   editor?.value?.resetEditor();
   editor?.value?.setEditorContent(content);
@@ -185,7 +178,6 @@ function onCurrentConversationUpdated(conversation: IConversationModel) {
 }
 
 function onQuoteMessageUpdated(options?: { message: IMessageModel; type: string }) {
-  // 当有引用消息时切换为文字输入模式
   // switch text input mode when there is a quote message
   if (options?.message && options?.type === 'quote') {
     changeDisplayType('editor');
@@ -201,66 +193,42 @@ defineExpose({
 <style scoped lang="scss">
 @import "../../../assets/styles/common";
 
+:not(not) {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 .message-input {
   position: relative;
   display: flex;
   flex-direction: column;
   border: none;
-  height: 100%;
-  width: 100%;
-  max-height: 100%;
-  max-width: 100%;
   overflow: hidden;
   background: #ebf0f6;
+
+  &-h5 {
+    padding: 10px 10px 15px;
+  }
 
   &-editor {
     flex: 1;
     display: flex;
   }
 
-  &-button {
-    width: fit-content;
-  }
-
   .icon {
-    width: 23px;
-    height: 23px;
-
-    &-face {
-      margin: 7px;
-    }
-
-    &-more {
-      margin: 7px 0;
-    }
+    margin-left: 3px;
   }
 
-  &-wx {
-    &-audio {
-      &-open {
-        flex: 1;
-      }
-    }
-  }
-
-  &-emoji-picker {
-    padding-top: 10px;
+  &-wx-audio-open {
+    flex: 1;
   }
 }
 
-.message-input-h5 {
-  display: flex;
-  flex-direction: column;
-  height: calc(100% - 20px);
-  width: calc(100% - 20px);
-  max-height: 100%;
-  max-width: calc(100% - 20px);
-  padding: 10px;
-  overflow: hidden;
-}
-
-.flex-row {
+.audio-main-content-line {
   display: flex;
   flex-direction: row;
+  align-items: center;
 }
 </style>

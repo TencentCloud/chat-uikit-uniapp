@@ -27,7 +27,12 @@ import TUISearch from '../TUISearch/index.vue';
 import ConversationList from './conversation-list/index.vue';
 import ConversationHeader from './conversation-header/index.vue';
 import ConversationNetwork from './conversation-network/index.vue';
-import { onHide } from '@dcloudio/uni-app'; // 该方法只能用在父组件内，子组件内不生效
+import { onHide } from '@dcloudio/uni-app';
+// #ifdef MP-WEIXIN
+// uniapp packaged mini-programs are integrated by default, and the default initialization entry file is imported here
+// TUIChatKit init needs to be encapsulated because uni vue2 will report an error when compiling H5 directly through conditional compilation
+import './entry.ts';
+// #endif
 
 const emits = defineEmits(['handleSwitchConversation']);
 
@@ -78,20 +83,20 @@ const handleTouchEnd = (e: any) => {
   const y = e.changedTouches[0].clientY;
   let turn = '';
   if (x - touchX.value > 50 && Math.abs(y - touchY.value) < 50) {
-    // 右滑
+    // Swipe right
     turn = 'right';
   } else if (x - touchX.value < -50 && Math.abs(y - touchY.value) < 50) {
-    // 左滑
+    // Swipe left
     turn = 'left';
   }
   if (y - touchY.value > 50 && Math.abs(x - touchX.value) < 50) {
-    // 下滑
+    // Swipe down
     turn = 'down';
   } else if (y - touchY.value < -50 && Math.abs(x - touchX.value) < 50) {
-    // 上滑
+    // Swipe up
     turn = 'up';
   }
-  // 根据方向进行操作
+  // Operate according to the direction
   if (turn === 'down' || turn === 'up') {
     closeChildren();
   }

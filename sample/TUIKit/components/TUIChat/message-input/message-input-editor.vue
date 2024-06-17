@@ -36,7 +36,7 @@
 import { ref, watch, onMounted, onUnmounted } from '../../../adapter-vue';
 import { TUIStore, StoreName, IConversationModel } from '@tencentcloud/chat-uikit-engine';
 import { TUIGlobal } from '@tencentcloud/universal-api';
-import { transformEmojiValueToKey } from '../utils/emojiList';
+import { transformTextWithEmojiNamesToKeys } from '../emoji-config';
 import { isPC } from '../../../utils/env';
 import { sendMessages } from '../utils/sendMessage';
 import { ISendMessagePayload } from '../../../interface';
@@ -123,7 +123,7 @@ const insertAt = (atInfo: any) => {
 
 const getEditorContent = () => {
   let text = inputText.value;
-  text = transformEmojiValueToKey(text);
+  text = transformTextWithEmojiNamesToKeys(text);
   const atUserList: string[] = [];
   allInsertedAtInfo?.forEach((value: string, key: string) => {
     if (text?.includes('@' + value)) {
@@ -168,7 +168,7 @@ const isEditorContentEmpty = () => {
 };
 
 const onInput = (e: any) => {
-  // uniapp 识别 @ 消息
+  // uni-app recognizes mention messages
   const text = e?.detail?.value;
   isEditorContentEmpty();
   if (props.isGroup && (text.endsWith('@') || text.endsWith('@\n'))) {
@@ -209,8 +209,6 @@ defineExpose({
   display: flex;
   flex-direction: column;
   flex: 1;
-  height: calc(100% - 13px);
-  width: calc(100% - 20px);
   padding: 3px 10px 10px;
   overflow: hidden;
 
@@ -218,7 +216,7 @@ defineExpose({
     flex: 1;
     height: auto;
     background: #fff;
-    border-radius: 9.4px;
+    border-radius: 10px;
     padding: 7px 0 7px 10px;
     font-size: 16px !important;
     max-height: 86px;
@@ -237,7 +235,7 @@ defineExpose({
     flex: 1;
     display: flex;
     overflow-y: scroll;
-    min-height: 20px;
+    min-height: 25px;
   }
 }
 </style>

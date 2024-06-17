@@ -1,10 +1,10 @@
 <template>
   <div class="branch-card">
     <p
-      v-if="content.header"
+      v-if="content.header || content.title"
       class="branch-title"
     >
-      {{ content.header }}
+      {{ content.header || content.title}}
     </p>
     <div
       v-for="(item, index) in content.items"

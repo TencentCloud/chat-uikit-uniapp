@@ -51,7 +51,7 @@ function handlerVideoPlay() {
     max-width: 120px;
     background-color: rgba(#000, 0.3);
     border-radius: 6px;
-    height: 200px; // todo 优化高度动态获取
+    height: 200px;
     font-size: 0;
   }
 

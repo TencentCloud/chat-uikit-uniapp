@@ -4,7 +4,7 @@ export default function unifyPromiseVue2() {
     function isPromise(obj) {
       return Boolean(obj) && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
     }
-    // 统一 vue2 API Promise 化返回格式与 vue3 保持一致
+    // Unified vue2 API Promise return format to be consistent with vue3
     // eslint-disable-next-line no-undef
     (uni as any).addInterceptor({
       returnValue(res) {

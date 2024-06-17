@@ -136,7 +136,7 @@ const extensionList: ExtensionInfo[] = [
 
 const getExtensionList = (conversationID: string) => {
   if (!conversationID) {
-    // uniapp build ios app has null in last index need to filter
+    // uni-app build ios app has null in last index need to filter
     return (
       currentExtensionList.value = extensionList.filter(extension => extension)
     );
@@ -145,13 +145,13 @@ const getExtensionList = (conversationID: string) => {
   const options: any = {
     chatType,
   };
-  // 向下兼容，callkit 没有chatType 判断时，使用 filterVoice、filterVideo 过滤
+  // Backward compatibility: When callkit does not have chatType judgment, use filterVoice and filterVideo to filter
   if (chatType === 'customerService') {
     options.filterVoice = true;
     options.filterVideo = true;
     enableSampleTaskStatus('customerService');
   }
-  // uniapp build ios app has null in last index need to filter
+  // uni-app build ios app has null in last index need to filter
   currentExtensionList.value = [
     ...TUICore.getExtensionList(
       TUIConstants.TUIChat.EXTENSION.INPUT_MORE.EXT_ID,
@@ -211,12 +211,25 @@ const onExtensionClick = (extension: ExtensionInfo) => {
   }
 };
 
+const genOfflinePushInfo = () => {
+  // doc: https://cloud.tencent.com/document/product/269/105713
+  return {
+    title: 'call',
+    description: 'you have a call',
+    androidSound: 'private_ring',
+    iOSSound: '01.caf',
+  };
+};
+
 const onCallExtensionClicked = (extension: ExtensionInfo, callType: number) => {
   selectorShowType.value = extension?.data?.name;
   if (currentConversation?.value?.type === TUIChatEngine.TYPES.CONV_C2C) {
     extension?.listener?.onClicked?.({
       userIDList: [currentConversation?.value?.conversationID?.slice(3)],
       type: callType,
+      callParams: {
+        offlinePushInfo: genOfflinePushInfo(),
+      },
     });
   } else if (isGroup.value) {
     currentUserSelectorExtension.value = extension;
@@ -232,7 +245,12 @@ const genExtensionText = (extension: any) => {
 };
 
 const onUserSelectorSubmit = (selectedInfo: any) => {
-  currentUserSelectorExtension.value?.listener?.onClicked?.(selectedInfo);
+  currentUserSelectorExtension.value?.listener?.onClicked?.({
+    ...selectedInfo,
+    callParams: {
+      offlinePushInfo: genOfflinePushInfo(),
+    },
+  });
   currentUserSelectorExtension.value = null;
 };
 
