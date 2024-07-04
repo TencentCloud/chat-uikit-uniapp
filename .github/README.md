@@ -26,4 +26,18 @@ chat-uikit-uniapp 界面效果如下图所示：
 - 微信小程序
 - H5
 
-## 【源码集成】[请参考 TUIKit 集成文档](https://cloud.tencent.com/document/product/269/64507)
+## 源码集成
+
+请参考[TUIKit 集成文档](https://cloud.tencent.com/document/product/269/64507)
+
+也可参考视频版 [TUIKit 新手接入指引视频](https://cloud.tencent.com/document/product/269/64506#156edcff-0a89-477c-883b-a99550fdd010)
+
+## 表情版权说明
+
+为尊重表情设计版权，IM Demo/TUIKit 工程中不包含大表情元素切图，正式上线商用前请您替换为自己设计或拥有版权的其他表情包。默认的小黄脸表情包版权归腾讯云所有，可有偿授权使用，如您希望获得授权可 提交工单 联系我们。
+
+提交工单链接：https://console.cloud.tencent.com/workorder/category?level1_id=29&level2_id=40&source=14&data_title=%E5%8D%B3%E6%97%B6%E9%80%9A%E4%BF%A1%20IM&step=1
+
+In respect for the copyright of the emoji design, the Chat Demo/TUIKit project does not include the cutouts of large emoji elements. Please replace them with your own designed or copyrighted emoji packs before the official launch for commercial use. The default small yellow face emoji pack is copyrighted by Tencent Cloud and can be authorized for a fee. If you wish to obtain authorization, please submit a ticket to contact us.
+
+submit a ticket url：https://console.tencentcloud.com/workorder/category?level1_id=29&level2_id=40&source=14&data_title=Chat&step=1
