@@ -44,6 +44,7 @@ interface IEmits {
     map: Map<string, IAudioContext>,
     options?: { newAudioSrc: string }
   ): void;
+  (e: 'setAudioPlayed', messageID: string): void;
 }
 
 const emits = defineEmits<IEmits>();
@@ -121,6 +122,9 @@ function playAudio() {
     return;
   }
   audioContext.play();
+  if (props.messageItem.flow === 'in') {
+    emits('setAudioPlayed', props.messageItem.ID);
+  }
 }
 
 function stopAudio() {
