@@ -129,53 +129,33 @@ const currentUserSelectorExtension = ref<ExtensionInfo | null>();
 const currentExtensionList = ref<ExtensionInfo[]>([]);
 const isSwiperIndicatorDotsEnable = ref<boolean>(false);
 
-// extensions
-const extensionList: ExtensionInfo[] = [
-  ...TUICore.getExtensionList(TUIConstants.TUIChat.EXTENSION.INPUT_MORE.EXT_ID),
-];
-
 const getExtensionList = (conversationID: string) => {
   if (!conversationID) {
-    // uni-app build ios app has null in last index need to filter
-    return (
-      currentExtensionList.value = extensionList.filter(extension => extension)
-    );
+    return;
   }
   const chatType = TUIChatConfig.getChatType();
-  const options: any = {
-    chatType,
-  };
+  const params: Record<string, boolean | string> = { chatType };
   // Backward compatibility: When callkit does not have chatType judgment, use filterVoice and filterVideo to filter
-  if (chatType === 'customerService') {
-    options.filterVoice = true;
-    options.filterVideo = true;
+  if (chatType === TUIConstants.TUIChat.TYPE.CUSTOMER_SERVICE) {
+    params.filterVoice = true;
+    params.filterVideo = true;
     enableSampleTaskStatus('customerService');
   }
   // uni-app build ios app has null in last index need to filter
   currentExtensionList.value = [
-    ...TUICore.getExtensionList(
-      TUIConstants.TUIChat.EXTENSION.INPUT_MORE.EXT_ID,
-      options,
-    ),
+    ...TUICore.getExtensionList(TUIConstants.TUIChat.EXTENSION.INPUT_MORE.EXT_ID, params),
   ].filter(extension => extension);
 };
 
 const onCurrentConversationUpdate = (conversation: IConversationModel) => {
-  if (
-    conversation?.conversationID
-    && currentConversation.value?.conversationID !== conversation?.conversationID
-  ) {
-    getExtensionList(conversation?.conversationID);
+  if (conversation?.conversationID && conversation.conversationID !== currentConversation.value?.conversationID) {
+    getExtensionList(conversation.conversationID);
     if (currentExtensionList.value.length > 2) {
       isSwiperIndicatorDotsEnable.value = true;
     }
   }
   currentConversation.value = conversation;
-  if (currentConversation?.value?.type === TUIChatEngine.TYPES.CONV_GROUP) {
-    isGroup.value = true;
-  } else {
-    isGroup.value = false;
-  }
+  isGroup.value = currentConversation?.value?.type === TUIChatEngine.TYPES.CONV_GROUP;
 };
 
 onMounted(() => {

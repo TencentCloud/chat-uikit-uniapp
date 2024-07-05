@@ -34,8 +34,9 @@
 </template>
 <script lang="ts" setup>
 import { ref, watch, onMounted, onUnmounted } from '../../../adapter-vue';
-import { TUIStore, StoreName, IConversationModel } from '@tencentcloud/chat-uikit-engine';
+import { TUIStore, StoreName, IConversationModel, IMessageModel } from '@tencentcloud/chat-uikit-engine';
 import { TUIGlobal } from '@tencentcloud/universal-api';
+import DraftManager from '../utils/conversationDraft';
 import { transformTextWithEmojiNamesToKeys } from '../emoji-config';
 import { isPC } from '../../../utils/env';
 import { sendMessages } from '../utils/sendMessage';
@@ -84,10 +85,16 @@ const inputBlur = ref(true);
 const inputContentEmpty = ref(true);
 const allInsertedAtInfo = new Map();
 const currentConversation = ref<IConversationModel>();
+const currentConversationID = ref<string>('');
+const currentQuoteMessage = ref<{ message: IMessageModel; type: string }>();
 
 onMounted(() => {
   TUIStore.watch(StoreName.CONV, {
     currentConversation: onCurrentConversationUpdated,
+  });
+
+  TUIStore.watch(StoreName.CHAT, {
+    quoteMessage: onQuoteMessageUpdated,
   });
 
   uni.$on('insert-emoji', (data) => {
@@ -100,12 +107,22 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  if (currentConversationID.value) {
+    DraftManager.setStore(currentConversationID.value, inputText.value, inputText.value, currentQuoteMessage.value);
+  }
+
   uni.$off('insertEmoji');
   uni.$off('send-message-in-emoji-picker');
 
   TUIStore.unwatch(StoreName.CONV, {
     currentConversation: onCurrentConversationUpdated,
   });
+
+  TUIStore.unwatch(StoreName.CHAT, {
+    quoteMessage: onQuoteMessageUpdated,
+  });
+
+  reset();
 });
 
 const handleSendMessage = () => {
@@ -191,7 +208,35 @@ watch(
 );
 
 function onCurrentConversationUpdated(conversation: IConversationModel) {
+  const prevConversationID = currentConversationID.value;
   currentConversation.value = conversation;
+  currentConversationID.value = conversation?.conversationID;
+  if (prevConversationID !== currentConversationID.value) {
+    if (prevConversationID) {
+      DraftManager.setStore(
+        prevConversationID,
+        inputText.value,
+        inputText.value,
+        currentQuoteMessage.value,
+      );
+    }
+    resetEditor();
+    if (currentConversationID.value) {
+      DraftManager.getStore(currentConversationID.value, setEditorContent);
+    }
+  }
+}
+
+function onQuoteMessageUpdated(options?: { message: IMessageModel; type: string }) {
+  currentQuoteMessage.value = options;
+}
+
+function reset() {
+  inputBlur.value = true;
+  currentConversation.value = null;
+  currentConversationID.value = '';
+  currentQuoteMessage.value = null;
+  resetEditor();
 }
 
 defineExpose({
@@ -222,7 +267,7 @@ defineExpose({
     max-height: 86px;
   }
 
-  .message-input-mute{
+  .message-input-mute {
     flex: 1;
     display: flex;
     color: #999;
@@ -233,7 +278,6 @@ defineExpose({
 
   .message-input-area {
     flex: 1;
-    display: flex;
     overflow-y: scroll;
     min-height: 25px;
   }

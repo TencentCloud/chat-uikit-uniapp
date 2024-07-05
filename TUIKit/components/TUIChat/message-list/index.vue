@@ -8,7 +8,10 @@
   >
     <!-- <JoinGroupCard /> -->
     <div class="tui-chat-main">
-      <div class="tui-chat-safe-tips">
+      <div
+        v-if="isOfficial"
+        class="tui-chat-safe-tips"
+      >
         <span>
           {{
             TUITranslateService.t(
@@ -72,6 +75,7 @@
               <MessageBubble
                 :messageItem="item"
                 :content="item.getMessageContent()"
+                :isAudioPlayed="audioPlayedMapping[item.ID]"
                 :blinkMessageIDList="blinkMessageIDList"
                 :isMultipleSelectMode="isMultipleSelectMode"
                 :multipleSelectedMessageIDList="multipleSelectedMessageIDList"
@@ -111,6 +115,7 @@
                   :content="item.getMessageContent()"
                   :messageItem="item"
                   :broadcastNewAudioSrc="broadcastNewAudioSrc"
+                  @setAudioPlayed="setAudioPlayed"
                   @getGlobalAudioContext="getGlobalAudioContext"
                 />
                 <MessageRecord
@@ -258,6 +263,7 @@ import ProgressMessage from '../../common/ProgressMessage/index.vue';
 import { isCreateGroupCustomMessage } from '../utils/utils';
 import { isEnabledMessageReadReceiptGlobal } from '../utils/utils';
 import { isPC, isH5, isMobile } from '../../../utils/env';
+import chatStorage from '../utils/chatStorage';
 import { IAudioContext } from '../../../interface';
 
 interface IEmits {
@@ -283,7 +289,9 @@ let selfAddValue = 0;
 let observer: any = null;
 let groupType: string | undefined;
 const sentReceiptMessageID = new Set<string>();
+const isOfficial = TUIStore.getData(StoreName.APP, 'isOfficial');
 const thisInstance = getCurrentInstance()?.proxy || getCurrentInstance();
+
 const messageList = ref<IMessageModel[]>();
 const multipleSelectedMessageIDList = ref<string[]>([]);
 const isCompleted = ref(false);
@@ -299,6 +307,7 @@ const scrollButtonInstanceRef = ref<InstanceType<typeof ScrollButton>>();
 const historyFirstMessageID = ref<string>('');
 const isShowSimpleMessageList = ref<boolean>(false);
 const simpleMessageListRenderMessageID = ref<string>();
+const audioPlayedMapping = ref<Record<string, boolean>>({});
 
 // audio control
 const broadcastNewAudioSrc = ref<string>('');
@@ -327,9 +336,17 @@ const onCurrentConversationIDUpdated = (conversationID: string) => {
       = TUIStore.getConversationModel(conversationID) || {};
     groupType = groupProfile?.type;
   }
+
+  if (Object.keys(audioPlayedMapping.value).length > 0) {
+    // Synchronize storage about whether the audio has been played when converstaion switched
+    chatStorage.setChatStorage('audioPlayedMapping', audioPlayedMapping.value);
+  }
 };
 
 onMounted(() => {
+  // Retrieve the information about whether the audio has been played from localStorage
+  audioPlayedMapping.value = chatStorage.getChatStorage('audioPlayedMapping') || {};
+
   TUIStore.watch(StoreName.CHAT, {
     messageList: onMessageListUpdated,
     messageSource: onMessageSourceUpdated,
@@ -359,6 +376,11 @@ onUnmounted(() => {
   observer = null;
 
   uni.$off('scroll-to-bottom');
+
+  if (Object.keys(audioPlayedMapping.value).length > 0) {
+    // Synchronize storage about whether the audio has been played when the component is unmounted
+    chatStorage.setChatStorage('audioPlayedMapping', audioPlayedMapping.value);
+  }
 });
 
 const handelScrollListScroll = throttle(
@@ -702,6 +724,10 @@ function oneByOneForwardMessage() {
 function assignMessageIDInUniapp(messageID: string) {
   simpleMessageListRenderMessageID.value = messageID;
   isShowSimpleMessageList.value = true;
+}
+
+function setAudioPlayed(messageID: string) {
+  audioPlayedMapping.value[messageID] = true;
 }
 
 defineExpose({
