@@ -2,7 +2,7 @@
   <div :class="['message-input', !isPC && 'message-input-h5']">
     <div class="audio-main-content-line">
       <MessageInputAudio
-        v-if="isWeChat || isApp"
+        v-if="(isWeChat || isApp) && isRenderVoice"
         :class="{
           'message-input-wx-audio-open': displayType === 'audio',
         }"
@@ -31,6 +31,7 @@
         @onAtListOpen="onAtListOpen"
       />
       <Icon
+        v-if="isRenderEmojiPicker"
         class="icon icon-face"
         :file="faceIcon"
         :size="'23px'"
@@ -38,6 +39,7 @@
         @onClick="changeToolbarDisplayType('emojiPicker')"
       />
       <Icon
+        v-if="isRenderMore"
         class="icon icon-more"
         :file="moreIcon"
         :size="'23px'"
@@ -71,6 +73,7 @@ import moreIcon from '../../../assets/icon/more-uni.png';
 import { isPC, isH5, isWeChat, isApp } from '../../../utils/env';
 import { sendTyping } from '../utils/sendMessage';
 import { ToolbarDisplayType, InputDisplayType } from '../../../interface';
+import TUIChatConfig from '../config';
 
 interface IProps {
   placeholder: string;
@@ -103,6 +106,10 @@ const messageInputAtRef = ref();
 const currentConversation = ref<IConversationModel>();
 const isGroup = ref<boolean>(false);
 const displayType = ref<InputDisplayType>('editor');
+const featureConfig = TUIChatConfig.getFeatureConfig();
+const isRenderVoice = ref<boolean>(featureConfig.InputVoice);
+const isRenderEmojiPicker = ref<boolean>(featureConfig.InputEmoji || featureConfig.InputStickers);
+const isRenderMore = ref<boolean>(featureConfig.InputImage || featureConfig.InputVideo || featureConfig.InputEvaluation || featureConfig.InputQuickReplies);
 
 onMounted(() => {
   TUIStore.watch(StoreName.CONV, {

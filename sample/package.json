@@ -1,6 +1,6 @@
 {
   "name": "sample-uniapp",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -16,8 +16,8 @@
     "@tencentcloud/chat": "latest",
     "@tencentcloud/chat-uikit-engine": "latest",
     "@tencentcloud/tui-core": "latest",
+    "@tencentcloud/tui-customer-service-plugin": "^2.2.3",
     "@tencentcloud/universal-api": "latest",
-    "@tencentcloud/tui-customer-service-plugin": "latest",
     "@vue/composition-api": "^1.7.1",
     "dayjs": "^1.11.10",
     "lodash": "^4.17.21",

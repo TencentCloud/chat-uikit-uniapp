@@ -47,7 +47,7 @@ export default class CallkitPluginServer {
   public onGetExtension(extensionID: string, params: Record<string, any>) {
     if (!TUIGlobal.$TUICallKit) {
       console.warn('请检查原生插件 TencentCloud-TUICallKit 是否已集成');
-      return;
+      return [];
     }
     if (extensionID === TUIConstants.TUIChat.EXTENSION.INPUT_MORE.EXT_ID) {
       const list = [];

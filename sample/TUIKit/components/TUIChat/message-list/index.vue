@@ -228,7 +228,7 @@ import TUIChatEngine, {
   TUITranslateService,
   TUIChatService,
 } from '@tencentcloud/chat-uikit-engine';
-import throttle from 'lodash/throttle';
+import { throttle } from 'lodash';
 import {
   setInstanceMapping,
   getBoundingClientRect,
@@ -275,6 +275,7 @@ interface IEmits {
 interface IProps {
   isGroup: boolean;
   groupID: string;
+  isNotInGroup: boolean;
   isMultipleSelectMode: boolean;
 }
 
@@ -282,6 +283,7 @@ const emits = defineEmits<IEmits>();
 const props = withDefaults(defineProps<IProps>(), {
   isGroup: false,
   groupID: '',
+  isNotInGroup: false,
   isMultipleSelectMode: false,
 });
 
@@ -488,7 +490,7 @@ const handleToggleMessageItem = (
   index: number,
   isLongpress = false,
 ) => {
-  if (props.isMultipleSelectMode) {
+  if (props.isMultipleSelectMode || props.isNotInGroup) {
     return;
   }
   if (isLongpress) {
@@ -505,7 +507,7 @@ const handleH5LongPress = (
   index: number,
   type: string,
 ) => {
-  if (props.isMultipleSelectMode) {
+  if (props.isMultipleSelectMode || props.isNotInGroup) {
     return;
   }
   if (!isH5) return;
@@ -636,6 +638,9 @@ async function bindIntersectionObserver() {
 }
 
 function setReadReceiptPanelVisible(visible: boolean, message?: IMessageModel) {
+  if (visible && props.isNotInGroup) {
+    return;
+  }
   if (!visible) {
     readStatusMessage.value = undefined;
   } else {
