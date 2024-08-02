@@ -4,9 +4,7 @@ chat-uikit-uniapp （vue2 / vue3）是基于腾讯云 Chat SDK 的一款 uniapp 
 chat-uikit-uniapp 界面效果如下图所示：
 ![](https://qcloudimg.tencent-cloud.cn/raw/2f16b1be0591a325250f9066af898036.png)
 
-> 为尊重表情设计版权，IM Demo/TUIKit 工程中不包含大表情元素切图，正式上线商用前请您替换为自己设计或拥有版权的其他表情包。默认的小黄脸表情包版权归腾讯云所有，可有偿授权使用，如您希望获得授权可 提交工单 联系我们。
->
-> 提交工单链接：https://console.cloud.tencent.com/workorder/category?level1_id=29&level2_id=40&source=14&data_title=%E5%8D%B3%E6%97%B6%E9%80%9A%E4%BF%A1%20IM&step=1
+> 为尊重表情设计版权，IM Demo/TUIKit 工程中不包含大表情元素切图，正式上线商用前请您替换为自己设计或拥有版权的其他表情包。默认的小黄脸表情包版权归腾讯云所有，可有偿授权使用，如您希望获得授权可 [提交工单](https://console.cloud.tencent.com/workorder/category?level1_id=29&level2_id=40&source=14&data_title=%E5%8D%B3%E6%97%B6%E9%80%9A%E4%BF%A1%20IM&step=1) 联系我们。
 
 ## chat-uikit-uniapp 支持平台
 

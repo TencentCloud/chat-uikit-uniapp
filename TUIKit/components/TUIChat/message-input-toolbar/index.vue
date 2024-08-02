@@ -23,13 +23,25 @@
             'message-input-toolbar-uni-list',
           ]"
         >
-          <ImageUpload imageSourceType="camera" />
-          <ImageUpload imageSourceType="album" />
-          <VideoUpload videoSourceType="album" />
-          <VideoUpload videoSourceType="camera" />
-          <template v-if="currentExtensionList[0]">
+          <ImageUpload
+            v-if="featureConfig.InputImage"
+            imageSourceType="camera"
+          />
+          <ImageUpload
+            v-if="featureConfig.InputImage"
+            imageSourceType="album"
+          />
+          <VideoUpload
+            v-if="featureConfig.InputVideo"
+            videoSourceType="album"
+          />
+          <VideoUpload
+            v-if="featureConfig.InputVideo"
+            videoSourceType="camera"
+          />
+          <template v-if="currentExtensionList.length > 0">
             <div
-              v-for="(extension, index) in currentExtensionList.slice(0, 4)"
+              v-for="(extension, index) in currentExtensionList.slice(0, slicePos)"
               :key="index"
             >
               <ToolbarItemContainer
@@ -43,17 +55,29 @@
               />
             </div>
           </template>
-          <Evaluate
-            v-if="currentExtensionList.length < 4"
-            @onDialogPopupShowOrHide="handleSwiperDotShow"
-          />
-          <Words
-            v-if="currentExtensionList.length < 3"
-            @onDialogPopupShowOrHide="handleSwiperDotShow"
-          />
+          <template v-if="neededCountFirstPage === 1">
+            <Evaluate
+              v-if="featureConfig.InputEvaluation"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
+            />
+            <Words
+              v-else-if="featureConfig.InputQuickReplies"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
+            />
+          </template>
+          <template v-if="neededCountFirstPage > 1">
+            <Evaluate
+              v-if="featureConfig.InputEvaluation"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
+            />
+            <Words
+              v-if="featureConfig.InputQuickReplies"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
+            />
+          </template>
         </swiper-item>
         <swiper-item
-          v-if="currentExtensionList[2] && currentExtensionList.length >= 3"
+          v-if="neededCountFirstPage <= 1"
           :class="[
             'message-input-toolbar-list',
             'message-input-toolbar-h5-list',
@@ -61,7 +85,7 @@
           ]"
         >
           <div
-            v-for="(extension, index) in currentExtensionList.slice(4)"
+            v-for="(extension, index) in currentExtensionList.slice(slicePos)"
             :key="index"
           >
             <ToolbarItemContainer
@@ -74,14 +98,22 @@
               @onIconClick="onExtensionClick(extension)"
             />
           </div>
-          <Evaluate
-            v-if="currentExtensionList.length >= 4"
-            @onDialogPopupShowOrHide="handleSwiperDotShow"
-          />
-          <Words
-            v-if="currentExtensionList.length >= 3"
-            @onDialogPopupShowOrHide="handleSwiperDotShow"
-          />
+          <template v-if="neededCountFirstPage === 1">
+            <Words
+              v-if="featureConfig.InputQuickReplies"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
+            />
+          </template>
+          <template v-else>
+            <Evaluate
+              v-if="featureConfig.InputEvaluation"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
+            />
+            <Words
+              v-if="featureConfig.InputQuickReplies"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
+            />
+          </template>
         </swiper-item>
       </swiper>
     </div>
@@ -113,6 +145,7 @@ import UserSelector from './user-selector/index.vue';
 import TUIChatConfig from '../config';
 import { enableSampleTaskStatus } from '../../../utils/enableSampleTaskStatus';
 import { ToolbarDisplayType } from '../../../interface';
+import OfflinePushInfoManager, { PUSH_SCENE } from '../offlinePushInfoManager/index';
 
 interface IProps {
   displayType: ToolbarDisplayType;
@@ -128,6 +161,26 @@ const userSelectorRef = ref();
 const currentUserSelectorExtension = ref<ExtensionInfo | null>();
 const currentExtensionList = ref<ExtensionInfo[]>([]);
 const isSwiperIndicatorDotsEnable = ref<boolean>(false);
+const featureConfig = TUIChatConfig.getFeatureConfig();
+const neededCountFirstPage = ref<number>(8);
+const slicePos = ref<number>(0);
+
+const computeToolbarPaging = () => {
+  if (featureConfig.InputImage && featureConfig.InputVideo) {
+    neededCountFirstPage.value -= 4;
+  } else if (featureConfig.InputImage || featureConfig.InputVideo) {
+    neededCountFirstPage.value -= 2;
+  }
+
+  slicePos.value = neededCountFirstPage.value;
+  neededCountFirstPage.value -= currentExtensionList.value.length;
+
+  if (neededCountFirstPage.value === 1) {
+    isSwiperIndicatorDotsEnable.value = (featureConfig.InputEvaluation && featureConfig.InputQuickReplies);
+  } else if (neededCountFirstPage.value < 1) {
+    isSwiperIndicatorDotsEnable.value = featureConfig.InputEvaluation || featureConfig.InputQuickReplies;
+  }
+};
 
 const getExtensionList = (conversationID: string) => {
   if (!conversationID) {
@@ -144,15 +197,18 @@ const getExtensionList = (conversationID: string) => {
   // uni-app build ios app has null in last index need to filter
   currentExtensionList.value = [
     ...TUICore.getExtensionList(TUIConstants.TUIChat.EXTENSION.INPUT_MORE.EXT_ID, params),
-  ].filter(extension => extension);
+  ].filter((extension: ExtensionInfo) => {
+    if (extension?.data?.name === 'search') {
+      return featureConfig.MessageSearch;
+    }
+    return true;
+  });
 };
 
 const onCurrentConversationUpdate = (conversation: IConversationModel) => {
   if (conversation?.conversationID && conversation.conversationID !== currentConversation.value?.conversationID) {
     getExtensionList(conversation.conversationID);
-    if (currentExtensionList.value.length > 2) {
-      isSwiperIndicatorDotsEnable.value = true;
-    }
+    computeToolbarPaging();
   }
   currentConversation.value = conversation;
   isGroup.value = currentConversation?.value?.type === TUIChatEngine.TYPES.CONV_GROUP;
@@ -191,16 +247,6 @@ const onExtensionClick = (extension: ExtensionInfo) => {
   }
 };
 
-const genOfflinePushInfo = () => {
-  // doc: https://cloud.tencent.com/document/product/269/105713
-  return {
-    title: 'call',
-    description: 'you have a call',
-    androidSound: 'private_ring',
-    iOSSound: '01.caf',
-  };
-};
-
 const onCallExtensionClicked = (extension: ExtensionInfo, callType: number) => {
   selectorShowType.value = extension?.data?.name;
   if (currentConversation?.value?.type === TUIChatEngine.TYPES.CONV_C2C) {
@@ -208,7 +254,7 @@ const onCallExtensionClicked = (extension: ExtensionInfo, callType: number) => {
       userIDList: [currentConversation?.value?.conversationID?.slice(3)],
       type: callType,
       callParams: {
-        offlinePushInfo: genOfflinePushInfo(),
+        offlinePushInfo: OfflinePushInfoManager.getOfflinePushInfo(PUSH_SCENE.CALL),
       },
     });
   } else if (isGroup.value) {
@@ -228,7 +274,7 @@ const onUserSelectorSubmit = (selectedInfo: any) => {
   currentUserSelectorExtension.value?.listener?.onClicked?.({
     ...selectedInfo,
     callParams: {
-      offlinePushInfo: genOfflinePushInfo(),
+      offlinePushInfo: OfflinePushInfoManager.getOfflinePushInfo(PUSH_SCENE.CALL),
     },
   });
   currentUserSelectorExtension.value = null;
@@ -239,8 +285,7 @@ const onUserSelectorCancel = () => {
 };
 
 const handleSwiperDotShow = (showStatus: boolean) => {
-  isSwiperIndicatorDotsEnable.value
-    = currentExtensionList.value.length > 2 ? !showStatus : false;
+  isSwiperIndicatorDotsEnable.value = (neededCountFirstPage.value <= 1 && !showStatus);
 };
 </script>
 <script lang="ts">
