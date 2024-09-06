@@ -73,7 +73,7 @@
               @mouseover="handleH5LongPress($event, item, index, 'touchend')"
             >
               <MessageBubble
-                :messageItem="item"
+                :messageItem="deepCopy(item)"
                 :content="item.getMessageContent()"
                 :isAudioPlayed="audioPlayedMapping[item.ID]"
                 :blinkMessageIDList="blinkMessageIDList"
@@ -92,7 +92,7 @@
                 <ProgressMessage
                   v-else-if="item.type === TYPES.MSG_IMAGE"
                   :content="item.getMessageContent()"
-                  :messageItem="item"
+                  :messageItem="deepCopy(item)"
                 >
                   <MessageImage
                     :content="item.getMessageContent()"
@@ -103,7 +103,7 @@
                 <ProgressMessage
                   v-else-if="item.type === TYPES.MSG_VIDEO"
                   :content="item.getMessageContent()"
-                  :messageItem="item"
+                  :messageItem="deepCopy(item)"
                 >
                   <MessageVideo
                     :content="item.getMessageContent()"
@@ -261,7 +261,7 @@ import Drawer from '../../common/Drawer/index.vue';
 import { Toast, TOAST_TYPE } from '../../common/Toast/index';
 import ProgressMessage from '../../common/ProgressMessage/index.vue';
 import { isCreateGroupCustomMessage } from '../utils/utils';
-import { isEnabledMessageReadReceiptGlobal } from '../utils/utils';
+import { isEnabledMessageReadReceiptGlobal, deepCopy } from '../utils/utils';
 import { isPC, isH5, isMobile } from '../../../utils/env';
 import chatStorage from '../utils/chatStorage';
 import { IAudioContext } from '../../../interface';
