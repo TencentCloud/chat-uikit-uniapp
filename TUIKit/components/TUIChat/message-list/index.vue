@@ -228,7 +228,6 @@ import TUIChatEngine, {
   TUITranslateService,
   TUIChatService,
 } from '@tencentcloud/chat-uikit-engine';
-import { throttle } from 'lodash';
 import {
   setInstanceMapping,
   getBoundingClientRect,
@@ -262,6 +261,7 @@ import { Toast, TOAST_TYPE } from '../../common/Toast/index';
 import ProgressMessage from '../../common/ProgressMessage/index.vue';
 import { isCreateGroupCustomMessage } from '../utils/utils';
 import { isEnabledMessageReadReceiptGlobal, deepCopy } from '../utils/utils';
+import { throttle } from '../../../utils/lodash';
 import { isPC, isH5, isMobile } from '../../../utils/env';
 import chatStorage from '../utils/chatStorage';
 import { IAudioContext } from '../../../interface';

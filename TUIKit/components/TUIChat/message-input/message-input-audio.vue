@@ -46,10 +46,10 @@ import {
   TUITranslateService,
 } from '@tencentcloud/chat-uikit-engine';
 import { TUIGlobal } from '@tencentcloud/universal-api';
-import { throttle } from 'lodash';
 import Icon from '../../common/Icon.vue';
 import audioIcon from '../../../assets/icon/audio.svg';
 import { Toast, TOAST_TYPE } from '../../common/Toast/index';
+import { throttle } from '../../../utils/lodash';
 import { isEnabledMessageReadReceiptGlobal } from '../utils/utils';
 import { InputDisplayType } from '../../../interface';
 
