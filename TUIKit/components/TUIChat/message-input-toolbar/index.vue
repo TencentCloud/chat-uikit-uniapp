@@ -182,10 +182,31 @@ const computeToolbarPaging = () => {
   }
 };
 
-const getExtensionList = (conversationID: string) => {
+onMounted(() => {
+  TUIStore.watch(StoreName.CUSTOM, {
+    activeConversation: onActiveConversationUpdate,
+  });
+});
+
+onUnmounted(() => {
+  TUIStore.unwatch(StoreName.CUSTOM, {
+    activeConversation: onActiveConversationUpdate,
+  });
+});
+
+const onActiveConversationUpdate = (conversationID: string) => {
   if (!conversationID) {
     return;
   }
+  if (conversationID !== currentConversation.value?.conversationID) {
+    getExtensionList();
+    computeToolbarPaging();
+    currentConversation.value = conversationID;
+    isGroup.value = conversationID.startsWith(TUIChatEngine.TYPES.CONV_GROUP);
+  }
+};
+
+const getExtensionList = () => {
   const chatType = TUIChatConfig.getChatType();
   const params: Record<string, boolean | string> = { chatType };
   // Backward compatibility: When callkit does not have chatType judgment, use filterVoice and filterVideo to filter
@@ -204,27 +225,6 @@ const getExtensionList = (conversationID: string) => {
     return true;
   });
 };
-
-const onCurrentConversationUpdate = (conversation: IConversationModel) => {
-  if (conversation?.conversationID && conversation.conversationID !== currentConversation.value?.conversationID) {
-    getExtensionList(conversation.conversationID);
-    computeToolbarPaging();
-  }
-  currentConversation.value = conversation;
-  isGroup.value = currentConversation?.value?.type === TUIChatEngine.TYPES.CONV_GROUP;
-};
-
-onMounted(() => {
-  TUIStore.watch(StoreName.CONV, {
-    currentConversation: onCurrentConversationUpdate,
-  });
-});
-
-onUnmounted(() => {
-  TUIStore.unwatch(StoreName.CONV, {
-    currentConversation: onCurrentConversationUpdate,
-  });
-});
 
 // handle extensions onclick
 const onExtensionClick = (extension: ExtensionInfo) => {
