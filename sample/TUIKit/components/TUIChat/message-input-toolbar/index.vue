@@ -201,7 +201,7 @@ const onActiveConversationUpdate = (conversationID: string) => {
   if (conversationID !== currentConversation.value?.conversationID) {
     getExtensionList();
     computeToolbarPaging();
-    currentConversation.value = conversationID;
+    currentConversation.value = TUIStore.getConversationModel(conversationID);
     isGroup.value = conversationID.startsWith(TUIChatEngine.TYPES.CONV_GROUP);
   }
 };
