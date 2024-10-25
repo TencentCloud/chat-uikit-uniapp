@@ -3,6 +3,7 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, onUnmounted, ref } from '../../../adapter-vue';
 import {
   TUIStore,
   StoreName,
@@ -10,11 +11,36 @@ import {
   TUITranslateService,
 } from '@tencentcloud/chat-uikit-engine';
 import { TUIGlobal } from '@tencentcloud/universal-api';
-import { onLoad } from '@dcloudio/uni-app';
-import { onMounted, onUnmounted, ref } from '../../../adapter-vue';
+import { onLoad, onNavigationBarButtonTap } from '@dcloudio/uni-app';
+
+const emits = defineEmits(['openGroupManagement']);
+const props = defineProps(['isGroup']);
 
 const currentConversation = ref<IConversationModel>();
 const typingStatus = ref(false);
+
+// #ifdef APP-PLUS
+onNavigationBarButtonTap(() => {
+  if (props.isGroup) {
+    emits('openGroupManagement');
+  }
+});
+
+const pages = getCurrentPages();
+const currentPage = pages[pages.length - 1];
+const currentWebview = currentPage.$getAppWebview();
+
+if (!props.isGroup) {
+  // hidden menu button in C2C chat
+  // override current webview titleNView
+  currentWebview.setStyle({
+    titleNView: {
+      ...currentWebview.getStyle().titleNView,
+      buttons: [],
+    },
+  });
+}
+// #endif
 
 const setChatHeaderContent = (content: string) => {
   TUIGlobal?.setNavigationBarTitle({
