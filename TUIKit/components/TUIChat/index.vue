@@ -144,14 +144,12 @@ const featureConfig = TUIChatConfig.getFeatureConfig();
 
 onMounted(() => {
   TUIStore.watch(StoreName.CONV, {
-    currentConversationID: onCurrentConversationIDUpdate,
     currentConversation: onCurrentConversationUpdate,
   });
 });
 
 onUnmounted(() => {
   TUIStore.unwatch(StoreName.CONV, {
-    currentConversationID: onCurrentConversationIDUpdate,
     currentConversation: onCurrentConversationUpdate,
   });
   reset();
@@ -239,7 +237,7 @@ function oneByOneForwardMessage() {
   messageListRef.value?.oneByOneForwardMessage();
 }
 
-function onCurrentConversationUpdate(conversation: IConversationModel) {
+function updateUIUserNotInGroup(conversation: IConversationModel) {
   if (conversation?.operationType > 0) {
     headerExtensionList.value = [];
     isNotInGroup.value = true;
@@ -255,13 +253,20 @@ function onCurrentConversationUpdate(conversation: IConversationModel) {
   }
 }
 
-function onCurrentConversationIDUpdate(conversationID: string) {
-  if (currentConversationID.value === conversationID) {
+function onCurrentConversationUpdate(conversation: IConversationModel) {
+  updateUIUserNotInGroup(conversation);
+  // return when currentConversation is null
+  if (!conversation) {
+    return;
+  }
+  // return when currentConversationID.value is the same as conversation.conversationID.
+  if (currentConversationID.value === conversation?.conversationID) {
     return;
   }
 
   isGroup.value = false;
   let conversationType = TUIChatEngine.TYPES.CONV_C2C;
+  const conversationID = conversation.conversationID;
   if (conversationID.startsWith(TUIChatEngine.TYPES.CONV_GROUP)) {
     conversationType = TUIChatEngine.TYPES.CONV_GROUP;
     isGroup.value = true;
