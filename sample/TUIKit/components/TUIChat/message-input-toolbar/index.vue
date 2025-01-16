@@ -128,11 +128,12 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onUnmounted, onMounted } from '../../../adapter-vue';
+import { ref, onUnmounted, onMounted } from 'vue';
 import TUIChatEngine, {
   IConversationModel,
   TUIStore,
   StoreName,
+  TUIReportService,
 } from '@tencentcloud/chat-uikit-engine';
 import TUICore, { ExtensionInfo, TUIConstants } from '@tencentcloud/tui-core';
 import ImageUpload from './image-upload/index.vue';
@@ -224,7 +225,21 @@ const getExtensionList = () => {
     }
     return true;
   });
+  reportExtension(currentExtensionList.value);
 };
+
+function reportExtension(extensionList:ExtensionInfo[]){
+  extensionList.forEach((extension: ExtensionInfo)=>{
+    const _name = extension?.data?.name;
+    if(_name === 'voiceCall'){
+      TUIReportService.reportFeature(203, 'voice-call');
+    } else if (_name === 'videoCall') {
+      TUIReportService.reportFeature(203, 'video-call');
+    } else if(_name === 'quickRoom'){
+      TUIReportService.reportFeature(204);
+    }
+  });
+}
 
 // handle extensions onclick
 const onExtensionClick = (extension: ExtensionInfo) => {
