@@ -128,7 +128,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onUnmounted, onMounted } from '../../../adapter-vue';
+import { ref, onUnmounted, onMounted } from 'vue';
 import TUIChatEngine, {
   IConversationModel,
   TUIStore,

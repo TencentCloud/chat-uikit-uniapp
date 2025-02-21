@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="form-branch-container">
     <p
       v-if="props.title"
       class="card-title"
@@ -18,7 +18,6 @@
 </template>
 
 <script lang="ts">
-
 interface branchItem {
   content: string;
   desc: string;
@@ -26,7 +25,7 @@ interface branchItem {
 
 interface Props {
   title: string;
-  list: Array<branchItem>;
+  list: branchItem[];
 }
 
 export default {
@@ -37,7 +36,7 @@ export default {
     },
     list: {
       type: Array,
-      default: () => ([]),
+      default: () => [],
     },
   },
   emits: ['input-click'],
@@ -53,15 +52,17 @@ export default {
 };
 </script>
 <style lang="scss">
-.card-title {
-  margin-bottom: 8px;
-}
+.form-branch-container {
+  .card-title {
+    margin-bottom: 8px;
+  }
 
-.form-branch-item {
-  font-weight: 400;
-  color: rgba(54, 141, 255, 1);
-  padding-top: 5px;
-  cursor: pointer;
-  padding-bottom: 5px;
+  .form-branch-item {
+    font-weight: 400;
+    color: rgba(54, 141, 255, 1);
+    padding-top: 5px;
+    cursor: pointer;
+    padding-bottom: 5px;
+  }
 }
 </style>

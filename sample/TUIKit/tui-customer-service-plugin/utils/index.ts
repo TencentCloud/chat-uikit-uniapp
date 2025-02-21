@@ -45,9 +45,12 @@ export const isMessageInvisible = (message: IMessageModel): boolean => {
     CUSTOM_MESSAGE_SRC.BRANCH_NUMBER,
     CUSTOM_MESSAGE_SRC.FROM_INPUT,
     CUSTOM_MESSAGE_SRC.PRODUCT_CARD,
+    CUSTOM_MESSAGE_SRC.ROBOT_MSG,
+    CUSTOM_MESSAGE_SRC.RICH_TEXT,
+    CUSTOM_MESSAGE_SRC.STREAM_TEXT,
   ];
   const isCustomerMessage = message?.type === TYPES.MSG_CUSTOM;
-  const isExistWhiteList = whiteList.includes(customerServicePayload?.src);
+  const isCustomerInvisible = customerServicePayload?.src && !whiteList.includes(customerServicePayload?.src);
   const isRobot = customerServicePayload?.src === CUSTOM_MESSAGE_SRC.ROBOT && robotCommandArray.indexOf(customerServicePayload?.content?.command) !== -1;
-  return isCustomerMessage && (!isExistWhiteList || isRobot);
+  return isCustomerMessage && (isCustomerInvisible || isRobot);
 };

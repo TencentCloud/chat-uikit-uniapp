@@ -1,7 +1,9 @@
-## [2.4.1] (2025-01-22)
+## [2.4.2] (2025-02-21)
 
-### Fix
-- 修复 EmojiPicker 表情选择面板点击无响应问题。
+### chore
+- 升级 @tencentcloud/call-uikit-vue 到 3.3.9。
+- 升级 @tencentcloud/call-uikit-vue2 到 3.3.9。
+- 升级 @tencentcloud/call-uikit-vue2.6 到 3.3.9。
 
 ## [2.4.0] (2025-01-16)
 

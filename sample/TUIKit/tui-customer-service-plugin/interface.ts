@@ -3,6 +3,9 @@ export interface customerServicePayloadType {
   customerServicePlugin?: number | string;
   src: string | number;
   content: any;
+  subtype?: string;
+  isFinished?: number;
+  chunks?: string[];
 }
 
 interface IMenuItem {

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="form-input-container">
     <div class="card-title">
       {{ props.title }}
     </div>
@@ -51,46 +51,48 @@ export default {
 };
 </script>
 <style lang="scss">
-.card-title {
-  margin-bottom: 8px;
-}
-
-.form-input-box {
-  display: flex;
-
-  button:disabled {
-    background: #d8d8d8;
+.form-input-container {
+  .card-title {
+    margin-bottom: 8px;
   }
-}
 
-.form-input {
-  width: 100%;
-  height: 36px;
-  border-radius: 8px 0 0 8px;
-  border: 1px rgba(221, 221, 221, 1) solid;
-}
+  .form-input-box {
+    display: flex;
 
-.form-button {
-  position: relative;
-  height: 40px;
-  width: 42px;
-  font-size: 16px;
-  border-radius: 0 8px 8px 0;
-  border: 0 rgba(221, 221, 221, 1) solid;
-  background: #006eff;
-  color: white;
-  cursor: pointer;
-}
+    button:disabled {
+      background: #d8d8d8;
+    }
+  }
 
-.form-button::before {
-  content: '';
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  top: 50%;
-  right: 40%;
-  border-left: 2px solid #FFF;
-  border-bottom: 2px solid #FFF;
-  transform: translate(0, -50%) rotate(-135deg);
+  .form-input {
+    width: 100%;
+    height: 36px;
+    border-radius: 8px 0 0 8px;
+    border: 1px rgba(221, 221, 221, 1) solid;
+  }
+
+  .form-button {
+    position: relative;
+    height: 40px;
+    width: 42px;
+    font-size: 16px;
+    border-radius: 0 8px 8px 0;
+    border: 0 rgba(221, 221, 221, 1) solid;
+    background: #006eff;
+    color: white;
+    cursor: pointer;
+  }
+
+  .form-button::before {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: 50%;
+    right: 40%;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: translate(0, -50%) rotate(-135deg);
+  }
 }
 </style>

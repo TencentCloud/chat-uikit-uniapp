@@ -12,7 +12,7 @@ export default class TUICustomerServer {
     console.log('TUICustomerServer.init ok');
     TUICore.registerService(TUIConstants.TUICustomerServicePlugin.SERVICE.NAME, this);
     TUICore.registerExtension(TUIConstants.TUIContact.EXTENSION.CONTACT_LIST.EXT_ID, this);
-    this.customerServiceAccounts = ['@im_agent#online_shopping_mall', '@im_agent#online_doctor'];
+    this.customerServiceAccounts = ['@customer_service_account'];
   }
 
   static getInstance(): TUICustomerServer {
@@ -22,23 +22,23 @@ export default class TUICustomerServer {
     return TUICustomerServer.instance;
   }
 
-  // 设置 客服号
+  // Set customer service number
   public setCustomerServiceAccounts(accounts: any[]) {
     this.customerServiceAccounts = accounts;
   }
 
-  // 获取 客服号
+  // Obtain customer service number
   public getCustomerServiceAccounts() {
     return this.customerServiceAccounts;
   }
 
-  // 判断当前会话是不是客服会话
+  // Determine if the current session is a customer service session
   private isCustomerConversation(conversationID: string) {
     const userID = (conversationID && conversationID.slice(3)) || '';
     return this.customerServiceAccounts.indexOf(userID) > -1;
   }
 
-  // 判断当前消息是不是客服消息
+  // Determine if the current message is a customer service message
   public isCustomerServicePluginMessage(message: IMessageModel) {
     if (!message || !this.isCustomerConversation(message.conversationID)) {
       return false;
@@ -78,7 +78,7 @@ export default class TUICustomerServer {
               to: params.conversationID.slice(3),
               conversationType: 'C2C',
               payload: {
-                data: JSON.stringify({ src: '7' }),
+                data: JSON.stringify({ src: '7', customerServicePlugin: 0 }),
               },
             },
           });

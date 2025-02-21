@@ -4,7 +4,7 @@
       v-if="content.header || content.title"
       class="branch-title"
     >
-      {{ content.header || content.title}}
+      {{ content.header || content.title }}
     </p>
     <div
       v-for="(item, index) in content.items"
@@ -49,10 +49,12 @@ export default {
   emits: ['sendMessage'],
   setup(props: Props, { emit }) {
     const content = computed(() => {
-      return props?.payload?.content || {
-        header: undefined,
-        items: [],
-      };
+      return (
+        props?.payload?.content || {
+          header: undefined,
+          items: [],
+        }
+      );
     });
 
     const handleContentListItemClick = (branch: branchItem) => {
