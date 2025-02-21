@@ -1,6 +1,6 @@
 {
   "name": "@tencentcloud/chat-uikit-uniapp",
-  "version": "2.4.1",
+  "version": "2.4.3",
   "repository": "https://github.com/TencentCloud/chat-uikit-uniapp",
   "description": "TUIKit 是基于 IM SDK 实现的一套 UI 组件，其包含会话、聊天、群组、个人资料等功能，基于这些精心设计的 UI 组件，您可以快速构建优雅的、可靠的、可扩展的 Chat 应用。",
   "scripts": {},
@@ -25,9 +25,9 @@
     "@tencentcloud/tui-core": "latest",
     "@tencentcloud/universal-api": "latest",
     "unplugin-vue2-script-setup": "^0.11.3",
-    "@tencentcloud/call-uikit-wechat": "latest",
-    "@tencentcloud/call-uikit-vue2.6": "latest",
-    "@tencentcloud/call-uikit-vue": "latest",
+    "@tencentcloud/call-uikit-wechat": "3.3.9",
+    "@tencentcloud/call-uikit-vue2.6": "3.3.9",
+    "@tencentcloud/call-uikit-vue": "3.3.9",
     "@tencentcloud/tui-customer-service-plugin": "latest",
     "dayjs": "^1.11.10"
   },

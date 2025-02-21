@@ -1,6 +1,6 @@
 {
   "name": "sample-uniapp",
-  "version": "2.4.0",
+  "version": "2.4.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,9 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tencentcloud/call-uikit-vue": "latest",
-    "@tencentcloud/call-uikit-vue2.6": "latest",
-    "@tencentcloud/call-uikit-wechat": "latest",
+    "@tencentcloud/call-uikit-vue": "3.3.9",
+    "@tencentcloud/call-uikit-vue2.6": "3.3.9",
+    "@tencentcloud/call-uikit-wechat": "3.3.9",
     "@tencentcloud/chat": "latest",
     "@tencentcloud/chat-uikit-engine": "latest",
     "@tencentcloud/tui-core": "latest",
