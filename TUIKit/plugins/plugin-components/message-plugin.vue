@@ -22,10 +22,6 @@
         :signalingInfo="messageSignalingInfo"
         :customContent="messageCustomContent"
       />
-      <MessageCustomerService
-        v-if="pluginMessageType.pluginType === 'customer'"
-        :message="props.message"
-      />
       <MessageRoom
         v-if="pluginMessageType.pluginType === 'room'"
         :message="props.message"
@@ -38,15 +34,10 @@
 import { computed } from '../../adapter-vue';
 import { TUIStore } from '@tencentcloud/chat-uikit-engine';
 import TUIChatEngine, { IMessageModel } from '@tencentcloud/chat-uikit-engine';
-import {
-  isCustomerServicePluginMessage,
-  isCustomServiceMessageInvisible,
-} from './message-customer/index';
 import { isCallMessage, isRoomCardMessage } from './index';
 import MessagePluginLayout from './message-plugin-layout.vue';
 import MessageCallGroup from './message-call/message-call-group.vue';
 import MessageCallC2C from './message-call/message-call-c2c.vue';
-import MessageCustomerService from './message-customer/message-customer-service.vue';
 // If TUIRoom is not integrated, please introduce the following path
 import MessageRoom from './message-room/message-room-default.vue';
 // After integrating TUIRoom, please comment the above path and open the following path to import
@@ -79,11 +70,6 @@ const pluginMessageType = computed<{ pluginType: string; showStyle: string }>(()
     typeObj = {
       pluginType: 'room',
       showStyle: 'bubble',
-    };
-  } else if (isCustomerServicePluginMessage(messageModel.value)) {
-    typeObj = {
-      pluginType: 'customer',
-      showStyle: isCustomServiceMessageInvisible(messageModel.value) ? '' : 'bubble',
     };
   }
   return typeObj;

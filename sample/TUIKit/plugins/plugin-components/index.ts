@@ -1,12 +1,11 @@
 import TUIChatEngine, { IMessageModel } from '@tencentcloud/chat-uikit-engine';
-import { isCustomerServicePluginMessage } from './message-customer/index';
 import { JSONToObject } from '../../utils/type-check';
 
 export function isCallMessage(message: IMessageModel): boolean {
   const payloadData = JSONToObject(message?.payload?.data);
   if (payloadData?.businessID === 1 && payloadData?.data) {
     const payloadDataData = JSONToObject(payloadData.data);
-    if (payloadDataData.businessID === 'av_call') {
+    if (payloadDataData.businessID === 'av_call' || payloadDataData.businessID === 'rtc_call') {
       return true;
     }
   }
@@ -30,7 +29,6 @@ export function isPluginMessage(message: IMessageModel): boolean {
   return (
     message.type === TUIChatEngine.TYPES.MSG_CUSTOM
     && (isCallMessage(message)
-    || isCustomerServicePluginMessage(message as any)
     || isRoomCardMessage(message)
     || isRoomSignalingMessage(message))
   );

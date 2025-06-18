@@ -138,6 +138,7 @@ export default class CallkitPluginServer {
           userIDList,
           callMediaType: type,
           callParams,
+          version: 'v3',
         }, (res: any) => {
           if (res.code === 0) {
             console.log('TUICallkit groupCall success');

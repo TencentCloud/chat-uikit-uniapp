@@ -228,14 +228,14 @@ const getExtensionList = () => {
   reportExtension(currentExtensionList.value);
 };
 
-function reportExtension(extensionList:ExtensionInfo[]){
-  extensionList.forEach((extension: ExtensionInfo)=>{
+function reportExtension(extensionList: ExtensionInfo[]) {
+  extensionList.forEach((extension: ExtensionInfo) => {
     const _name = extension?.data?.name;
-    if(_name === 'voiceCall'){
+    if (_name === 'voiceCall') {
       TUIReportService.reportFeature(203, 'voice-call');
     } else if (_name === 'videoCall') {
       TUIReportService.reportFeature(203, 'video-call');
-    } else if(_name === 'quickRoom'){
+    } else if (_name === 'quickRoom') {
       TUIReportService.reportFeature(204);
     }
   });
@@ -271,6 +271,7 @@ const onCallExtensionClicked = (extension: ExtensionInfo, callType: number) => {
       callParams: {
         offlinePushInfo: OfflinePushInfoManager.getOfflinePushInfo(PUSH_SCENE.CALL),
       },
+      version: 'v3',
     });
   } else if (isGroup.value) {
     currentUserSelectorExtension.value = extension;
