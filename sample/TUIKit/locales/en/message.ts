@@ -51,7 +51,7 @@ const message = {
     "已拒绝": "Declined",
     "对方已拒绝": "Call declined by user",
     "对方忙线中": "Line busy",
-    "忙线未接听": "	Line busy. Call not received.",
+    "忙线未接听": "Line busy. Call not received.",
     "对方无应答": "Call wasn't answered",
     "超时无应答": "Call not answered",
     "对本次服务评价": "Rate this service",

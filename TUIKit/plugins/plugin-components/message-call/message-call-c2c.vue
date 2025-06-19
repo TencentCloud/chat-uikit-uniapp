@@ -72,6 +72,7 @@ const callAgain = () => {
         callParams: {
           offlinePushInfo: OfflinePushInfoManager.getOfflinePushInfo(PUSH_SCENE.CALL),
         },
+        version: 'v3',
       },
     });
   }
