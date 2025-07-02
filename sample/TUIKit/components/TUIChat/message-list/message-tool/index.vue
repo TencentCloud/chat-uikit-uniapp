@@ -59,6 +59,7 @@ import TUIChatConfig from '../../config';
 // uni-app conditional compilation will not run the following code
 // #ifndef APP || APP-PLUS || MP || H5
 import CopyManager from '../../utils/copy';
+import AiRobotManager from '../../aiRobotManager';
 // #endif
 
 interface IProps {
@@ -98,7 +99,8 @@ const actionItems = ref([
     iconUrl: copyIcon,
     renderCondition() {
       if (!featureConfig.CopyMessage || !message.value) return false;
-      return message.value.type === TYPES.MSG_TEXT;
+      const isAiRobotTextMessage = AiRobotManager.isRobotMessage(message.value);
+      return message.value.type === TYPES.MSG_TEXT || isAiRobotTextMessage;
     },
     clickEvent: copyMessage,
   },
@@ -250,19 +252,36 @@ function revokeMessage() {
 
 function deleteMessage() {
   if (!message.value) return;
+  if (AiRobotManager.isStreamingMessage(message.value as IMessageModel)) {
+    const message = TUITranslateService.t('TUIChat.回答输出中，请稍后或点击停止回答');
+    return Toast({
+      message,
+      type: TOAST_TYPE.NORMAL,
+    });
+  }
   const messageModel = TUIStore.getMessageModel(message.value.ID);
   messageModel.deleteMessage();
 }
 
 async function copyMessage() {
+  if (AiRobotManager.isStreamingMessage(message.value as IMessageModel)) {
+    const message = TUITranslateService.t('TUIChat.回答输出中，请稍后或点击停止回答');
+    return Toast({
+      message,
+      type: TOAST_TYPE.NORMAL,
+    });
+  }
+  const isAiRobotText = AiRobotManager.getRobotRenderText(message.value as IMessageModel);
+  const text = isAiRobotText ? isAiRobotText : message.value?.payload.text;
+  
   if (isUniFrameWork) {
     TUIGlobal?.setClipboardData({
-      data: transformTextWithKeysToEmojiNames(message.value?.payload?.text),
+      data: transformTextWithKeysToEmojiNames(text),
     });
   } else {
     // uni-app conditional compilation will not run the following code
     // #ifndef APP || APP-PLUS || MP || H5
-    CopyManager.copySelection(message.value?.payload?.text);
+    CopyManager.copySelection(text);
     // #endif
   }
 }
@@ -282,6 +301,13 @@ function beforeCopy(key: string) {
 
 function forwardSingleMessage() {
   if (!message.value) return;
+  if (AiRobotManager.isStreamingMessage(message.value as IMessageModel)) {
+    const message = TUITranslateService.t('TUIChat.回答输出中，请稍后或点击停止回答');
+    return Toast({
+      message,
+      type: TOAST_TYPE.NORMAL,
+    });
+  }
   TUIStore.update(StoreName.CUSTOM, 'singleForwardMessageID', message.value.ID);
 }
 
@@ -314,6 +340,7 @@ function convertVoiceToText() {
   if (!enable) {
     Toast({
       message: TUITranslateService.t('TUIChat.请开通语音转文字功能'),
+      type: ''
     });
     return;
   }

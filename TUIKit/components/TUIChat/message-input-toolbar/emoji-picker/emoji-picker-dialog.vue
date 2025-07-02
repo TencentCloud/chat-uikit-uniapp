@@ -165,6 +165,7 @@ function sendMessage() {
 
 function onCurrentConversationUpdate(conversation: IConversationModel) {
   currentConversation.value = conversation;
+  list.value = initEmojiList();
 }
 
 function initEmojiList() {

@@ -1,3 +1,53 @@
+const defaultFeatures = {
+  DownloadFile: true,
+  CopyMessage: true,
+  DeleteMessage: true,
+  RevokeMessage: true,
+  QuoteMessage: true,
+  ForwardMessage: true,
+  TranslateMessage: true,
+  VoiceToText: true,
+  MultiSelection: true,
+  EmojiReaction: true,
+  InputEmoji: true,
+  InputStickers: true,
+  InputImage: true,
+  InputVoice: true,
+  InputVideo: true,
+  InputFile: true,
+  InputEvaluation: true,
+  InputQuickReplies: true,
+  InputMention: true,
+  MessageSearch: true,
+  ReadStatus: true,
+  ClearHistory: false,
+};
+
+enum FeaturesType {
+  DownloadFile = 'DownloadFile',
+  CopyMessage = 'CopyMessage',
+  DeleteMessage = 'DeleteMessage',
+  RevokeMessage = 'RevokeMessage',
+  QuoteMessage = 'QuoteMessage',
+  ForwardMessage = 'ForwardMessage',
+  TranslateMessage = 'TranslateMessage',
+  VoiceToText = 'VoiceToText',
+  MultiSelection = 'MultiSelection',
+  EmojiReaction = 'EmojiReaction',
+  InputEmoji = 'InputEmoji',
+  InputStickers = 'InputStickers',
+  InputImage = 'InputImage',
+  InputVoice = 'InputVoice',
+  InputVideo = 'InputVideo',
+  InputFile = 'InputFile',
+  InputEvaluation = 'InputEvaluation',
+  InputQuickReplies = 'InputQuickReplies',
+  InputMention = 'InputMention',
+  MessageSearch = 'MessageSearch',
+  ReadStatus = 'ReadStatus',
+  ClearHistory = 'ClearHistory',
+}
+
 class TUIChatConfig {
   static instance: TUIChatConfig;
   private chatType: string;
@@ -5,29 +55,7 @@ class TUIChatConfig {
   private theme: string;
   constructor() {
     this.chatType = '';
-    this.features = {
-      DownloadFile: true,
-      CopyMessage: true,
-      DeleteMessage: true,
-      RevokeMessage: true,
-      QuoteMessage: true,
-      ForwardMessage: true,
-      TranslateMessage: true,
-      VoiceToText: true,
-      MultiSelection: true,
-      EmojiReaction: true,
-      InputEmoji: true,
-      InputStickers: true,
-      InputImage: true,
-      InputVoice: true,
-      InputVideo: true,
-      InputFile: true,
-      InputEvaluation: true,
-      InputQuickReplies: true,
-      InputMention: true,
-      MessageSearch: true,
-      ReadStatus: true,
-    };
+    this.features = JSON.parse(JSON.stringify(defaultFeatures));
     this.theme = 'light';
   }
 
@@ -44,6 +72,16 @@ class TUIChatConfig {
 
   getChatType() {
     return this.chatType;
+  }
+
+  showTUIChatFeatures(features?: string[]) {
+    if (!features) {
+      return;
+    } else {
+      features.forEach((feature: string) => {
+        this.features[feature] = true;
+      });
+    }
   }
 
   hideTUIChatFeatures(features: string[]) {
@@ -71,6 +109,10 @@ class TUIChatConfig {
   getTheme() {
     return this.theme;
   }
+
+  resetFeatureConfig() {
+    this.features = JSON.parse(JSON.stringify(defaultFeatures));;
+  }
 }
 
 const ChatConfig = TUIChatConfig.getInstance();
@@ -78,6 +120,7 @@ const hideTUIChatFeatures = ChatConfig.hideTUIChatFeatures.bind(ChatConfig);
 
 export {
   hideTUIChatFeatures,
+  FeaturesType,
 };
 
 export default ChatConfig;

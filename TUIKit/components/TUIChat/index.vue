@@ -110,6 +110,7 @@ import MessageInputToolbar from './message-input-toolbar/index.vue';
 import { isPC, isWeChat, isUniFrameWork, isMobile, isApp } from '../../utils/env';
 import { ToolbarDisplayType } from '../../interface';
 import TUIChatConfig from './config';
+
 // @Start uniapp use Chat only
 import { onLoad, onUnload } from '@dcloudio/uni-app';
 import { initChat, logout } from './entry-chat-only.ts';

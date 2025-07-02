@@ -12,7 +12,7 @@
     >
       <header
         v-if="isHeaderShowDialog"
-        class="dialog-main-header"
+        :class="['dialog-main-header', headerClass]"
       >
         <h1 class="dialog-main-title">
           {{ showTitle }}
@@ -30,7 +30,7 @@
       </div>
       <footer
         v-if="isFooterShowDialog"
-        class="dialog-main-footer"
+        :class="['dialog-main-footer', footerClass]"
       >
         <button
           class="btn btn-cancel"
@@ -81,6 +81,14 @@ const props = defineProps({
   center: {
     type: Boolean,
     default: false,
+  },
+  headerClass: {
+    type: String,
+    default: '',
+  },
+  footerClass: {
+    type: String,
+    default: '',
   },
 });
 
