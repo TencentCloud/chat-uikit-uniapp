@@ -2,7 +2,7 @@
   <div :class="['message-input-button', !isPC && 'message-input-button-h5']">
     <button
       v-if="props.enableSend"
-      class="message-input-button-cont"
+      :class="['message-input-button-cont', props.className]"
       data-type="text"
       :disabled="false"
       @click="sendMessage"
@@ -11,9 +11,12 @@
         v-if="displayHover"
         class="message-input-button-hover"
       >
-        {{ TUITranslateService.t("TUIChat.按Enter发送，Ctrl+Enter换行") }}
+        {{ props.hoverText }}
       </p>
-      {{ TUITranslateService.t("发送") }}
+      <slot v-if="$slots.default"></slot>
+      <div v-else class="default-content">
+        {{ TUITranslateService.t("发送") }}
+      </div>
     </button>
   </div>
 </template>
@@ -28,6 +31,14 @@ const props = defineProps({
   enableSend: {
     type: Boolean,
     default: true,
+  },
+  className: {
+    type: String,
+    default: '',
+  },
+  hoverText: {
+    type: String,
+    default: TUITranslateService.t("TUIChat.按Enter发送，Ctrl+Enter换行"),
   },
 });
 

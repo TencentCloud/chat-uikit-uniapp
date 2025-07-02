@@ -34,7 +34,7 @@
           <div class="list">
             <div
               v-for="item in result.list"
-              :key="item.conversation.conversationID"
+              :key="item?.conversation?.conversationID"
               :class="[generateListItemClass(item)]"
             >
               <SearchResultItem

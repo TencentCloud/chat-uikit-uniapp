@@ -151,6 +151,11 @@ const TUIChat = {
   '您已被管理员移出群聊': 'You have been removed from the group by the admin.',
   '您已退出该群聊': 'You have left the group.',
   '您已被禁止聊天': 'you have been forbidden to speak',
+  '点击打断': 'Click to interrupt',
+  '停止回答': 'Stop answering',
+  '确认要清空当前的聊天记录吗？': 'Are you sure you want to clear the current chat history?',
+  '清空后无法恢复': 'Clearing cannot be restored',
+  '回答输出中，请稍后或点击停止回答': 'Answering, please wait or click stop answering',
 };
 
 export default TUIChat;
