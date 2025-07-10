@@ -55,11 +55,11 @@ import { transformTextWithKeysToEmojiNames } from '../../emoji-config';
 import { isH5, isPC, isUniFrameWork } from '../../../../utils/env';
 import { ITranslateInfo, IConvertInfo } from '../../../../interface';
 import TUIChatConfig from '../../config';
+import AiRobotManager from '../../aiRobotManager';
 
 // uni-app conditional compilation will not run the following code
 // #ifndef APP || APP-PLUS || MP || H5
 import CopyManager from '../../utils/copy';
-import AiRobotManager from '../../aiRobotManager';
 // #endif
 
 interface IProps {
@@ -273,7 +273,7 @@ async function copyMessage() {
   }
   const isAiRobotText = AiRobotManager.getRobotRenderText(message.value as IMessageModel);
   const text = isAiRobotText ? isAiRobotText : message.value?.payload.text;
-  
+
   if (isUniFrameWork) {
     TUIGlobal?.setClipboardData({
       data: transformTextWithKeysToEmojiNames(text),
@@ -340,7 +340,7 @@ function convertVoiceToText() {
   if (!enable) {
     Toast({
       message: TUITranslateService.t('TUIChat.请开通语音转文字功能'),
-      type: ''
+      type: '',
     });
     return;
   }

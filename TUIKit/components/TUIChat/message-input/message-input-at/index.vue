@@ -19,8 +19,13 @@
             TUITranslateService.t("TUIChat.选择提醒的人")
           }}</span>
         </header>
-        <ul class="member-list-box">
-          <li
+        <scroll-view
+          ref="memberListBox"
+          class="member-list-box"
+          scroll-y="true"
+          @scrolltolower="handleScrollToLower"
+        >
+          <div
             v-for="(item, index) in showMemberList"
             :key="index"
             ref="memberListItems"
@@ -35,8 +40,14 @@
             <span class="member-list-box-body-name">
               {{ handleMemberName(item) }}
             </span>
-          </li>
-        </ul>
+          </div>
+          <div
+            v-if="isLoading"
+            class="member-list-box-loading"
+          >
+            <span class="loading-text">{{ TUITranslateService.t("TUIChat.正在加载") }}</span>
+          </div>
+        </scroll-view>
       </div>
     </div>
   </BottomPopup>
@@ -57,11 +68,12 @@ const emits = defineEmits(['onAtListOpen', 'insertAt']);
 
 const MessageInputAt = ref();
 const memberListItems = ref();
+const memberListBox = ref();
 
 const showAtList = ref(false);
-const memberList = ref<Array<any>>();
-const allMemberList = ref<Array<any>>();
-const showMemberList = ref<Array<any>>();
+const memberList = ref<any[]>();
+const allMemberList = ref<any[]>();
+const showMemberList = ref<any[]>();
 const isGroup = ref(false);
 const position = ref({
   left: 0,
@@ -69,6 +81,8 @@ const position = ref({
 });
 const selectedIndex = ref(0);
 const currentConversationID = ref('');
+const isLoading = ref(false);
+const isCompleted = ref(false);
 
 const all = {
   userID: TUIChatEngine.TYPES.MSG_AT_ALL,
@@ -85,6 +99,7 @@ TUIStore.watch(StoreName.CONV, {
       allMemberList.value = [];
       showMemberList.value = [];
       isGroup.value = false;
+      isCompleted.value = false;
       TUIStore.update(StoreName.CUSTOM, 'memberList', memberList.value);
       if (currentConversationID?.value?.startsWith('GROUP')) {
         isGroup.value = true;
@@ -98,13 +113,64 @@ TUIStore.watch(StoreName.CONV, {
 });
 
 TUIStore.watch(StoreName.GRP, {
-  currentGroupMemberList: (list: Array<any>) => {
+  currentGroupMemberList: (list: any[]) => {
     memberList.value = list;
     allMemberList.value = [all, ...memberList.value];
     showMemberList.value = allMemberList.value;
     TUIStore.update(StoreName.CUSTOM, 'memberList', memberList.value);
   },
+  isCompleted: (completed: boolean) => {
+    isCompleted.value = completed;
+    isLoading.value = false;
+  },
 });
+
+// 获取正确的滚动容器
+const getScrollElement = () => {
+  return memberListBox.value;
+};
+
+const handleScrollToLower = async () => {
+  if (!isGroup.value || isLoading.value || isCompleted.value) {
+    return;
+  }
+  await loadMoreMembers();
+};
+
+const handleScroll = async () => {
+  if (!isGroup.value || isLoading.value || isCompleted.value) {
+    return;
+  }
+
+  const scrollElement = getScrollElement();
+  if (!scrollElement) {
+    return;
+  }
+
+  const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+  // 检查是否滑动到底部（留有10px的缓冲区）
+  if (scrollTop + clientHeight >= scrollHeight - 10) {
+    await loadMoreMembers();
+  }
+};
+
+const loadMoreMembers = async () => {
+  if (isLoading.value || isCompleted.value || !isGroup.value) {
+    return;
+  }
+
+  try {
+    isLoading.value = true;
+    const groupID = currentConversationID.value?.substring(5);
+    await TUIGroupService.getGroupMemberList({
+      groupID,
+      count: 50,
+    });
+    isLoading.value = false;
+  } catch (error) {
+    isLoading.value = false;
+  }
+};
 
 const toggleAtList = (show: boolean) => {
   if (!isGroup.value) {
@@ -188,14 +254,17 @@ const handleMemberName = (item: any) => {
 .message-input-at {
   position: fixed;
   max-width: 15rem;
-  max-height: 10rem;
-  overflow: hidden auto;
+  max-height: 200px;
+  overflow: hidden;
   background: #fff;
   box-shadow: 0 0.06rem 0.63rem 0 rgba(2,16,43,0.15);
   border-radius: 0.13rem;
 }
 
 .member-list-box {
+  max-height: 200px;
+  overflow-y: auto;
+
   &-header {
     height: 2.5rem;
     padding-top: 5px;
@@ -241,6 +310,19 @@ const handleMemberName = (item: any) => {
     }
   }
 
+  &-loading {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 12px;
+
+    .loading-text {
+      padding: 0;
+    }
+  }
+
   .selected {
     background: rgba(0,110,255,0.1);
   }
@@ -282,6 +364,7 @@ const handleMemberName = (item: any) => {
     &-box {
       flex: 1;
       overflow-y: scroll;
+      max-height: 200px;
 
       &-body {
         padding: 10px;
@@ -293,6 +376,17 @@ const handleMemberName = (item: any) => {
 
         span {
           font-size: 14px;
+        }
+      }
+
+      &-loading {
+        padding: 10px;
+        text-align: center;
+        color: #999;
+        font-size: 14px;
+
+        .loading-text {
+          padding: 0;
         }
       }
     }

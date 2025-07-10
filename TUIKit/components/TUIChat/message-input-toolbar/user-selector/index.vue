@@ -13,9 +13,11 @@
       :list="searchMemberList"
       :isH5="!isPC"
       :isRadio="false"
+      :total="searchMemberCount"
       @search="search"
       @submit="submit"
       @cancel="cancel"
+      @getMore="loadMoreMembers"
     />
   </Dialog>
 </template>
@@ -23,8 +25,11 @@
 import {
   TUIGroupService,
   TUIUserService,
+  TUIStore,
+  StoreName,
+  IGroupModel,
 } from '@tencentcloud/chat-uikit-engine';
-import { ref, computed, watch } from '../../../../adapter-vue';
+import { ref, computed } from '../../../../adapter-vue';
 import Dialog from '../../../common/Dialog/index.vue';
 import Transfer from '../../../common/Transfer/index.vue';
 import { isPC } from '../../../../utils/env';
@@ -48,7 +53,9 @@ const emits = defineEmits(['submit', 'cancel']);
 const show = ref<boolean>(false);
 const groupID = ref<string>('');
 const memberList = ref<any[]>([]);
+const memberCount = ref<number>(0);
 const searchMemberList = ref<any[]>([]);
+const searchMemberCount = ref<number>(0);
 const selfUserID = ref<string>('');
 const titleMap: any = {
   voiceCall: '发起群语音',
@@ -64,37 +71,51 @@ TUIUserService.getUserProfile().then((res: any) => {
   }
 });
 
-watch(
-  () => [props?.currentConversation?.conversationID, show.value],
-  (newVal: any, oldVal: any) => {
-    if (newVal && newVal !== oldVal) {
-      if (props.isGroup && show.value) {
-        groupID.value = props.currentConversation.groupProfile.groupID;
-        TUIGroupService.getGroupMemberList({
-          groupID: groupID.value,
-        }).then((res: any) => {
-          memberList.value = res?.data?.memberList?.filter(
-            (user: any) => user?.userID !== selfUserID.value,
-          );
-          searchMemberList.value = memberList.value;
-        });
-      } else {
-        groupID.value = '';
-        memberList.value = [];
-        searchMemberList.value = memberList.value;
-      }
-    }
+TUIStore.watch(StoreName.GRP, {
+  currentGroup: (group: IGroupModel) => {
+    memberCount.value = group?.memberCount > 0 ? group?.memberCount - 1 : 0;
+    searchMemberCount.value = memberCount.value;
+    groupID.value = group?.groupID;
   },
-  {
-    immediate: true,
+  currentGroupMemberList: (list: any[]) => {
+    memberList.value = list?.filter(
+      (user: any) => user?.userID !== selfUserID.value,
+    );
+    searchMemberList.value = memberList.value;
   },
-);
+});
 
-const search = (searchInfo: string) => {
-  const results = memberList.value?.filter(
-    (member: any) => member?.userID === searchInfo,
-  );
-  searchMemberList.value = results?.length ? results : memberList.value;
+const loadMoreMembers = async () => {
+  try {
+    await TUIGroupService.getGroupMemberList({
+      groupID: groupID.value,
+      count: 50,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const search = async (searchInfo: string) => {
+  try {
+    const res = await TUIGroupService.getGroupMemberProfile({
+      groupID: groupID.value,
+      userIDList: [searchInfo],
+    });
+    const results = res?.data?.memberList?.filter(
+      (member: any) => member?.userID !== selfUserID.value,
+    );
+    if (searchInfo.trim()) {
+      searchMemberList.value = results;
+      searchMemberCount.value = results?.length;
+    } else {
+      searchMemberList.value = memberList.value;
+      searchMemberCount.value = memberCount.value;
+    }
+  } catch {
+    searchMemberList.value = memberList.value;
+    searchMemberCount.value = memberCount.value;
+  }
 };
 
 const submit = (selectedMemberList: string[]) => {
