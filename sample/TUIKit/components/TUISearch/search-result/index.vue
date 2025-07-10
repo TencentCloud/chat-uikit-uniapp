@@ -33,8 +33,8 @@
           </div>
           <div class="list">
             <div
-              v-for="item in result.list"
-              :key="item?.conversation?.conversationID"
+              v-for="(item, index) in result.list"
+              :key="`${result.key}-${index}`"
               :class="[generateListItemClass(item)]"
             >
               <SearchResultItem
