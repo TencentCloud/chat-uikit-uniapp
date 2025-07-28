@@ -2,7 +2,7 @@ import TUIChatEngine, { TUIChatService, IMessageModel, TUIUserService } from '@t
 import { sendMessageOptions } from './info';
 import { breakAiRobotPayload, ChatbotBreakMsgType, ChatbotErrorMsgType, ChatbotPlugin } from './const';
 import TUIChatConfig, { FeaturesType } from '../config';
-import { JSONToObject } from '@/TUIKit/utils';
+import { JSONToObject } from '../../../utils';
 
 class AiRobotManager {
   private name = 'aiRobotManager';
@@ -16,7 +16,7 @@ class AiRobotManager {
     this.aiRobots = new Map();
     this.streamingMessages = new Map();
     this.streamingStatus = new Map();
-    this.streamingListener = (options: Record<string, boolean>) => {};
+    this.streamingListener = () => {};
   }
 
   private getUserID = (conversationID: string) => {
