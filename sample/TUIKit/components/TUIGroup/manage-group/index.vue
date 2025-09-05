@@ -227,6 +227,7 @@
       <Transfer
         :title="TUITranslateService.t(`TUIGroup.${transferTitle}`)"
         :list="transferList"
+        :total="!isCompleted ? transferTotal : transferList.length"
         :isSearch="isSearch"
         :isRadio="isRadio"
         :selectedList="selectedList"
@@ -234,6 +235,7 @@
         @submit="submit"
         @cancel="cancel"
         @search="handleSearchMember"
+        @getMore="getMember('more')"
       />
     </MaskLayer>
     <Dialog
@@ -278,6 +280,7 @@ import TUIChatEngine, {
   IGroupModel,
   TUIConversationService,
   IConversationModel,
+  GetMemberListParams,
 } from '@tencentcloud/chat-uikit-engine';
 import { TUIGlobal, outsideClick } from '@tencentcloud/universal-api';
 import MaskLayer from '../../common/MaskLayer/index.vue';
@@ -295,7 +298,7 @@ import { Toast, TOAST_TYPE } from '../../common/Toast/index';
 import { isPC, isUniFrameWork } from '../../../utils/env';
 import Server from '../server';
 import { enableSampleTaskStatus } from '../../../utils/enableSampleTaskStatus';
-import { IFriendProfile, IGroupMember, IUserProfile } from '../../../interface';
+import { IFriendProfile, IGroupMember } from '../../../interface';
 
 const TUIGroupServer = Server.getInstance();
 const TUIConstants = TUIGroupServer.constants;
@@ -317,10 +320,7 @@ const currentTab = ref('');
 const editLableName = ref('');
 const transferType = ref('');
 const mask = ref(false);
-const currentGroupID = ref('');
-const userInfo = ref({
-  list: [] as IGroupMember[],
-});
+const currentGroupID = ref<string>('');
 const currentMember = ref<IGroupMember>({});
 const typeName = ref({
   [TUIChatEngine.TYPES.GRP_WORK]: '好友工作群',
@@ -337,7 +337,9 @@ const member = ref({
   member: [] as IGroupMember[],
   muteMember: [] as IGroupMember[],
 });
+const friendList = ref<IFriendProfile[]>([]);
 const transferList = ref<IGroupMember[]>([]);
+const transferTotal = ref<number>(0);
 const transferTitle = ref('');
 const isSearch = ref(false);
 const isRadio = ref(false);
@@ -348,6 +350,8 @@ const deletedUserList = ref([]);
 const currentGroup = ref<IGroupModel>();
 const currentSelfRole = ref('');
 const groupIDValue = ref<string>('');
+const groupMemberOffset = ref<number | string>(0);
+const isCompleted = ref(false);
 
 onMounted(() => {
   nextTick(() => {
@@ -391,6 +395,15 @@ TUIStore.watch(StoreName.GRP, {
     member.value.muteMember = Array.from(memberList).filter(
       (item: any) => item?.muteUntil * 1000 - time > 0,
     );
+    if (mask.value) {
+      updateTransferList(transferType.value);
+    }
+  },
+  offset: (offset: number | string) => {
+    groupMemberOffset.value = offset;
+  },
+  isCompleted: (data: boolean) => {
+    isCompleted.value = data;
   },
 });
 
@@ -484,6 +497,13 @@ const setCurrentTab = (tabName: string) => {
   if (!currentTab.value) {
     transferType.value = '';
   }
+  if (tabName === 'admin') {
+    getAllGroupMember({
+      groupID: currentGroupID.value,
+      count: 100,
+      offset: groupMemberOffset.value,
+    });
+  }
 };
 
 const cancel = () => {
@@ -491,68 +511,98 @@ const cancel = () => {
 };
 
 const toggleMask = async (type?: string) => {
-  selectedList.value = [];
-  let memberUserIDList: string[] = [];
   switch (type) {
     case 'add':
       isRadio.value = false;
-      memberUserIDList = [...member.value.admin, ...member.value.member].map((item: IUserProfile) => item.userID);
-      transferList.value = (await friendList()).filter((item: IFriendProfile) => {
-        return item.userID && memberUserIDList.indexOf(item.userID) < 0;
-      });
       transferTitle.value = '添加成员';
       break;
     case 'remove':
       isRadio.value = false;
-      transferList.value = groupMemberList.value.filter(
-        (item: any) => item.userID !== currentGroup?.value?.selfInfo?.userID,
-      );
       transferTitle.value = '删除成员';
       break;
     case 'addAdmin':
       isRadio.value = true;
-      transferList.value = member.value.member;
       transferTitle.value = '新增管理员';
       break;
     case 'removeAdmin':
       isRadio.value = true;
-      transferList.value = member.value.admin;
       transferTitle.value = '移除管理员';
       break;
     case 'changeOwner':
       isRadio.value = true;
-      transferList.value = [...member.value.admin, ...member.value.member];
       transferTitle.value = '转让群组';
       break;
     case 'addMute':
       isRadio.value = true;
-      transferList.value = member.value.member;
-      if (currentGroup.value.selfInfo.role === 'Owner') {
-        transferList.value = [...member.value.admin, ...member.value.member];
-      }
-      transferList.value = transferList?.value?.filter((item: any) => {
-        return member?.value?.muteMember?.indexOf(item) < 0;
-      });
       transferTitle.value = '新增禁言用户';
       break;
     case 'removeMute':
       isRadio.value = true;
-      transferList.value = member.value.muteMember;
       transferTitle.value = '移除禁言用户';
       break;
     default:
       break;
   }
+  selectedList.value = [];
   type && (transferType.value = type);
+  await updateTransferList(type);
   mask.value = !mask.value;
 };
 
-const friendList = async () => {
-  const imResponse = await TUIFriendService.getFriendList();
-  const friendList = imResponse.data.map((item: any) => item?.profile);
-  return friendList.filter(
+const updateTransferList = async (type?: string) => {
+  switch (type) {
+    case 'add':
+      transferList.value = await getFriendsNotInGroup();
+      transferTotal.value = transferList.value.length;
+      break;
+    case 'remove':
+      transferList.value = groupMemberList.value.filter(
+        (item: IGroupMember) => item.userID !== currentGroup?.value?.selfInfo?.userID,
+      );
+      transferTotal.value = currentGroup.value.memberCount - 1;
+      break;
+    case 'addAdmin':
+      transferList.value = member.value.member;
+      transferTotal.value = currentGroup.value.memberCount - member.value.admin.length - 1;
+      break;
+    case 'removeAdmin':
+      transferList.value = member.value.admin;
+      transferTotal.value = currentGroup.value.memberCount - member.value.admin.length - 1;
+      break;
+    case 'changeOwner':
+      transferList.value = groupMemberList.value.filter(
+        (item: IGroupMember) => item.userID !== currentGroup?.value?.selfInfo?.userID,
+      );
+      transferTotal.value = currentGroup.value.memberCount - 1;
+      break;
+    case 'addMute':
+      transferList.value = member.value.member;
+      if (currentGroup.value.selfInfo.role === 'Owner') {
+        transferList.value = groupMemberList.value.filter(
+          (item: IGroupMember) => item.userID !== currentGroup?.value?.selfInfo?.userID,
+        );
+      }
+      transferList.value = transferList?.value?.filter((item: IGroupMember) => {
+        return member?.value?.muteMember?.indexOf(item) < 0;
+      });
+      break;
+    case 'removeMute':
+      transferList.value = member.value.muteMember;
+      break;
+    default:
+      break;
+  }
+};
+
+const getFriendsNotInGroup = async () => {
+  if (friendList.value.length === 0) {
+    const imResponse = await TUIFriendService.getFriendList();
+    const friendList = imResponse.data.map((item: any) => item?.profile);
+    friendList.value = friendList;
+  }
+  return friendList.value.filter(
     (item: any) =>
-      !userInfo.value.list.some(
+      !groupMemberList.value.some(
         (infoItem: any) => infoItem.userID === item.userID,
       ),
   );
@@ -584,20 +634,35 @@ const showUserNum = computed(() => {
   return num;
 });
 
+const getAllGroupMember = async (options: GetMemberListParams) => {
+  const isNotCurrentGroup = options.groupID !== currentGroupID.value;
+  const isNotAdminTab = currentTab.value !== 'admin';
+  const isMoreThanThousand = groupMemberList.value.length >= 1000;
+  if (isNotCurrentGroup || isCompleted.value || isNotAdminTab || isMoreThanThousand) {
+    return;
+  }
+  await TUIGroupService.getGroupMemberList(options).then(async (imResponse: any) => {
+    const { offset = 0 } = imResponse.data;
+    if (offset) {
+      await getAllGroupMember({
+        groupID: currentGroupID.value,
+        count: 100,
+        offset: offset,
+      });
+    }
+  }).catch((error: any) => {
+    console.error('getGroupMemberList error:', error);
+  });
+};
+
 const getMember = async (type?: string) => {
   const groupID = currentGroupID.value;
   const options = {
     groupID,
     count: 100,
-    offset: type && type === 'more' ? userInfo.value.list.length : 0,
+    offset: type && type === 'more' ? groupMemberOffset.value : 0,
   };
-  await TUIGroupService.getGroupMemberList(options).then((res: any) => {
-    if (type && type === 'more') {
-      userInfo.value.list = [...userInfo.value.list, ...res.data.memberList];
-    } else {
-      userInfo.value.list = res.data.memberList;
-    }
-  });
+  await TUIGroupService.getGroupMemberList(options);
 };
 
 const handleMemberProfileShow = (user: any) => {
@@ -773,7 +838,18 @@ const setMemberMuteTime = async (userID: string, type?: string) => {
     userID,
     muteTime: type === 'add' ? 60 * 60 * 24 * 30 : 0,
   };
-  await TUIGroupService.setGroupMemberMuteTime(options);
+  await TUIGroupService.setGroupMemberMuteTime(options).then((res: any) => {
+    const { group, member: mutedMember } = res.data;
+    if (group.groupID === currentGroupID.value) {
+      if (type === 'add') {
+        member.value.muteMember.push(mutedMember);
+      } else {
+        member.value.muteMember = member.value.muteMember.filter(
+          (item: any) => item.userID !== mutedMember.userID,
+        );
+      }
+    }
+  });
 };
 
 const handleAdmin = async (user: any) => {
@@ -781,8 +857,12 @@ const handleAdmin = async (user: any) => {
   switch (user.role) {
     case TUIChatEngine.TYPES.GRP_MBR_ROLE_ADMIN:
       role = TUIChatEngine.TYPES.GRP_MBR_ROLE_MEMBER;
+      member.value.admin = member.value.admin.filter(
+        (item: any) => item.userID !== user.userID,
+      );
       break;
     case TUIChatEngine.TYPES.GRP_MBR_ROLE_MEMBER:
+      member.value.admin.push(user);
       role = TUIChatEngine.TYPES.GRP_MBR_ROLE_ADMIN;
       break;
   }
