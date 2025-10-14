@@ -26,7 +26,7 @@
 
 <script lang="ts" setup>
 import { onUnmounted, ref, watch } from '../../../../adapter-vue';
-import { IMessageModel } from '@tencentcloud/chat-uikit-engine';
+import { IMessageModel } from '@tencentcloud/chat-uikit-engine-lite';
 import Icon from '../../../common/Icon.vue';
 import { Toast } from '../../../common/Toast/index';
 import audioIcon from '../../../../assets/icon/msg-audio.svg';

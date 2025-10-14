@@ -4,7 +4,7 @@
     :class="['tui-contact-list', !isPC && 'tui-contact-list-h5']"
   >
     <li
-      v-for="(contactListObj, key) in contactListMap"
+      v-for="(contactListObj, key) in sortContactListMap"
       :key="key"
       class="tui-contact-list-item"
     >
@@ -30,19 +30,43 @@
         </div>
       </header>
       <ul :class="['tui-contact-list-item-main', currentContactListKey === key ? '' : 'hidden']">
-        <li
-          v-for="contactListItem in contactListObj.list"
-          :key="contactListItem.renderKey"
-          class="tui-contact-list-item-main-item"
-          :class="['selected']"
-          @click="selectItem(contactListItem)"
-        >
-          <ContactListItem
+        <template v-if="key === 'friendList'">
+          <div
+            v-for="(groupData, groupKey) in contactListObj.list"
+            :key="groupKey"
+          >
+            <div class="tui-contact-list-group-title">
+              {{ groupKey }} ({{ groupData.length }})
+            </div>
+            <li
+              v-for="contactListItem in groupData"
+              :key="contactListItem.renderKey"
+              class="tui-contact-list-item-main-item"
+              :class="['selected']"
+              @click="selectItem(contactListItem)"
+            >
+              <ContactListItem
+                :key="contactListItem.renderKey"
+                :item="deepCopy(contactListItem)"
+                :display-online-status="displayOnlineStatus"
+              />
+            </li>
+          </div>
+        </template>
+        <template v-else>
+          <li
+            v-for="contactListItem in contactListObj.list"
             :key="contactListItem.renderKey"
-            :item="deepCopy(contactListItem)"
-            :displayOnlineStatus="displayOnlineStatus && key === 'friendList'"
-          />
-        </li>
+            class="tui-contact-list-item-main-item"
+            :class="['selected']"
+            @click="selectItem(contactListItem)"
+          >
+            <ContactListItem
+              :key="contactListItem.renderKey"
+              :item="deepCopy(contactListItem)"
+            />
+          </li>
+        </template>
       </ul>
     </li>
   </ul>
@@ -71,7 +95,7 @@
         >
           <ContactListItem
             :item="listItem"
-            :displayOnlineStatus="false"
+            :display-online-status="false"
           />
         </div>
       </div>
@@ -89,18 +113,19 @@ import {
   TUITranslateService,
   TUIStore,
   StoreName,
-  IGroupModel,
   TUIFriendService,
-  Friend,
-  FriendApplication,
   TUIUserService,
-} from '@tencentcloud/chat-uikit-engine';
-import TUICore, { TUIConstants } from '@tencentcloud/tui-core';
+} from '@tencentcloud/chat-uikit-engine-lite';
+import TUICore, { TUIConstants } from '@tencentcloud/tui-core-lite';
 import { ref, computed, onMounted, onUnmounted, provide } from '../../../adapter-vue';
-import Icon from '../../common/Icon.vue';
 import downSVG from '../../../assets/icon/down-icon.svg';
 import rightSVG from '../../../assets/icon/right-icon.svg';
-import {
+import { isPC } from '../../../utils/env';
+import Icon from '../../common/Icon.vue';
+import { deepCopy } from '../../TUIChat/utils/utils';
+import { sortByFirstChar } from '../utils/sortByFirstChar';
+import ContactListItem from './contact-list-item/index.vue';
+import type {
   IContactList,
   IContactSearchResult,
   IBlackListUserItem,
@@ -108,9 +133,10 @@ import {
   IUserStatusMap,
   IContactInfoType,
 } from '../../../interface';
-import ContactListItem from './contact-list-item/index.vue';
-import { deepCopy } from '../../TUIChat/utils/utils';
-import { isPC } from '../../../utils/env';
+import type {
+  IGroupModel,
+  Friend,
+  FriendApplication } from '@tencentcloud/chat-uikit-engine-lite';
 
 const currentContactListKey = ref<keyof IContactList>('');
 const currentContactInfo = ref<IContactInfoType>({} as IContactInfoType);
@@ -137,17 +163,27 @@ const contactListMap = ref<IContactList>({
     list: [] as Friend[],
   },
 });
+const sortContactListMap = computed(() => {
+  const { groupedList } = sortByFirstChar(
+    contactListMap.value?.friendList?.list,
+    (friend: Friend) => friend.remark || friend.profile?.nick || friend.userID || '');
+  return {
+    ...contactListMap.value,
+    friendList: {
+      ...contactListMap.value?.friendList,
+      list: groupedList,
+    },
+  };
+});
 const contactSearchingStatus = ref<boolean>(false);
 const contactSearchResult = ref<IContactSearchResult>();
 const displayOnlineStatus = ref<boolean>(false);
 const userOnlineStatusMap = ref<IUserStatusMap>();
 
-const isContactSearchNoResult = computed((): boolean => {
-  return (
-    !contactSearchResult?.value?.user?.list[0]
-    && !contactSearchResult?.value?.group?.list[0]
-  );
-});
+const isContactSearchNoResult = computed((): boolean => (
+  !contactSearchResult?.value?.user?.list[0]
+  && !contactSearchResult?.value?.group?.list[0]
+));
 
 onMounted(() => {
   TUIStore.watch(StoreName.APP, {
@@ -278,14 +314,12 @@ function onCustomerServiceCommercialPluginUpdated(isEnabled: boolean) {
         if (res.data.length > 0) {
           const customerList = {
             title: text,
-            list: res.data.map((item: any, index: number) => {
-              return {
-                ...item,
-                renderKey: generateRenderKey('customerList', item, index),
-                infoKeyList: [],
-                btnKeyList: ['enterC2CConversation'],
-              };
-            }),
+            list: res.data.map((item: any, index: number) => ({
+              ...item,
+              renderKey: generateRenderKey('customerList', item, index),
+              infoKeyList: [],
+              btnKeyList: ['enterC2CConversation'],
+            })),
             key: 'customerList',
           };
           contactListMap.value = { ...contactListMap.value, customerList };
@@ -338,7 +372,7 @@ function updateCurrentContactInfoFromList(list: IContactInfoType[], type: keyof 
 }
 
 function generateRenderKey(contactListMapKey: keyof IContactList, contactInfo: IContactInfoType, index: number) {
-  return `${contactListMapKey}-${(contactInfo as Friend).userID || (contactInfo as IGroupModel).groupID || ('index' + index)}`;
+  return `${contactListMapKey}-${(contactInfo as Friend).userID || (contactInfo as IGroupModel).groupID || (`index${index}`)}`;
 }
 
 function onCurrentContactSearchResultUpdated(searchResult: IContactSearchResult) {

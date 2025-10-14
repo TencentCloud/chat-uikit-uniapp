@@ -61,7 +61,7 @@ import TUIChatEngine, {
   StoreName,
   IMessageModel,
   IConversationModel,
-} from '@tencentcloud/chat-uikit-engine';
+} from '@tencentcloud/chat-uikit-engine-lite';
 import { ref, watch, onMounted, onUnmounted } from '../../../adapter-vue';
 import MessageInputEditor from './message-input-editor.vue';
 import MessageInputAt from './message-input-at/index.vue';

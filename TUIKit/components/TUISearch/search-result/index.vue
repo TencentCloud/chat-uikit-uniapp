@@ -207,7 +207,7 @@ import {
   StoreName,
   IMessageModel,
   SearchCloudMessagesParams,
-} from '@tencentcloud/chat-uikit-engine';
+} from '@tencentcloud/chat-uikit-engine-lite';
 import { TUIGlobal } from '@tencentcloud/universal-api';
 import SearchResultItem from './search-result-item/index.vue';
 import SearchResultDefault from './search-result-default/index.vue';
@@ -560,7 +560,7 @@ const navigateToChatPosition = (message: IMessageModel) => {
 };
 
 const generateVueRenderKey = (value: string): string => {
-  return `${currentSearchTabKey}-${value}`;
+  return `${currentSearchTabKey.value}-${value}`;
 };
 </script>
 <style lang="scss" scoped src="./style/index.scss"></style>

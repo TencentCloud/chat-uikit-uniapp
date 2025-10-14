@@ -1,6 +1,6 @@
 {
   "name": "sample-uniapp",
-  "version": "2.5.4",
+  "version": "2.5.5",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,20 +10,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tencentcloud/call-uikit-vue": "latest",
-    "@tencentcloud/call-uikit-vue2.6": "latest",
-    "@tencentcloud/call-uikit-wx-uniapp": "latest",
-    "@tencentcloud/chat": "latest",
-    "@tencentcloud/chat-uikit-engine": "latest",
-    "@tencentcloud/tui-core": "latest",
-    "@tencentcloud/tui-customer-service-plugin": "^2.2.3",
-    "@tencentcloud/universal-api": "latest",
+    "@tencentcloud/chat-uikit-engine-lite": "1.0.1",
+    "@tencentcloud/chat-uikit-uniapp": "3.0.1",
+    "@tencentcloud/tui-core-lite": "1.0.0",
+    "@tencentcloud/universal-api": "^2.4.0",
     "@vue/composition-api": "^1.7.1",
+    "@trtc/calls-uikit-vue": "4.2.2",
+    "@trtc/calls-uikit-vue2.6": "4.2.2",
+    "@trtc/calls-uikit-wx": "4.2.2",
     "dayjs": "^1.11.10",
+    "i18next": "^22.4.10",
     "lodash": "^4.17.21",
     "tim-profanity-filter-plugin": "latest",
-    "tim-upload-plugin": "latest",
-    "unplugin-vue2-script-setup": "^0.11.3"
+    "tim-upload-plugin": "latest"
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.17.0",

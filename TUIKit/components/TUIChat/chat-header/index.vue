@@ -9,7 +9,7 @@ import {
   StoreName,
   IConversationModel,
   TUITranslateService,
-} from '@tencentcloud/chat-uikit-engine';
+} from '@tencentcloud/chat-uikit-engine-lite';
 import { TUIGlobal } from '@tencentcloud/universal-api';
 import { onLoad, onNavigationBarButtonTap } from '@dcloudio/uni-app';
 

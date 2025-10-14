@@ -50,16 +50,24 @@
     }
 
     &-main {
-      padding: 0 15px !important;
-
       &.hidden{
         display: none;
       }
 
       &-item {
+        margin: 0 15px;
         padding: 5px 0;
       }
     }
+  }
+
+  &-group-title {
+    padding: 8px 16px;
+    background-color: #f8f9fa;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    line-height: 20px;
   }
 }
 

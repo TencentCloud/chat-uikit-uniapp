@@ -1,5 +1,9 @@
-import { TUILogin } from '@tencentcloud/tui-core';
-import { TUIUserService, TUIConversationService, TUIStore, StoreName } from '@tencentcloud/chat-uikit-engine';
+import { TUILogin } from '@tencentcloud/tui-core-lite';
+import { TUIUserService, TUIConversationService, TUIStore, StoreName } from '@tencentcloud/chat-uikit-engine-lite';
+// #ifdef APP-PLUS
+import { setRegistrationID, registerPush, getRegistrationID } from '@/uni_modules/TencentCloud-Push';
+import { getNotificationAuth } from './utils/getNotificationAuth';
+// #endif
 
 export const loginChat = (loginInfo) => {
   return TUILogin.login(loginInfo)
@@ -11,6 +15,7 @@ export const loginChat = (loginInfo) => {
         },
       });
       TUIUserService.switchUserStatus({ displayOnlineStatus: true });
+      PushInit(loginInfo.userID);
       uni?.setStorage({
         key: 'userInfo',
         data: JSON.stringify({
@@ -20,7 +25,7 @@ export const loginChat = (loginInfo) => {
         }),
       });
       return res;
-    })
+    });
 };
 
 export const loginFromStorage = () => {
@@ -29,22 +34,13 @@ export const loginFromStorage = () => {
     success: function (res) {
       if (res.data) {
         const loginInfo = {
-          ...JSON.parse(res.data)
-        }
-        if (uni?.$TIMPush) {
-          loginInfo.TIMPush = uni?.$TIMPush;
-          loginInfo.pushConfig = {
-            androidConfig: uni?.$TIMPushConfigs, // Android 推送配置，如不需要可传空。
-            iOSConfig: {
-              iOSBusinessID: '29064', // iOS 推送配置，如不需要可传空。
-            },
-          }
-        }
+          ...JSON.parse(res.data),
+        };
         loginChat(loginInfo).catch(() => {
           uni?.removeStorage({
             key: 'userInfo',
           });
-        })
+        });
       }
     },
   });
@@ -54,6 +50,24 @@ export declare interface IEnterChatConfig {
   isLoginChat: boolean;
   conversationID: string;
 }
+
+export const PushInit = (userID: string) => {
+  // #ifdef APP-PLUS
+  getNotificationAuth();
+  setRegistrationID(userID, () => {
+  	console.log('PushInit | setRegistrationID ok');
+  });
+  registerPush(uni.$chat_SDKAppID, uni.$push_appKey, (data: any) => {
+    console.log('PushInit | registerPush ok', data);
+    getRegistrationID((registrationID: string) => {
+      console.log('PushInit | getRegistrationID ok', registrationID);
+    });
+  }, (errCode: any, errMsg: any) => {
+    console.error('PushInit | registerPush failed', errCode, errMsg);
+  },
+  );
+  // #endif
+};
 
 export const openChat = (enterChatConfig: IEnterChatConfig) => {
   const { isLoginChat = false, conversationID = '' } = enterChatConfig || {};

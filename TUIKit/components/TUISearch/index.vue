@@ -1,19 +1,15 @@
 <template>
   <div
-    v-if="
-      searchType === 'global' ||
-        ((searchType === 'conversation' || (!searchType && isUniFrameWork)) &&
-          isShowInConversationSearch)
-    "
+    v-if="isShowSearch"
     :class="[
       'tui-search',
       !isPC && 'tui-search-h5',
-      `tui-search-main-${searchType ? searchType : 'conversation'}`,
+      `tui-search-main-${currentSearchType}`,
       isFullScreen && 'tui-search-h5-full-screen',
     ]"
   >
     <div
-      v-if="searchType === 'global'"
+      v-if="currentSearchType === 'global'"
       ref="globalSearchRef"
       :class="['tui-search-global', !isPC && 'tui-search-h5-global']"
     >
@@ -25,31 +21,31 @@
       >
         <SearchInput
           class="search-input"
-          :searchType="searchType"
+          :searchType="currentSearchType"
         />
         <SearchMore
           v-if="isPC || !searchingStatus"
           class="search-more"
-          :searchType="searchType"
+          :searchType="currentSearchType"
         />
       </div>
       <SearchContainer
         v-if="searchingStatus"
         class="search-container"
         popupPosition="bottom"
-        :searchType="searchType"
+        :searchType="currentSearchType"
       >
         <template #result>
           <SearchResult
             class="search-result"
-            :searchType="searchType"
+            :searchType="currentSearchType"
           />
         </template>
       </SearchContainer>
     </div>
     <div
       v-else-if="
-        (searchType === 'conversation' && isShowInConversationSearch) ||
+        (currentSearchType === 'conversation' && isShowInConversationSearch) ||
           isUniFrameWork
       "
       :class="[
@@ -60,18 +56,18 @@
       <SearchContainer
         class="search-container"
         popupPosition="aside"
-        :searchType="searchType ? searchType : 'conversation'"
+        :searchType="currentSearchType"
         @closeInConversationSearch="closeInConversationSearch"
       >
         <template #input>
           <SearchInput
-            :searchType="searchType ? searchType : 'conversation'"
+            :searchType="currentSearchType"
           />
         </template>
         <template #result>
           <SearchResult
             class="search-result"
-            :searchType="searchType ? searchType : 'conversation'"
+            :searchType="currentSearchType"
           />
         </template>
       </SearchContainer>
@@ -86,7 +82,7 @@ import {
   withDefaults,
   onUnmounted,
 } from '../../adapter-vue';
-import { TUIStore, StoreName } from '@tencentcloud/chat-uikit-engine';
+import { TUIStore, StoreName } from '@tencentcloud/chat-uikit-engine-lite';
 import { TUIGlobal, outsideClick } from '@tencentcloud/universal-api';
 import SearchInput from './search-input/index.vue';
 import SearchContainer from './search-container/index.vue';
@@ -103,10 +99,11 @@ const props = withDefaults(
   }>(),
   {
     searchType: () => {
-      return isUniFrameWork ? 'conversation' : 'global';
+      return 'global';
     },
   },
 );
+
 const globalSearchRef = ref<HTMLElement | null>();
 const currentConversationID = ref<string>('');
 const searchingStatus = ref<boolean>(false);
@@ -116,9 +113,22 @@ const isShowInConversationSearch = ref<boolean>(isUniFrameWork);
 const isFullScreen = computed(
   () =>
     !isPC
-    && ((props.searchType === 'global' && searchingStatus.value)
-    || (props.searchType === 'conversation' && isShowInConversationSearch.value)),
+    && ((currentSearchType.value === 'global' && searchingStatus.value)
+    || (currentSearchType.value === 'conversation' && isShowInConversationSearch.value)),
 );
+
+const isShowSearch = computed(() => {
+  return currentSearchType.value === 'global'
+    || ((currentSearchType.value === 'conversation' || (!currentSearchType.value && isUniFrameWork))
+    && isShowInConversationSearch.value);
+});
+
+const currentSearchType = computed(() => {
+  if (isUniFrameWork && currentConversationID.value) {
+    return 'conversation';
+  }
+  return props.searchType;
+});
 
 const initSearchValue = (searchType: SEARCH_TYPE) => {
   TUIStore.update(StoreName.SEARCH, 'currentSearchInputValue', {
@@ -133,6 +143,10 @@ const initSearchValue = (searchType: SEARCH_TYPE) => {
     value: searchMessageTimeDefault,
     searchType: searchType,
   });
+  TUIStore.update(StoreName.SEARCH, 'currentSearchingStatus', {
+    isSearching: false,
+    searchType: currentSearchType.value,
+  });
 };
 
 function onCurrentConversationIDUpdate(conversationID: string) {
@@ -144,7 +158,7 @@ function onCurrentConversationIDUpdate(conversationID: string) {
 }
 
 function onCurrentSearchingStatusChange(value: ISearchingStatus) {
-  if (value?.searchType === props.searchType) {
+  if (value?.searchType === currentSearchType.value) {
     searchingStatus.value = value?.isSearching;
     // global search ui bind on click outside close
     if (value?.searchType === 'global' && globalSearchRef.value) {
@@ -164,7 +178,7 @@ function onCurrentSearchingStatusChange(value: ISearchingStatus) {
 
 function onIsShowInConversationSearchChange(value: boolean) {
   isShowInConversationSearch.value = value ? true : false;
-  isShowInConversationSearch.value && initSearchValue(props.searchType);
+  isShowInConversationSearch.value && initSearchValue(currentSearchType.value);
 }
 
 onMounted(() => {
@@ -196,7 +210,7 @@ onUnmounted(() => {
 function closeGlobalSearch() {
   TUIStore.update(StoreName.SEARCH, 'currentSearchingStatus', {
     isSearching: false,
-    searchType: props.searchType,
+    searchType: currentSearchType.value,
   });
 }
 

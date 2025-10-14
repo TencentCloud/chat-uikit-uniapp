@@ -138,8 +138,8 @@ import TUIChatEngine, {
   TUIStore,
   StoreName,
   TUIChatService,
-} from '@tencentcloud/chat-uikit-engine';
-import { TUILogin } from '@tencentcloud/tui-core';
+} from '@tencentcloud/chat-uikit-engine-lite';
+import { TUILogin } from '@tencentcloud/tui-core-lite';
 import { TUIGlobal } from '@tencentcloud/universal-api';
 import { ref, defineProps, onMounted } from '../../TUIKit/adapter-vue';
 import { isPC } from '../../TUIKit/utils/env';

@@ -15,7 +15,7 @@
 
 <script lang="ts" setup>
 import { watchEffect, ref } from '../../../../adapter-vue';
-import type { IMessageModel } from '@tencentcloud/chat-uikit-engine';
+import type { IMessageModel } from '@tencentcloud/chat-uikit-engine-lite';
 import type { IImageMessageContent } from '../../../../interface';
 
 interface IProps {

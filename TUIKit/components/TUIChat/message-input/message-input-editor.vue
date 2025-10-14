@@ -34,7 +34,7 @@
 </template>
 <script lang="ts" setup>
 import { ref, watch, onMounted, onUnmounted } from '../../../adapter-vue';
-import { TUIStore, StoreName, IConversationModel, IMessageModel } from '@tencentcloud/chat-uikit-engine';
+import { TUIStore, StoreName, IConversationModel, IMessageModel } from '@tencentcloud/chat-uikit-engine-lite';
 import { TUIGlobal } from '@tencentcloud/universal-api';
 import DraftManager from '../utils/conversationDraft';
 import { transformTextWithEmojiNamesToKeys } from '../emoji-config';
