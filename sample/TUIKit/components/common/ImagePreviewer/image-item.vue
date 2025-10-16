@@ -31,7 +31,7 @@
 </template>
 <script setup lang="ts">
 import { computed } from '../../../adapter-vue';
-import { IMessageModel } from '@tencentcloud/chat-uikit-engine';
+import { IMessageModel } from '@tencentcloud/chat-uikit-engine-lite';
 const props = defineProps({
   zoom: {
     type: Number,

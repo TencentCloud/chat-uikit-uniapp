@@ -123,7 +123,7 @@
 
 <script lang="ts" setup>
 import { computed, toRefs } from '../../../../adapter-vue';
-import TUIChatEngine, { TUITranslateService, IMessageModel } from '@tencentcloud/chat-uikit-engine';
+import TUIChatEngine, { TUITranslateService, IMessageModel } from '@tencentcloud/chat-uikit-engine-lite';
 import Icon from '../../../common/Icon.vue';
 import ReadStatus from './read-status/index.vue';
 import MessageQuote from './message-quote/index.vue';

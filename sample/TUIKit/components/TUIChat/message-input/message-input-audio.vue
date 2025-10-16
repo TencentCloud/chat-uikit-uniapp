@@ -44,7 +44,7 @@ import {
   SendMessageParams,
   IConversationModel,
   TUITranslateService,
-} from '@tencentcloud/chat-uikit-engine';
+} from '@tencentcloud/chat-uikit-engine-lite';
 import { TUIGlobal } from '@tencentcloud/universal-api';
 import Icon from '../../common/Icon.vue';
 import audioIcon from '../../../assets/icon/audio.svg';

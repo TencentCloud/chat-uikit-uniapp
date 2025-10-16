@@ -48,7 +48,7 @@ import { ref, watch } from '../../../../../adapter-vue';
 import {
   IMessageModel,
   TUITranslateService,
-} from '@tencentcloud/chat-uikit-engine';
+} from '@tencentcloud/chat-uikit-engine-lite';
 import { TranslationTextType, translator } from '../../../utils/translation';
 
 interface IProps {

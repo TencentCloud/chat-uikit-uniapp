@@ -1,5 +1,5 @@
-import { TUILogin } from '@tencentcloud/tui-core';
-import { TUIConversationService } from '@tencentcloud/chat-uikit-engine';
+import { TUILogin } from '@tencentcloud/tui-core-lite';
+import { TUIConversationService } from '@tencentcloud/chat-uikit-engine-lite';
 // #ifdef MP-WEIXIN
 import { TUIChatKit } from '../../index.ts';
 // #endif

@@ -1,4 +1,4 @@
-import TUICore, { TUIConstants, TUILogin } from '@tencentcloud/tui-core';
+import TUICore, { TUIConstants, TUILogin } from '@tencentcloud/tui-core-lite';
 import { TUIGlobal } from '@tencentcloud/universal-api';
 
 export default class CallkitPluginServer {
@@ -97,72 +97,40 @@ export default class CallkitPluginServer {
     }
     if (method === TUIConstants.TUICalling.SERVICE.METHOD.START_CALL) {
       const { groupID = undefined, userIDList = [], type, callParams } = params;
-      if (groupID) {
-        TUIGlobal.$TUICallKit.groupCall({
-          groupID,
-          userIDList,
-          callMediaType: type,
-          callParams,
-        }, (res: any) => {
-          if (res.code === 0) {
-            console.log('TUICallkit groupCall success');
-          } else {
-            console.error(`TUICallkit groupCall failed,${res.msg}`);
-          }
-        });
-      } else if (userIDList.length === 1) {
-        TUIGlobal.$TUICallKit.call(
-          {
-            userID: userIDList[0],
-            callMediaType: type,
-            callParams,
-          },
-          (res: any) => {
-            if (res.code === 0) {
-              console.log('TUICallkit call success');
-            } else {
-              console.log(`TUICallkit call failed,${res.msg}`);
-            }
-          });
-      }
+      TUIGlobal.$TUICallKit.calls({
+        userIDList,
+        callMediaType: type,
+        callParams: {
+          ...callParams,
+          chatGroupId: groupID,
+        },
+      }, (res: any) => {
+        if (res.code === 0) {
+          console.log('TUICallkit calls success');
+        } else {
+          console.error(`TUICallkit calls failed,${res.msg}`);
+        }
+      });
     }
   }
 
   public setCallExtension(options: any) {
     const { groupID = undefined, userIDList = [], type, callParams } = options;
     try {
-      if (groupID) {
-        // group call
-        TUIGlobal.$TUICallKit.groupCall({
-          groupID,
-          userIDList,
-          callMediaType: type,
-          callParams,
-          version: 'v3',
-        }, (res: any) => {
-          if (res.code === 0) {
-            console.log('TUICallkit groupCall success');
-          } else {
-            console.log(`TUICallkit groupCall failed,${res.msg}`);
-          }
-        });
-      } else if (userIDList.length === 1) {
-        // 1v1 call
-        TUIGlobal.$TUICallKit.call(
-          {
-            userID: userIDList[0],
-            callMediaType: type,
-            callParams,
-          },
-          (res: any) => {
-            if (res.code === 0) {
-              console.log('TUICallkit call success');
-            } else {
-              console.log(`TUICallkit call failed,${res.msg}`);
-            }
-          },
-        );
-      }
+      TUIGlobal.$TUICallKit.calls({
+        userIDList,
+        callMediaType: type,
+        callParams: {
+          ...callParams,
+          chatGroupId: groupID,
+        },
+      }, (res: any) => {
+        if (res.code === 0) {
+          console.log('TUICallkit calls success');
+        } else {
+          console.log(`TUICallkit calls failed,${res.msg}`);
+        }
+      });
     } catch (error: any) {
       TUIGlobal.showToast({
         title: '拨打失败！',

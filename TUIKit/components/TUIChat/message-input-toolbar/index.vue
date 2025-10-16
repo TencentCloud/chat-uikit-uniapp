@@ -23,21 +23,11 @@
             'message-input-toolbar-uni-list',
           ]"
         >
-          <ImageUpload
-            v-if="featureConfig.InputImage"
-            imageSourceType="camera"
+          <AlbumUpload
+            v-if="featureConfig.InputAlbum"
           />
-          <ImageUpload
-            v-if="featureConfig.InputImage"
-            imageSourceType="album"
-          />
-          <VideoUpload
-            v-if="featureConfig.InputVideo"
-            videoSourceType="album"
-          />
-          <VideoUpload
-            v-if="featureConfig.InputVideo"
-            videoSourceType="camera"
+          <CameraUpload
+            v-if="featureConfig.InputCamera"
           />
           <template v-if="currentExtensionList.length > 0">
             <div
@@ -46,33 +36,33 @@
             >
               <ToolbarItemContainer
                 v-if="extension"
-                :iconFile="genExtensionIcon(extension)"
+                :icon-file="genExtensionIcon(extension)"
                 :title="genExtensionText(extension)"
-                iconWidth="25px"
-                iconHeight="25px"
-                :needDialog="false"
-                @onIconClick="onExtensionClick(extension)"
+                icon-width="25px"
+                icon-height="25px"
+                :need-dialog="false"
+                @on-icon-click="onExtensionClick(extension)"
               />
             </div>
           </template>
           <template v-if="neededCountFirstPage === 1">
             <Evaluate
               v-if="featureConfig.InputEvaluation"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
+              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
             />
             <Words
               v-else-if="featureConfig.InputQuickReplies"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
+              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
             />
           </template>
           <template v-if="neededCountFirstPage > 1">
             <Evaluate
               v-if="featureConfig.InputEvaluation"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
+              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
             />
             <Words
               v-if="featureConfig.InputQuickReplies"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
+              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
             />
           </template>
         </swiper-item>
@@ -90,28 +80,28 @@
           >
             <ToolbarItemContainer
               v-if="extension"
-              :iconFile="genExtensionIcon(extension)"
+              :icon-file="genExtensionIcon(extension)"
               :title="genExtensionText(extension)"
-              iconWidth="25px"
-              iconHeight="25px"
-              :needDialog="false"
-              @onIconClick="onExtensionClick(extension)"
+              icon-width="25px"
+              icon-height="25px"
+              :need-dialog="false"
+              @on-icon-click="onExtensionClick(extension)"
             />
           </div>
           <template v-if="neededCountFirstPage === 1">
             <Words
               v-if="featureConfig.InputQuickReplies"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
+              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
             />
           </template>
           <template v-else>
             <Evaluate
               v-if="featureConfig.InputEvaluation"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
+              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
             />
             <Words
               v-if="featureConfig.InputQuickReplies"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
+              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
             />
           </template>
         </swiper-item>
@@ -120,24 +110,24 @@
     <UserSelector
       ref="userSelectorRef"
       :type="selectorShowType"
-      :currentConversation="currentConversation"
-      :isGroup="isGroup"
+      :current-conversation="currentConversation"
+      :is-group="isGroup"
       @submit="onUserSelectorSubmit"
       @cancel="onUserSelectorCancel"
     />
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onUnmounted, onMounted } from '../../../adapter-vue';
 import TUIChatEngine, {
   IConversationModel,
   TUIStore,
   StoreName,
   TUIReportService,
-} from '@tencentcloud/chat-uikit-engine';
-import TUICore, { ExtensionInfo, TUIConstants } from '@tencentcloud/tui-core';
-import ImageUpload from './image-upload/index.vue';
-import VideoUpload from './video-upload/index.vue';
+} from '@tencentcloud/chat-uikit-engine-lite';
+import TUICore, { ExtensionInfo, TUIConstants } from '@tencentcloud/tui-core-lite';
+import { ref, onUnmounted, onMounted } from '../../../adapter-vue';
+import AlbumUpload from './album-upload/index.vue';
+import CameraUpload from './camera-upload/index.vue';
 import Evaluate from './evaluate/index.vue';
 import Words from './words/index.vue';
 import ToolbarItemContainer from './toolbar-item-container/index.vue';
@@ -167,10 +157,10 @@ const neededCountFirstPage = ref<number>(8);
 const slicePos = ref<number>(0);
 
 const computeToolbarPaging = () => {
-  if (featureConfig.InputImage && featureConfig.InputVideo) {
-    neededCountFirstPage.value -= 4;
-  } else if (featureConfig.InputImage || featureConfig.InputVideo) {
+  if (featureConfig.InputAlbum && featureConfig.InputCamera) {
     neededCountFirstPage.value -= 2;
+  } else if (featureConfig.InputAlbum || featureConfig.InputCamera) {
+    neededCountFirstPage.value -= 1;
   }
 
   slicePos.value = neededCountFirstPage.value;
@@ -271,7 +261,6 @@ const onCallExtensionClicked = (extension: ExtensionInfo, callType: number) => {
       callParams: {
         offlinePushInfo: OfflinePushInfoManager.getOfflinePushInfo(PUSH_SCENE.CALL),
       },
-      version: 'v3',
     });
   } else if (isGroup.value) {
     currentUserSelectorExtension.value = extension;
@@ -279,12 +268,8 @@ const onCallExtensionClicked = (extension: ExtensionInfo, callType: number) => {
   }
 };
 
-const genExtensionIcon = (extension: any) => {
-  return extension?.icon;
-};
-const genExtensionText = (extension: any) => {
-  return extension?.text;
-};
+const genExtensionIcon = (extension: any) => extension?.icon;
+const genExtensionText = (extension: any) => extension?.text;
 
 const onUserSelectorSubmit = (selectedInfo: any) => {
   currentUserSelectorExtension.value?.listener?.onClicked?.({

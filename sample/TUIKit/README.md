@@ -17,7 +17,7 @@ chat-uikit-uniapp 界面效果如下图所示：
 
 ``` javascript
 // 引入 TUILogin 模块
-import { TUILogin } from '@tencentcloud/tui-core';
+import { TUILogin } from '@tencentcloud/tui-core-lite';
 ```
 初始化登录参数 options 配置说明：
 | 参数 | 类型 | 含义 |

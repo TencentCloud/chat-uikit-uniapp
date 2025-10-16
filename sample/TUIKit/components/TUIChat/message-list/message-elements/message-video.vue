@@ -19,7 +19,7 @@
 
 <script lang="ts" setup>
 import { withDefaults } from '../../../../adapter-vue';
-import type { IMessageModel } from '@tencentcloud/chat-uikit-engine';
+import type { IMessageModel } from '@tencentcloud/chat-uikit-engine-lite';
 import Icon from '../../../common/Icon.vue';
 import playIcon from '../../../../assets/icon/video-play.png';
 import type { IVideoMessageContent } from '../../../../interface';

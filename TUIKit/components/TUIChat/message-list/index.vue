@@ -228,13 +228,13 @@ import TUIChatEngine, {
   StoreName,
   TUITranslateService,
   TUIChatService,
-} from '@tencentcloud/chat-uikit-engine';
+} from '@tencentcloud/chat-uikit-engine-lite';
 import {
   setInstanceMapping,
   getBoundingClientRect,
   getScrollInfo,
 } from '@tencentcloud/universal-api';
-// import { JoinGroupCard } from '@tencentcloud/call-uikit-wechat';
+// import { JoinGroupCard } from '@trtc/calls-uikit-wx';
 import Link from './link';
 import SimpleMessageList from './message-elements/simple-message-list/index.vue';
 import MessageGroupApplication from './message-group-application/index.vue';

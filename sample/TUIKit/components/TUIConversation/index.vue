@@ -20,7 +20,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { TUIStore, StoreName } from '@tencentcloud/chat-uikit-engine';
+import { TUIStore, StoreName } from '@tencentcloud/chat-uikit-engine-lite';
 import { TUIGlobal } from '@tencentcloud/universal-api';
 import { ref } from '../../adapter-vue';
 import TUISearch from '../TUISearch/index.vue';

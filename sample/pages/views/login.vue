@@ -97,7 +97,7 @@
 
 <script lang="ts" setup>
 import { ref, vueVersion } from '../../TUIKit/adapter-vue';
-import { TUITranslateService } from '@tencentcloud/chat-uikit-engine';
+import { TUITranslateService } from '@tencentcloud/chat-uikit-engine-lite';
 import Link from '../../utils/link';
 import { genTestUserSig } from '../../TUIKit/debug';
 import { isPC, isH5, isApp } from '../../TUIKit/utils/env';
@@ -123,13 +123,6 @@ const handleLoginInfo = () => {
     userSig: options.userSig,
     useUploadPlugin: true,
     framework: `vue${vueVersion}`,
-    TIMPush: uni.$TIMPush, // register TencentCloud-TIMPush
-    pushConfig: {
-      androidConfig: uni.$TIMPushConfigs, // Android timpush-configs.json
-      iOSConfig: {
-        iOSBusinessID: '', // iOS Certificate ID
-      },
-    },
   };
   login(loginInfo);
 };
