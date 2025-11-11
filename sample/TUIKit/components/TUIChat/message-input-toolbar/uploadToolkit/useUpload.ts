@@ -9,7 +9,6 @@ import {
   MEDIA_CHOOSE_CONFIG,
   UploadType,
   SourceType,
-  MediaType,
   PlatformType,
 } from './constants';
 import {
@@ -97,117 +96,53 @@ export function useUpload(uploadType: UploadType) {
   };
 
   const chooseImageInUniApp = () => {
-    if (TUIGlobal?.chooseMedia) {
-      TUIGlobal.chooseMedia({
-        count: MEDIA_CHOOSE_CONFIG.IMAGE.COUNT,
-        mediaType: MEDIA_CHOOSE_CONFIG.IMAGE.MEDIA_TYPE,
-        sizeType: MEDIA_CHOOSE_CONFIG.IMAGE.SIZE_TYPE,
-        sourceType: [sourceType],
-        success: function (res: Record<string, any>) {
-          if (currentConversation.value) {
-            sendImageMessage(currentConversation.value, res);
-          }
-        },
-      });
-    } else {
-      TUIGlobal?.chooseImage({
-        count: MEDIA_CHOOSE_CONFIG.IMAGE.COUNT,
-        sourceType: [sourceType],
-        success: function (res: Record<string, any>) {
-          if (currentConversation.value) {
-            sendImageMessage(currentConversation.value, res);
-          }
-        },
-      });
-    }
+    TUIGlobal?.chooseImage({
+      count: MEDIA_CHOOSE_CONFIG.IMAGE.COUNT,
+      sourceType: [sourceType],
+      success: function (res: Record<string, any>) {
+        if (currentConversation.value) {
+          sendImageMessage(currentConversation.value, res);
+        }
+      },
+    });
   };
 
   const chooseVideoInUniApp = () => {
-    if (TUIGlobal?.chooseMedia) {
-      TUIGlobal.chooseMedia({
-        mediaType: MEDIA_CHOOSE_CONFIG.VIDEO.MEDIA_TYPE,
-        count: MEDIA_CHOOSE_CONFIG.VIDEO.COUNT,
-        sourceType: [sourceType],
-        maxDuration: MEDIA_CHOOSE_CONFIG.VIDEO.MAX_DURATION,
-        success: function (res: Record<string, any>) {
-          if (currentConversation.value) {
-            sendVideoMessage(currentConversation.value, res);
-          }
-        },
-      });
-    } else {
-      TUIGlobal?.chooseVideo({
-        count: MEDIA_CHOOSE_CONFIG.VIDEO.COUNT,
-        sourceType: [sourceType],
-        compressed: MEDIA_CHOOSE_CONFIG.VIDEO.COMPRESSED,
-        success: function (res: Record<string, any>) {
-          if (currentConversation.value) {
-            sendVideoMessage(currentConversation.value, res);
-          }
-        },
-      });
-    }
+    TUIGlobal?.chooseVideo({
+      count: MEDIA_CHOOSE_CONFIG.VIDEO.COUNT,
+      sourceType: [sourceType],
+      compressed: MEDIA_CHOOSE_CONFIG.VIDEO.COMPRESSED,
+      success: function (res: Record<string, any>) {
+        if (currentConversation.value) {
+          sendVideoMessage(currentConversation.value, res);
+        }
+      },
+    });
   };
 
   const chooseMediaInUniApp = () => {
-    if (TUIGlobal?.chooseMedia) {
-      TUIGlobal.chooseMedia({
-        count: MEDIA_CHOOSE_CONFIG.MIXED.COUNT,
-        mediaType: MEDIA_CHOOSE_CONFIG.MIXED.MEDIA_TYPE,
-        sizeType: MEDIA_CHOOSE_CONFIG.MIXED.SIZE_TYPE,
-        sourceType: [sourceType],
-        success: function (res: Record<string, any>) {
-          if (currentConversation.value) {
-            if (res?.type === MediaType.IMAGE) {
-              sendImageMessage(currentConversation.value, res);
-            } else if (res?.type === MediaType.VIDEO) {
-              sendVideoMessage(currentConversation.value, res);
-            }
-          }
-        },
-      });
-    } else {
-      TUIGlobal?.chooseImage({
-        count: MEDIA_CHOOSE_CONFIG.IMAGE.COUNT,
-        sourceType: [sourceType],
-        success: function (res: Record<string, any>) {
-          if (currentConversation.value) {
-            sendImageMessage(currentConversation.value, res);
-          }
-        },
-      });
-    }
+    TUIGlobal?.chooseImage({
+      count: MEDIA_CHOOSE_CONFIG.IMAGE.COUNT,
+      sourceType: [SourceType.ALBUM, SourceType.CAMERA],
+      success: function (res: Record<string, any>) {
+        if (currentConversation.value) {
+          sendImageMessage(currentConversation.value, res);
+        }
+      },
+    });
   };
 
   const chooseCameraInUniApp = () => {
-    if (TUIGlobal?.chooseMedia) {
-      TUIGlobal.chooseMedia({
-        count: MEDIA_CHOOSE_CONFIG.MIXED.COUNT,
-        mediaType: MEDIA_CHOOSE_CONFIG.MIXED.MEDIA_TYPE,
-        sizeType: MEDIA_CHOOSE_CONFIG.MIXED.SIZE_TYPE,
-        sourceType: [sourceType],
-        success: function (res: Record<string, any>) {
-          if (currentConversation.value) {
-            if (res?.type === MediaType.IMAGE) {
-              sendImageMessage(currentConversation.value, res);
-            } else if (res?.type === MediaType.VIDEO) {
-              sendVideoMessage(currentConversation.value, res);
-            }
-          }
-        },
-      });
-    } else {
-      TUIGlobal?.chooseVideo({
-        count: MEDIA_CHOOSE_CONFIG.VIDEO.COUNT,
-        sourceType: [sourceType],
-        compressed: MEDIA_CHOOSE_CONFIG.VIDEO.COMPRESSED,
-        success: function (res: Record<string, any>) {
-          if (currentConversation.value) {
-            sendVideoMessage(currentConversation.value, res);
-          }
-        },
-      });
-    }
+    TUIGlobal?.chooseVideo({
+      count: MEDIA_CHOOSE_CONFIG.VIDEO.COUNT,
+      sourceType: [SourceType.ALBUM, SourceType.CAMERA],
+      compressed: MEDIA_CHOOSE_CONFIG.VIDEO.COMPRESSED,
+      success: function (res: Record<string, any>) {
+        if (currentConversation.value) {
+          sendVideoMessage(currentConversation.value, res);
+        }
+      },
+    });
   };
 
   const handleWebFileChange = (event: Event) => {

@@ -36,33 +36,33 @@
             >
               <ToolbarItemContainer
                 v-if="extension"
-                :icon-file="genExtensionIcon(extension)"
+                :iconFile="genExtensionIcon(extension)"
                 :title="genExtensionText(extension)"
-                icon-width="25px"
-                icon-height="25px"
-                :need-dialog="false"
-                @on-icon-click="onExtensionClick(extension)"
+                iconWidth="25px"
+                iconHeight="25px"
+                :needDialog="false"
+                @onIconClick="onExtensionClick(extension)"
               />
             </div>
           </template>
           <template v-if="neededCountFirstPage === 1">
             <Evaluate
               v-if="featureConfig.InputEvaluation"
-              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
             />
             <Words
               v-else-if="featureConfig.InputQuickReplies"
-              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
             />
           </template>
           <template v-if="neededCountFirstPage > 1">
             <Evaluate
               v-if="featureConfig.InputEvaluation"
-              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
             />
             <Words
               v-if="featureConfig.InputQuickReplies"
-              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
             />
           </template>
         </swiper-item>
@@ -80,28 +80,28 @@
           >
             <ToolbarItemContainer
               v-if="extension"
-              :icon-file="genExtensionIcon(extension)"
+              :iconFile="genExtensionIcon(extension)"
               :title="genExtensionText(extension)"
-              icon-width="25px"
-              icon-height="25px"
-              :need-dialog="false"
-              @on-icon-click="onExtensionClick(extension)"
+              iconWidth="25px"
+              iconHeight="25px"
+              :needDialog="false"
+              @onIconClick="onExtensionClick(extension)"
             />
           </div>
           <template v-if="neededCountFirstPage === 1">
             <Words
               v-if="featureConfig.InputQuickReplies"
-              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
             />
           </template>
           <template v-else>
             <Evaluate
               v-if="featureConfig.InputEvaluation"
-              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
             />
             <Words
               v-if="featureConfig.InputQuickReplies"
-              @on-dialog-popup-show-or-hide="handleSwiperDotShow"
+              @onDialogPopupShowOrHide="handleSwiperDotShow"
             />
           </template>
         </swiper-item>
@@ -110,8 +110,8 @@
     <UserSelector
       ref="userSelectorRef"
       :type="selectorShowType"
-      :current-conversation="currentConversation"
-      :is-group="isGroup"
+      :currentConversation="currentConversation"
+      :isGroup="isGroup"
       @submit="onUserSelectorSubmit"
       @cancel="onUserSelectorCancel"
     />

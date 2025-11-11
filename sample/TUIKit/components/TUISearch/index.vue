@@ -154,9 +154,11 @@ function onCurrentConversationIDUpdate(conversationID: string) {
     // PC side single page switch session, close search
     closeInConversationSearch();
   }
+  if(!conversationID && isUniFrameWork) {
+	  initSearchValue('global');
+  }
   currentConversationID.value = conversationID;
 }
-
 function onCurrentSearchingStatusChange(value: ISearchingStatus) {
   if (value?.searchType === currentSearchType.value) {
     searchingStatus.value = value?.isSearching;

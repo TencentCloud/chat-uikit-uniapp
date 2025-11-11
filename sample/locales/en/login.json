@@ -18,6 +18,8 @@
   "每月活跃用户数超过10亿": "Over 1 billion active users per month",
   "请输入手机号": "Enter a mobile number",
   "请输入userID": "Please enter your userID",
+  "缺少正确的 SDKAppID，请在 App.vue 中配置": "Missing correct SDKAppID, please configure it in App.vue",
+  "缺少正确的 secretKey，请在 App.vue 中配置": "Missing correct secretKey, please configure it in App.vue",
   "请输入验证码": "Enter the verification code",
   "请输入正确的手机号": "Enter a valid mobile number",
   "请先勾选用户协议": "Agree to the User Agreement first",

@@ -265,6 +265,7 @@ const currentSearchConversationID = ref<string>('');
 const searchConversationResult = ref<ISearchCloudMessageResult>();
 const searchConversationMessageList = ref<IMessageModel[]>([]);
 const searchConversationMessageTotalCount = ref<number>();
+const previousParams = ref<any>(null);
 
 // search results for file messages/image and video messages, grouped by timeline
 const searchConversationResultGroupByDate = ref<
@@ -419,40 +420,62 @@ const resetSearchResult = () => {
   searchConversationResultGroupByDate.value = [];
 };
 
+const debouncedSearch = debounce(() => {
+  isLoading.value = true;
+  
+  if (props.searchType === 'conversation') {
+    resetSearchResult();
+    setMessageSearchResultList({
+      conversationID: currentSearchConversationID.value,
+    });
+  } else {
+    const currentParams = [keywordList.value, currentSearchTabKey.value, timePosition.value, timePeriod.value];
+    const oldParams = previousParams.value;
+    
+    if (oldParams && oldParams[1] === 'all' && currentParams && currentParams[1] === 'allMessage') {
+      searchResult?.value['allMessage']?.list
+      && (searchResult.value['allMessage'].list = searchAllMessageList?.value);
+      Object?.keys(searchResult?.value)?.forEach((key: string) => {
+        if (key !== 'allMessage') {
+          delete searchResult?.value[key];
+        }
+      });
+      isLoading.value = false;
+      return;
+    } else {
+      isResultDetailShow.value = false;
+      resetSearchResult();
+    }
+    setMessageSearchResultList();
+  }
+}, 500);
+
 watch(
   () => [keywordList.value, currentSearchTabKey.value, timePosition.value, timePeriod.value],
   (newValue, oldValue) => {
     if (newValue === oldValue) {
       return;
     }
+    
     // Global search must have keywords, but search in conversation can be without keywords
     if (!keywordList?.value?.length && props?.searchType === 'global') {
       resetSearchResult();
       return;
     }
-    isLoading.value = true;
-    if (props.searchType === 'conversation') {
-      resetSearchResult();
-      setMessageSearchResultList({
-        conversationID: currentSearchConversationID.value,
-      });
-    } else {
-      if (oldValue && oldValue[1] === 'all' && newValue && newValue[1] === 'allMessage') {
-        searchResult?.value['allMessage']?.list
-        && (searchResult.value['allMessage'].list = searchAllMessageList?.value);
-        Object?.keys(searchResult?.value)?.forEach((key: string) => {
-          if (key !== 'allMessage') {
-            delete searchResult?.value[key];
-          }
-        });
-        isLoading.value = false;
-        return;
-      } else {
-        isResultDetailShow.value = false;
-        resetSearchResult();
-      }
-      setMessageSearchResultListDebounce();
+    
+    // 参数变化检查
+    const searchKey = JSON.stringify(newValue);
+    const oldSearchKey = JSON.stringify(oldValue);
+    
+    if (searchKey === oldSearchKey) {
+      return;
     }
+    
+    // 保存当前参数供防抖函数使用
+    previousParams.value = oldValue;
+    
+    // 使用防抖函数执行搜索
+    debouncedSearch();
   },
   { immediate: true },
 );
