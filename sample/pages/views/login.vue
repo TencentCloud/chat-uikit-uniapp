@@ -128,7 +128,17 @@ const handleLoginInfo = () => {
 };
 
 const login = (loginInfo: any) => {
-  if (!inputValue.value) {
+  if (!Number(loginInfo.SDKAppID)) {
+    uni.showToast({
+      title: TUITranslateService.t('Login.缺少正确的 SDKAppID，请在 App.vue 中配置'),
+      icon: 'none',
+    });
+  } else if (!uni.$chat_secretKey) {
+    uni.showToast({
+      title: TUITranslateService.t('Login.缺少正确的 secretKey，请在 App.vue 中配置'),
+      icon: 'none',
+    });
+  } else if (!loginInfo.userID) {
     uni.showToast({
       title: TUITranslateService.t('Login.请输入userID'),
       icon: 'none',

@@ -1,9 +1,5 @@
 import { TUILogin } from '@tencentcloud/tui-core-lite';
-import { TUIUserService, TUIConversationService, TUIStore, StoreName } from '@tencentcloud/chat-uikit-engine-lite';
-// #ifdef APP-PLUS
-import { setRegistrationID, registerPush, getRegistrationID } from '@/uni_modules/TencentCloud-Push';
-import { getNotificationAuth } from './utils/getNotificationAuth';
-// #endif
+import { StoreName, TUIConversationService, TUIStore, TUIUserService } from '@tencentcloud/chat-uikit-engine-lite';
 
 export const loginChat = (loginInfo) => {
   return TUILogin.login(loginInfo)
@@ -15,14 +11,10 @@ export const loginChat = (loginInfo) => {
         },
       });
       TUIUserService.switchUserStatus({ displayOnlineStatus: true });
-      PushInit(loginInfo.userID);
+      setEnterChatConfig({ isLoginChat: true });
       uni?.setStorage({
         key: 'userInfo',
-        data: JSON.stringify({
-          ...loginInfo,
-          TIMPush: undefined,
-          pushConfig: {},
-        }),
+        data: JSON.stringify(loginInfo),
       });
       return res;
     });
@@ -47,26 +39,18 @@ export const loginFromStorage = () => {
 };
 
 export declare interface IEnterChatConfig {
-  isLoginChat: boolean;
-  conversationID: string;
+  isLoginChat?: boolean;
+  conversationID?: string;
 }
 
-export const PushInit = (userID: string) => {
-  // #ifdef APP-PLUS
-  getNotificationAuth();
-  setRegistrationID(userID, () => {
-  	console.log('PushInit | setRegistrationID ok');
-  });
-  registerPush(uni.$chat_SDKAppID, uni.$push_appKey, (data: any) => {
-    console.log('PushInit | registerPush ok', data);
-    getRegistrationID((registrationID: string) => {
-      console.log('PushInit | getRegistrationID ok', registrationID);
-    });
-  }, (errCode: any, errMsg: any) => {
-    console.error('PushInit | registerPush failed', errCode, errMsg);
-  },
-  );
-  // #endif
+export const enterChatConfig: IEnterChatConfig = {
+  isLoginChat: false,
+  conversationID: '',
+};
+
+export const setEnterChatConfig = (config: IEnterChatConfig) => {
+  Object.assign(enterChatConfig, config);
+  openChat(enterChatConfig);
 };
 
 export const openChat = (enterChatConfig: IEnterChatConfig) => {

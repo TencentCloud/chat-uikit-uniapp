@@ -1,52 +1,15 @@
 <script lang="ts">
 import { TUIChatKit } from './TUIKit';
 import { TUITranslateService } from '@tencentcloud/chat-uikit-engine-lite';
+import { loginFromStorage } from './loginChat';
 // #ifndef MP-WEIXIN
 import { locales } from './locales';
 // #endif
 // #ifdef APP-PLUS
-// register TencentCloud-TIMPush
-import { IEnterChatConfig, loginFromStorage, openChat } from './loginChat';
-import TUIChatEngine from '@tencentcloud/chat-uikit-engine-lite';
-import { EVENT, addPushListener, createNotificationChannel } from '@/uni_modules/TencentCloud-Push';
-const enterChatConfig: IEnterChatConfig = {
-  isLoginChat: false,
-  conversationID: '',
-};
-const notificationChannelInfo = {
-  channelID: 'tuikit', // 控制台配置 oppo 的 channelID
-  channelName: 'tuikit', // 自定义名称
-  channelDesc: '自定义铃音', // 自定义描述
-  channelSound: 'private_ring', // 自定义铃音的名称且不需要后缀名
-};
-createNotificationChannel(notificationChannelInfo, () => {
-  console.log('createNotificationChannel success');
-});
-const onNotificationClicked = (res: any) => {
-  console.log('App.vue | onNotificationClicked', res);
-  const { notification = '' } = res?.data || {};
-  if (!notification) {
-    return;
-  }
-  const { entity } = JSON.parse(notification);
-  const type = entity.chatType === 1 ? TUIChatEngine.TYPES.CONV_C2C : TUIChatEngine.TYPES.CONV_GROUP;
-  enterChatConfig.conversationID = `${type}${entity.sender}`;
-  if (enterChatConfig.isLoginChat && entity.sender) {
-    openChat(enterChatConfig);
-  }
-};
-addPushListener(EVENT.NOTIFICATION_CLICKED, onNotificationClicked);
-
-// 监听在线新消息
-const onMessageReceived = (res: any) => {
-  console.log('App.vue | onMessageReceived', res, JSON.stringify(res));
-};
-addPushListener(EVENT.MESSAGE_RECEIVED, onMessageReceived);
-// 监听在线撤回消息
-const onMessageRevoked = (res: any) => {
-  console.log('App.vue | onMessageRevoked', res);
-};
-addPushListener(EVENT.MESSAGE_REVOKED, onMessageRevoked);
+// register TencentCloud-Push
+// 避免阻塞初始化，如需使用推送功能，请取消以下注释，并创建自定义基座使用。
+// import { pushService } from './pushService';
+// pushService.init();
 
 // register TencentCloud-TUICallKit
 const TUICallKit: any = uni.requireNativePlugin('TencentCloud-TUICallKit');
@@ -61,8 +24,8 @@ TUITranslateService.useI18n();
 
 TUIChatKit.init();
 const SDKAppID = 0; // Your SDKAppID
-const secretKey = 'xxx'; // Your secretKey
-const appKey = 'xxx'; // 客户端密钥
+const secretKey = ''; // Your secretKey
+const appKey = ''; // 客户端密钥（用户实现离线推送）可参考：https://cloud.tencent.com/document/product/269/103522
 
 uni.$chat_SDKAppID = SDKAppID;
 uni.$chat_secretKey = secretKey;
