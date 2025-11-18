@@ -15,7 +15,10 @@
     {
       "path": "TUIKit/components/TUIChat/index",
       "style": {
-        "navigationBarTitleText": "腾讯云 IM"
+        "navigationBarTitleText": "腾讯云 IM",
+        "app-plus": {
+          "softinputMode": "adjustResize"
+        }
       }
     },
     {

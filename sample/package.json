@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@tencentcloud/chat-uikit-engine-lite": "1.0.3",
-    "@tencentcloud/chat-uikit-uniapp": "3.0.2",
+    "@tencentcloud/chat-uikit-uniapp": "3.0.3",
     "@tencentcloud/tui-core-lite": "1.0.0",
     "@tencentcloud/universal-api": "^2.4.0",
     "@vue/composition-api": "^1.7.1",

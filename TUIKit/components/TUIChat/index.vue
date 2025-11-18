@@ -81,7 +81,7 @@
       </div>
       <!-- Group Management -->
       <div
-        v-if="!isNotInGroup && !isApp && isUniFrameWork && isGroup && headerExtensionList.length > 0"
+        v-if="!isNotInGroup && isUniFrameWork && isGroup && headerExtensionList.length > 0"
         class="group-profile"
         @click="handleGroup"
       >
@@ -216,9 +216,19 @@ const handleGroup = () => {
 };
 
 function changeToolbarDisplayType(type: ToolbarDisplayType) {
-  inputToolbarDisplayType.value = inputToolbarDisplayType.value === type ? 'none' : type;
-  if (inputToolbarDisplayType.value !== 'none' && isUniFrameWork) {
-    uni.$emit('scroll-to-bottom');
+  const willOpen = inputToolbarDisplayType.value !== type;
+
+  if (willOpen && type !== 'none' && isUniFrameWork) {
+    uni.hideKeyboard();
+    setTimeout(() => {
+      inputToolbarDisplayType.value = type;
+      uni.$emit('scroll-to-bottom');
+    }, 200);
+  } else {
+    inputToolbarDisplayType.value = inputToolbarDisplayType.value === type ? 'none' : type;
+    if (inputToolbarDisplayType.value !== 'none' && isUniFrameWork) {
+      uni.$emit('scroll-to-bottom');
+    }
   }
 }
 
