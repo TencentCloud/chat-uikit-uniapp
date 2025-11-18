@@ -156,6 +156,18 @@ const TUIChat = {
   '确认要清空当前的聊天记录吗？': 'Are you sure you want to clear the current chat history?',
   '清空后无法恢复': 'Clearing cannot be restored',
   '回答输出中，请稍后或点击停止回答': 'Answering, please wait or click stop answering',
+  '获取麦克风权限状态失败，请重试': 'Failed to get microphone permission status, please try again',
+  '权限申请': 'Permission Request',
+  '请允许使用麦克风权限用于发送语音消息': 'Please allow microphone permission to send voice messages',
+  '需要麦克风权限': 'Microphone Permission Required',
+  '麦克风权限已被拒绝，请前往"设置 → 应用信息 → 权限"中开启麦克风权限': 'Microphone permission has been denied. Please go to "Settings → App Info → Permissions" to enable microphone permission',
+  '麦克风权限已被拒绝，请前往"设置 → 隐私 → 麦克风"中开启权限': 'Microphone permission has been denied. Please go to "Settings → Privacy → Microphone" to enable permission',
+  '麦克风权限已被拒绝，请前往"右上角设置"中开启权限': 'Microphone permission has been denied. Please go to "Settings" in the top right corner to enable permission',
+  '去设置': 'Go to Settings',
+  '需要您授权麦克风权限以使用语音功能': 'Microphone permission is required to use voice features',
+  '授权': 'Authorize',
+  '录音时间太短': 'Recording duration is too short',
+  '录音失败，请重试': 'Recording failed, please try again',
 };
 
 export default TUIChat;

@@ -11,6 +11,14 @@
     >
       {{ props.muteText }}
     </div>
+    <!-- #ifdef APP-PLUS -->
+    <div
+      v-if="inputToolbarDisplayType === 'emojiPicker' || inputToolbarDisplayType === 'tools'"
+      class="input-click-mask"
+      @tap.stop.prevent="handleMaskClick"
+    >
+    </div>
+    <!-- #endif -->
     <input
       id="editor"
       ref="inputRef"
@@ -19,6 +27,7 @@
       cursor-spacing="20"
       confirm-type="send"
       :confirm-hold="true"
+	    :focus="programmaticFocus"
       maxlength="140"
       type="text"
       placeholder-class="input-placeholder"
@@ -40,7 +49,7 @@ import DraftManager from '../utils/conversationDraft';
 import { transformTextWithEmojiNamesToKeys } from '../emoji-config';
 import { isPC } from '../../../utils/env';
 import { sendMessages } from '../utils/sendMessage';
-import { ISendMessagePayload } from '../../../interface';
+import { ISendMessagePayload, ToolbarDisplayType } from '../../../interface';
 
 const props = defineProps({
   placeholder: {
@@ -76,12 +85,17 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  inputToolbarDisplayType: {
+	  type: String,
+	  defult: '',
+  }
 });
 
 const emits = defineEmits(['onTyping', 'onFocus', 'onAt']);
 const inputText = ref('');
 const inputRef = ref();
 const inputBlur = ref(true);
+const programmaticFocus = ref(false);
 const inputContentEmpty = ref(true);
 const allInsertedAtInfo = new Map();
 const currentConversation = ref<IConversationModel>();
@@ -173,11 +187,13 @@ const setEditorContent = (content: any) => {
 
 const onBlur = () => {
   inputBlur.value = true;
+  programmaticFocus.value = false;
 };
 
 const onFocus = (e: any) => {
   inputBlur.value = false;
   emits('onFocus', e?.detail?.height);
+  uni.$emit('scroll-to-bottom');
 };
 
 const isEditorContentEmpty = () => {
@@ -239,6 +255,17 @@ function reset() {
   resetEditor();
 }
 
+// #ifdef APP-PLUS
+function handleMaskClick(e: Event) {
+	e.stopPropagation();
+	emits('onFocus');
+	uni.$emit('scroll-to-bottom');
+	setTimeout(() => {
+		programmaticFocus.value = true;
+    // IOS set 500ms timeout
+	}, 100);
+}
+// #endif
 defineExpose({
   insertAt,
   resetEditor,
@@ -256,6 +283,7 @@ defineExpose({
   flex: 1;
   padding: 3px 10px 10px;
   overflow: hidden;
+  position: relative;
 
   &-h5 {
     flex: 1;
@@ -281,5 +309,12 @@ defineExpose({
     overflow-y: scroll;
     min-height: 25px;
   }
+}
+
+.input-click-mask {
+	background-color: transparent;
+	position: absolute;
+	inset: 0;
+	z-index: 1;
 }
 </style>

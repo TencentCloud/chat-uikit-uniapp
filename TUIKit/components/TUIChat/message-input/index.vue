@@ -20,6 +20,7 @@
         :enableAt="props.enableAt"
         :enableTyping="props.enableTyping"
         :isGroup="isGroup"
+        :inputToolbarDisplayType="inputToolbarDisplayType"
         @onTyping="onTyping"
         @onAt="onAt"
         @onFocus="onFocus"
@@ -157,9 +158,7 @@ const onAt = (show: boolean) => {
 };
 
 const onFocus = () => {
-  if (isH5) {
-    emits('changeToolbarDisplayType', 'none');
-  }
+  emits('changeToolbarDisplayType', 'none');
 };
 
 const insertEmoji = (emoji: any) => {
