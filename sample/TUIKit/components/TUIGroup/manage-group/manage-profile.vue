@@ -177,6 +177,7 @@ const close = (tabName: string) => {
   &-main {
     display: flex;
     flex-direction: row;
+    align-items: center;
     width: 100%;
     overflow: hidden;
 
@@ -192,9 +193,16 @@ const close = (tabName: string) => {
       overflow: hidden;
       margin: 20px 10px;
       font-weight: 400;
+    display: flex;
+      flex-direction: column;
+      gap: 6px;
 
       li {
         color: #999;
+      }
+
+      h1 {
+        font-size: 20px;
       }
 
       h1,
@@ -251,6 +259,13 @@ const close = (tabName: string) => {
       display: flex;
       align-items: center;
       justify-content: space-between;
+
+      h1 {
+        font-family: PingFang SC;
+        font-weight: 500;
+        font-size: 22px;
+        line-height: 26px;
+      }
 
       .close {
         font-family: PingFangSC-Regular;

@@ -4,7 +4,7 @@
     :class="[!isPC ? 'transfer-h5' : '', isWeChat ? 'transfer-h5-wechat' : '']"
   >
     <header
-      v-if="!isPC"
+      v-if="!isPC && transferTitle"
       class="transfer-header transfer-h5-header"
     >
       <div

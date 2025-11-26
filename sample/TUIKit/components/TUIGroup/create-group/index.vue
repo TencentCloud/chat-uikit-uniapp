@@ -1,129 +1,109 @@
 <template>
-  <Dialog
-    :show="true"
-    :isH5="!isPC"
-    :isHeaderShow="false"
-    :isFooterShow="false"
-    :background="false"
-    @update:show="closeCreated"
+  <div
+    class="group"
+    :class="[!isPC ? 'group-h5' : '']"
   >
-    <div
-      class="group"
-      :class="[!isPC ? 'group-h5' : '']"
-    >
-      <div class="group-box">
-        <header class="group-box-header">
-          <Icon
-            :file="isPC ? closeIcon : backIcon"
-            class="icon-close"
-            size="16px"
-            @onClick="closeCreated"
-          />
-          <h1 class="group-box-header-title">
-            {{ headerTitle }}
-          </h1>
-        </header>
-        <ul
-          v-if="!groupInfo.isEdit"
-          class="group-list"
-        >
-          <li class="group-list-item">
-            <label class="group-list-item-label">{{ TUITranslateService.t('TUIGroup.群头像') }}</label>
-            <Avatar :url="groupInfo.profile.avatar" />
-          </li>
-          <ul>
-            <li
-              v-for="(item, index) in createInfo"
-              :key="index"
-              class="group-list-item"
+    <div class="group-box">
+      <ul
+        v-if="!groupInfo.isEdit"
+        class="group-list"
+      >
+        <li class="group-list-item">
+          <label class="group-list-item-label">{{ TUITranslateService.t('TUIGroup.群头像') }}</label>
+          <Avatar :url="groupInfo.profile.avatar" />
+        </li>
+        <ul>
+          <li
+            v-for="(item, index) in createInfo"
+            :key="index"
+            class="group-list-item"
+          >
+            <label class="group-list-item-label">{{ item.name }}</label>
+            <input
+              v-if="isPC"
+              v-model="groupInfo.profile[item.key]"
+              type="text"
+              :placeholder="item.placeholder"
             >
-              <label class="group-list-item-label">{{ item.name }}</label>
-              <input
+            <span
+              v-else
+              class="group-h5-list-item-content"
+              @click="edit(item.key)"
+            >
+              <p class="content">{{ groupInfo.profile[item.key] }}</p>
+              <Icon :file="rightIcon" />
+            </span>
+          </li>
+          <li class="group-list-introduction">
+            <div class="group-list-item">
+              <label class="group-list-item-label">{{ TUITranslateService.t('TUIGroup.群类型') }}</label>
+              <GroupIntroduction
                 v-if="isPC"
-                v-model="groupInfo.profile[item.key]"
-                type="text"
-                :placeholder="item.placeholder"
-              >
+                :groupType="groupInfo.profile.type"
+                @selectType="selected"
+              />
               <span
                 v-else
                 class="group-h5-list-item-content"
-                @click="edit(item.key)"
+                @click="edit('type')"
               >
-                <p class="content">{{ groupInfo.profile[item.key] }}</p>
+                <p class="content">{{ groupTypeDetail.label }}</p>
                 <Icon :file="rightIcon" />
               </span>
-            </li>
-            <li class="group-list-introduction">
-              <div class="group-list-item">
-                <label class="group-list-item-label">{{ TUITranslateService.t('TUIGroup.群类型') }}</label>
-                <GroupIntroduction
-                  v-if="isPC"
-                  :groupType="groupInfo.profile.type"
-                  @selectType="selected"
-                />
-                <span
-                  v-else
-                  class="group-h5-list-item-content"
-                  @click="edit('type')"
-                >
-                  <p class="content">{{ groupTypeDetail.label }}</p>
-                  <Icon :file="rightIcon" />
-                </span>
-              </div>
-              <article
-                v-if="!isPC"
-                class="group-h5-list-item-introduction"
+            </div>
+            <article
+              v-if="!isPC"
+              class="group-h5-list-item-introduction"
+            >
+              <label class="introduction-name">{{ groupTypeDetail.label }}：</label>
+              <span class="introduction-detail">{{ groupTypeDetail.detail }}</span>
+              <a
+                :href="documentLink.product.url"
+                target="view_window"
               >
-                <label class="introduction-name">{{ groupTypeDetail.label }}：</label>
-                <span class="introduction-detail">{{ groupTypeDetail.detail }}</span>
-                <a
-                  :href="documentLink.product.url"
-                  target="view_window"
-                >
-                  {{ TUITranslateService.t(`TUIGroup.${groupTypeDetail.src}`) }}
-                </a>
-              </article>
-            </li>
-          </ul>
+                {{ TUITranslateService.t(`TUIGroup.${groupTypeDetail.src}`) }}
+              </a>
+            </article>
+          </li>
         </ul>
-        <!-- Edit Group Name -->
-        <div
-          v-else
-          class="group-list group-list-edit"
+      </ul>
+      <!-- Edit Group Name -->
+      <div
+        v-else
+        class="group-list group-list-edit"
+      >
+        <input
+          v-if="groupInfo.groupConfig.type === 'input'"
+          v-model="groupInfo.groupConfig.value"
+          class="group-name-input"
+          type="text"
+          :placeholder="TUITranslateService.t(`TUIGroup.${groupInfo.groupConfig.placeholder}`)"
         >
-          <input
-            v-if="groupInfo.groupConfig.type === 'input'"
-            v-model="groupInfo.groupConfig.value"
-            class="group-name-input"
-            type="text"
-            :placeholder="TUITranslateService.t(`TUIGroup.${groupInfo.groupConfig.placeholder}`)"
-          >
-          <GroupIntroduction
-            v-else
-            class="group-introduction-list"
-            :groupType="groupInfo.groupConfig.value"
-            @selectType="selected"
-          />
-        </div>
-        <footer class="group-profile-footer">
-          <button
-            v-if="isPC && !groupInfo.isEdit"
-            class="btn-default"
-            @click="closeCreated"
-          >
-            {{ TUITranslateService.t('TUIGroup.取消') }}
-          </button>
-          <button
-            class="btn-submit"
-            :disabled="submitDisabledStatus"
-            @click="submit"
-          >
-            {{ TUITranslateService.t('TUIGroup.确认') }}
-          </button>
-        </footer>
+        <GroupIntroduction
+          v-else
+          class="group-introduction-list"
+          :groupType="groupInfo.groupConfig.value"
+          @selectType="selected"
+        />
       </div>
+      <footer class="group-profile-footer">
+        <button
+          v-if="isPC && !groupInfo.isEdit"
+          class="btn-default"
+          @click="closeCreated"
+        >
+          {{ TUITranslateService.t('TUIGroup.取消') }}
+        </button>
+        <button
+          class="btn-submit"
+          :disabled="submitDisabledStatus"
+          @click="submit"
+        >
+          {{ TUITranslateService.t('TUIGroup.确认') }}
+        </button>
+      </footer>
     </div>
-  </Dialog>
+  </div>
 </template>
 <script lang="ts" setup>
 import TUIChatEngine, {
@@ -136,12 +116,9 @@ import { computed, reactive, watchEffect } from '../../../adapter-vue';
 import documentLink from '../../../utils/documentLink';
 import { isPC } from '../../../utils/env';
 import Icon from '../../common/Icon.vue';
-import backIcon from '../../../assets/icon/back.svg';
-import closeIcon from '../../../assets/icon/icon-close.svg';
 import rightIcon from '../../../assets/icon/right-icon.svg';
 import GroupIntroduction from './group-introduction/index.vue';
 import { groupIntroConfig, findGroupIntroConfig } from './group-introduction/config';
-import Dialog from '../../common/Dialog/index.vue';
 import { Toast, TOAST_TYPE } from '../../common/Toast/index';
 import Avatar from '../../common/Avatar/index.vue';
 import Server from '../server';
@@ -292,6 +269,10 @@ const handleCompleteCreate = (group: any) => {
   const callback = TUIGroupServer.getOnCallCallback(TUIConstants.TUIGroup.SERVICE.METHOD.CREATE_GROUP);
   callback && callback(group);
 };
+
+defineExpose({
+  closeCreated,
+});
 
 </script>
 <style lang="scss" scoped src="./style/index.scss"></style>

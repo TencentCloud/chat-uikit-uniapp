@@ -9,73 +9,29 @@
     <div v-if="props.displayType === 'emojiPicker'">
       <EmojiPickerDialog />
     </div>
-    <div v-else>
-      <swiper
-        :class="['message-input-toolbar-swiper']"
-        :indicator-dots="isSwiperIndicatorDotsEnable"
-        :autoplay="false"
-        :circular="false"
+    <swiper
+      v-else
+      :class="['message-input-toolbar-swiper']"
+      :indicator-dots="isSwiperIndicatorDotsEnable"
+      :autoplay="false"
+      :circular="false"
+    >
+      <swiper-item
+        :class="[
+          'message-input-toolbar-list',
+          'message-input-toolbar-h5-list',
+          'message-input-toolbar-uni-list',
+        ]"
       >
-        <swiper-item
-          :class="[
-            'message-input-toolbar-list',
-            'message-input-toolbar-h5-list',
-            'message-input-toolbar-uni-list',
-          ]"
-        >
-          <AlbumUpload
-            v-if="featureConfig.InputAlbum"
-          />
-          <CameraUpload
-            v-if="featureConfig.InputCamera"
-          />
-          <template v-if="currentExtensionList.length > 0">
-            <div
-              v-for="(extension, index) in currentExtensionList.slice(0, slicePos)"
-              :key="index"
-            >
-              <ToolbarItemContainer
-                v-if="extension"
-                :iconFile="genExtensionIcon(extension)"
-                :title="genExtensionText(extension)"
-                iconWidth="25px"
-                iconHeight="25px"
-                :needDialog="false"
-                @onIconClick="onExtensionClick(extension)"
-              />
-            </div>
-          </template>
-          <template v-if="neededCountFirstPage === 1">
-            <Evaluate
-              v-if="featureConfig.InputEvaluation"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
-            />
-            <Words
-              v-else-if="featureConfig.InputQuickReplies"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
-            />
-          </template>
-          <template v-if="neededCountFirstPage > 1">
-            <Evaluate
-              v-if="featureConfig.InputEvaluation"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
-            />
-            <Words
-              v-if="featureConfig.InputQuickReplies"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
-            />
-          </template>
-        </swiper-item>
-        <swiper-item
-          v-if="neededCountFirstPage <= 1"
-          :class="[
-            'message-input-toolbar-list',
-            'message-input-toolbar-h5-list',
-            'message-input-toolbar-uni-list',
-          ]"
-        >
+        <CameraUpload
+          v-if="featureConfig.InputCamera"
+        />
+        <AlbumUpload
+          v-if="featureConfig.InputAlbum"
+        />
+        <template v-if="currentExtensionList.length > 0">
           <div
-            v-for="(extension, index) in currentExtensionList.slice(slicePos)"
+            v-for="(extension, index) in currentExtensionList.slice(0, slicePos)"
             :key="index"
           >
             <ToolbarItemContainer
@@ -88,25 +44,68 @@
               @onIconClick="onExtensionClick(extension)"
             />
           </div>
-          <template v-if="neededCountFirstPage === 1">
-            <Words
-              v-if="featureConfig.InputQuickReplies"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
-            />
-          </template>
-          <template v-else>
-            <Evaluate
-              v-if="featureConfig.InputEvaluation"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
-            />
-            <Words
-              v-if="featureConfig.InputQuickReplies"
-              @onDialogPopupShowOrHide="handleSwiperDotShow"
-            />
-          </template>
-        </swiper-item>
-      </swiper>
-    </div>
+        </template>
+        <template v-if="neededCountFirstPage === 1">
+          <Words
+            v-if="featureConfig.InputQuickReplies"
+            @onDialogPopupShowOrHide="handleSwiperDotShow"
+          />
+          <Evaluate
+            v-else-if="featureConfig.InputEvaluation"
+            @onDialogPopupShowOrHide="handleSwiperDotShow"
+          />
+        </template>
+        <template v-if="neededCountFirstPage > 1">
+          <Words
+            v-if="featureConfig.InputQuickReplies"
+            @onDialogPopupShowOrHide="handleSwiperDotShow"
+          />
+          <Evaluate
+            v-if="featureConfig.InputEvaluation"
+            @onDialogPopupShowOrHide="handleSwiperDotShow"
+          />
+        </template>
+      </swiper-item>
+      <swiper-item
+        v-if="neededCountFirstPage <= 1"
+        :class="[
+          'message-input-toolbar-list',
+          'message-input-toolbar-h5-list',
+          'message-input-toolbar-uni-list',
+        ]"
+      >
+        <div
+          v-for="(extension, index) in currentExtensionList.slice(slicePos)"
+          :key="index"
+        >
+          <ToolbarItemContainer
+            v-if="extension"
+            :iconFile="genExtensionIcon(extension)"
+            :title="genExtensionText(extension)"
+            iconWidth="25px"
+            iconHeight="25px"
+            :needDialog="false"
+            @onIconClick="onExtensionClick(extension)"
+          />
+        </div>
+        <template v-if="neededCountFirstPage === 1">
+          <Evaluate
+            v-if="featureConfig.InputEvaluation"
+            @onDialogPopupShowOrHide="handleSwiperDotShow"
+          />
+        </template>
+        <template v-else>
+          <Words
+            v-if="featureConfig.InputQuickReplies"
+            @onDialogPopupShowOrHide="handleSwiperDotShow"
+          />
+          <Evaluate
+            v-if="featureConfig.InputEvaluation"
+            @onDialogPopupShowOrHide="handleSwiperDotShow"
+          />
+        </template>
+      </swiper-item>
+    </swiper>
     <UserSelector
       ref="userSelectorRef"
       :type="selectorShowType"
@@ -144,6 +143,8 @@ interface IProps {
 
 const props = withDefaults(defineProps<IProps>(), {
 });
+
+const emits = defineEmits(['changeToolbarDisplayType']);
 
 const currentConversation = ref<IConversationModel>();
 const isGroup = ref<boolean>(false);
@@ -287,6 +288,7 @@ const onUserSelectorCancel = () => {
 
 const handleSwiperDotShow = (showStatus: boolean) => {
   isSwiperIndicatorDotsEnable.value = (neededCountFirstPage.value <= 1 && !showStatus);
+  emits('changeToolbarDisplayType', showStatus ? 'dialog' : 'tools');
 };
 </script>
 <script lang="ts">

@@ -1,7 +1,19 @@
 .tui-conversation {
   &-item {
+    position: relative;
+
+    &::after {
+      position: absolute;
+      content: '';
+      width: calc(100% - 60px);
+      height: .5px;
+      background: #E5E5E5;
+      bottom: 0;
+      left: 60px;
+    }
+
     &-pinned {
-      background: #eef0f3;
+      background: #F4F4F4;
     }
 
     &-selected,

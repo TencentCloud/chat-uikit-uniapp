@@ -1,77 +1,62 @@
 <template>
-  <ul
+  <div
     v-if="!contactSearchingStatus"
     :class="['tui-contact-list', !isPC && 'tui-contact-list-h5']"
   >
-    <li
-      v-for="(contactListObj, key) in sortContactListMap"
-      :key="key"
-      class="tui-contact-list-item"
-    >
-      <header
-        class="tui-contact-list-item-header"
-        @click="toggleCurrentContactList(key)"
-      >
-        <div class="tui-contact-list-item-header-left">
-          <Icon
-            :file="currentContactListKey === key ? downSVG : rightSVG"
-            width="16px"
-            height="16px"
-          />
-          <div>{{ TUITranslateService.t(`TUIContact.${contactListObj.title}`) }}</div>
-        </div>
-        <div class="tui-contact-list-item-header-right">
-          <span
-            v-if="contactListObj.unreadCount"
-            class="tui-contact-list-item-header-right-unread"
+    <div v-if="!currentContactListKey">
+      <ul>
+        <li
+          v-for="(contactListObj, key) in contactListMap"
+          :key="key"
+          class="tui-contact-list-item"
+        >
+          <header
+            class="tui-contact-list-item-header"
+            @click="toggleCurrentContactList(key)"
           >
-            {{ contactListObj.unreadCount }}
-          </span>
-        </div>
-      </header>
-      <ul :class="['tui-contact-list-item-main', currentContactListKey === key ? '' : 'hidden']">
-        <template v-if="key === 'friendList'">
-          <div
-            v-for="(groupData, groupKey) in contactListObj.list"
-            :key="groupKey"
-          >
-            <div class="tui-contact-list-group-title">
-              {{ groupKey }} ({{ groupData.length }})
-            </div>
-            <li
-              v-for="contactListItem in groupData"
-              :key="contactListItem.renderKey"
-              class="tui-contact-list-item-main-item"
-              :class="['selected']"
-              @click="selectItem(contactListItem)"
-            >
-              <ContactListItem
-                :key="contactListItem.renderKey"
-                :item="deepCopy(contactListItem)"
-                :display-online-status="displayOnlineStatus"
+            <div class="tui-contact-list-item-header-left">
+              <Icon
+                v-if="contactListObj.icon"
+                :file="contactListObj.icon"
+                size="30px"
               />
-            </li>
-          </div>
-        </template>
-        <template v-else>
-          <li
-            v-for="contactListItem in contactListObj.list"
-            :key="contactListItem.renderKey"
-            class="tui-contact-list-item-main-item"
-            :class="['selected']"
-            @click="selectItem(contactListItem)"
-          >
-            <ContactListItem
-              :key="contactListItem.renderKey"
-              :item="deepCopy(contactListItem)"
-            />
-          </li>
-        </template>
+              <span
+                v-if="contactListObj.unreadCount"
+                class="tui-contact-list-item-header-left-unread"
+              >
+                {{ contactListObj.unreadCount }}
+              </span>
+            </div>
+            <div class="tui-contact-list-item-header-right">
+              <div>{{ TUITranslateService.t(`TUIContact.${contactListObj.title}`) }}</div>
+              <Icon
+                :file="currentContactListKey === key ? downSVG : rightSVG"
+                size="20px"
+              />
+            </div>
+          </header>
+        </li>
       </ul>
-    </li>
-  </ul>
+      <FriendList @enterConversation="selectFriend" />
+    </div>
+    <template v-else>
+      <li
+        v-for="contactListItem in contactListMap[currentContactListKey].list"
+        :key="contactListItem.renderKey"
+        class="tui-contact-list-item-main-item"
+        :class="['selected']"
+        @click="selectItem(contactListItem)"
+      >
+        <ContactListItem
+          :key="contactListItem.renderKey"
+          :item="deepCopy(contactListItem)"
+        />
+      </li>
+    </template>
+  </div>
+
   <ul
-    v-else
+    v-else-if="contactSearchingStatus"
     class="tui-contact-list"
   >
     <li
@@ -118,13 +103,19 @@ import {
 } from '@tencentcloud/chat-uikit-engine-lite';
 import TUICore, { TUIConstants } from '@tencentcloud/tui-core-lite';
 import { ref, computed, onMounted, onUnmounted, provide } from '../../../adapter-vue';
+import { isPC } from '../../../utils/env';
+import { deepCopy } from '../../TUIChat/utils/utils';
+
+import Icon from '../../common/Icon.vue';
+import ContactListItem from './contact-list-item/index.vue';
+import FriendList from './components/FriendList.vue';
+
 import downSVG from '../../../assets/icon/down-icon.svg';
 import rightSVG from '../../../assets/icon/right-icon.svg';
-import { isPC } from '../../../utils/env';
-import Icon from '../../common/Icon.vue';
-import { deepCopy } from '../../TUIChat/utils/utils';
-import { sortByFirstChar } from '../utils/sortByFirstChar';
-import ContactListItem from './contact-list-item/index.vue';
+import newContactsSVG from '../../../assets/icon/new-contacts.svg';
+import groupSVG from '../../../assets/icon/groups.svg';
+import blackListSVG from '../../../assets/icon/black-list.svg';
+
 import type {
   IContactList,
   IContactSearchResult,
@@ -142,39 +133,26 @@ const currentContactListKey = ref<keyof IContactList>('');
 const currentContactInfo = ref<IContactInfoType>({} as IContactInfoType);
 const contactListMap = ref<IContactList>({
   friendApplicationList: {
+    icon: newContactsSVG,
     key: 'friendApplicationList',
     title: '新的联系人',
     list: [] as FriendApplication[],
     unreadCount: 0,
   },
-  blackList: {
-    key: 'blackList',
-    title: '黑名单',
-    list: [] as IBlackListUserItem[],
-  },
   groupList: {
+    icon: groupSVG,
     key: 'groupList',
     title: '我的群聊',
     list: [] as IGroupModel[],
   },
-  friendList: {
-    key: 'friendList',
-    title: '我的好友',
-    list: [] as Friend[],
+  blackList: {
+    icon: blackListSVG,
+    key: 'blackList',
+    title: '黑名单',
+    list: [] as IBlackListUserItem[],
   },
 });
-const sortContactListMap = computed(() => {
-  const { groupedList } = sortByFirstChar(
-    contactListMap.value?.friendList?.list,
-    (friend: Friend) => friend.remark || friend.profile?.nick || friend.userID || '');
-  return {
-    ...contactListMap.value,
-    friendList: {
-      ...contactListMap.value?.friendList,
-      list: groupedList,
-    },
-  };
-});
+
 const contactSearchingStatus = ref<boolean>(false);
 const contactSearchResult = ref<IContactSearchResult>();
 const displayOnlineStatus = ref<boolean>(false);
@@ -201,7 +179,6 @@ onMounted(() => {
   });
 
   TUIStore.watch(StoreName.FRIEND, {
-    friendList: onFriendListUpdated,
     friendApplicationList: onFriendApplicationListUpdated,
     friendApplicationUnreadCount: onFriendApplicationUnreadCountUpdated,
   });
@@ -230,7 +207,6 @@ onUnmounted(() => {
   });
 
   TUIStore.unwatch(StoreName.FRIEND, {
-    friendList: onFriendListUpdated,
     friendApplicationList: onFriendApplicationListUpdated,
     friendApplicationUnreadCount: onFriendApplicationUnreadCountUpdated,
   });
@@ -279,6 +255,11 @@ function selectItem(item: any) {
   }
   TUIStore.update(StoreName.CUSTOM, 'currentContactInfo', currentContactInfo.value);
 }
+
+const selectFriend = (item: any) => {
+  TUIStore.update(StoreName.CUSTOM, 'currentContactListKey', 'friendList');
+  selectItem(item);
+};
 
 function onDisplayOnlineStatusUpdated(status: boolean) {
   displayOnlineStatus.value = status;
@@ -339,10 +320,6 @@ function onUserBlacklistUpdated(userBlacklist: IBlackListUserItem[]) {
 
 function onFriendApplicationUnreadCountUpdated(friendApplicationUnreadCount: number) {
   contactListMap.value.friendApplicationList.unreadCount = friendApplicationUnreadCount;
-}
-
-function onFriendListUpdated(friendList: Friend[]) {
-  updateContactListMap('friendList', friendList);
 }
 
 function onFriendApplicationListUpdated(friendApplicationList: FriendApplication[]) {

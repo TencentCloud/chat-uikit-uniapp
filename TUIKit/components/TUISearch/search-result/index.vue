@@ -137,8 +137,8 @@
           "
         >
           <div
-            v-for="item in searchConversationMessageList"
-            :key="generateVueRenderKey(item.ID)"
+            v-for="(item, index) in searchConversationMessageList"
+            :key="generateVueRenderKey(item.ID) + (index + 1)"
             :class="['list-item']"
           >
             <SearchResultItem

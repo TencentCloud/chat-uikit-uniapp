@@ -6,12 +6,11 @@
 }
 
 .list {
-  padding: 0 20px;
   display: flex;
   flex-direction: column;
 
   &-item {
-    padding: 14px 0;
+    padding: 14px 20px;
     display: flex;
     align-items: center;
     font-size: 14px;
@@ -69,16 +68,18 @@
 
       &-list {
         flex: 1;
-        display: flex;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
         flex-wrap: wrap;
-        padding-bottom: 20px;
+        padding: 12px 0 14px;
+        border-top: 0.5px solid #E5E5E5;
 
         &-item {
           position: relative;
-          flex: 0 0 36px;
           display: flex;
           flex-direction: column;
-          padding-right: 20px;
+          align-items: center;
 
           &:last-child {
             padding-right: 0;
@@ -99,14 +100,32 @@
       }
     }
 
-    .content {
-      padding: 0 20px;
+    .view-more {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 400;
+      color: #bbb;
+      padding-bottom: 14px;
+    }
 
+    .content {
       .list-item {
+        box-sizing: border-box;
+        position: relative;
         justify-content: space-between;
+        border-top: 0.5px solid #E5E5E5;
+
+        &:first-child {
+          border: none;
+        }
 
         .btn {
           flex: 1;
+        }
+
+        .label {
+          color: #444;
         }
 
         .article {
@@ -119,19 +138,14 @@
 
         .end {
           align-self: flex-end;
-          margin-bottom: 4px;
         }
       }
     }
 
     .footer {
-      padding: 0 20px;
-
       .list-item {
         cursor: pointer;
-        width: 100%;
         font-size: 14px;
-        padding: 14px 0;
         justify-content: center;
 
         &:last-child {
@@ -206,10 +220,11 @@
 }
 
 .avatar {
-  width: 36px;
-  height: 36px;
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 20px;
   display: flex;
   justify-content: center;
   align-items: center;

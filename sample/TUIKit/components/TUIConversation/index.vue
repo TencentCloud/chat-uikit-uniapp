@@ -5,11 +5,9 @@
     @touchstart="handleTouchStart"
     @touchend="handleTouchEnd"
   >
-    <TUISearch searchType="global" />
-    <ConversationHeader
-      v-if="isShowConversationHeader"
-      ref="headerRef"
-    />
+    <ConversationHeader>
+      <TUISearch searchType="global" />
+    </ConversationHeader>
     <ConversationNetwork />
     <ConversationList
       ref="conversationListDomRef"
@@ -43,9 +41,92 @@ const touchX = ref<number>(0);
 const touchY = ref<number>(0);
 const isShowConversationHeader = ref<boolean>(true);
 
+const getTabBarConfig = () => {
+  try {
+    // 方法1: 从 getApp() 全局数据中获取
+    const app = getApp();
+    if (app?.globalData?.tabBar) {
+      return app.globalData.tabBar;
+    }
+    
+    // 方法2: 从 pages.json 配置中读取（如果可访问）
+    // @ts-ignore
+    if (typeof __uniConfig !== 'undefined' && __uniConfig.tabBar) {
+      // @ts-ignore
+      return __uniConfig.tabBar;
+    }
+    
+    // 方法3: 尝试调用 uni.getTabBar() 检测是否存在 tabbar
+    try {
+      const tabBar = uni.getTabBar && uni.getTabBar();
+      if (tabBar) {
+        return { list: tabBar};
+      }
+    } catch (e) {
+      return null;
+    }
+    
+    return null;
+  } catch (error) {
+    return null;
+  }
+};
+
+const getTabBarIndex = () => {
+  try {
+  
+    const pages = getCurrentPages();
+    if (!pages || pages.length === 0) return;
+    
+    const currentPage = pages[pages.length - 1];
+    const currentRoute = currentPage.route;
+    
+    const isTUIConversationPage = currentRoute && (
+      currentRoute.includes('TUIKit/components/TUIConversation/index') ||
+      currentRoute.includes('TUIConversation')
+    );
+    
+    if (!isTUIConversationPage) {
+      return;
+    }
+    
+    const tabBarConfig = getTabBarConfig();
+    
+    if (!tabBarConfig) {
+      return;
+    }
+    
+    let tabBarIndex = -1;
+    
+    if (tabBarConfig.list && Array.isArray(tabBarConfig.list)) {
+      tabBarIndex = tabBarConfig.list.findIndex((item: any) => {
+        const pagePath = item.pagePath || '';
+        return pagePath.includes('TUIConversation') || 
+                pagePath.includes('TUIKit/components/TUIConversation/index');
+      });
+    }
+    return tabBarIndex;
+  } catch (error) {
+    return -1;
+  }
+};
+
 TUIStore.watch(StoreName.CONV, {
   totalUnreadCount: (count: number) => {
     totalUnreadCount.value = count;
+    const tabBarIndex = getTabBarIndex() ?? -1;
+    if (tabBarIndex >= 0) {
+      if (count > 0) {
+        uni.setTabBarBadge({
+          index: tabBarIndex,
+          text: count > 99 ? '99+' : count.toString(),
+        });
+      } else {
+        uni.removeTabBarBadge({
+          index: tabBarIndex,
+        });
+      }
+    }
   },
 });
 

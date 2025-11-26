@@ -8,7 +8,27 @@
         : 'tui-search-input-container-conversation'
     ]"
   >
-    <div :class="['tui-search-input', !isPC && 'tui-search-input-h5']">
+    <div
+      v-if="!searchingStatus && props.searchType === 'global'"
+      :class="['tui-search-input', !isPC && 'tui-search-input-h5']"
+    >
+      <div
+        class="tui-search-input-place"
+        @click="onSearchInputClick"
+      >
+        <Icon
+          class="icon"
+          :file="searchIcon"
+          width="14px"
+          height="14px"
+        />
+        <p>{{ props.placeholder }}</p>
+      </div>
+    </div>
+    <div
+      v-else
+      :class="['tui-search-input', !isPC && 'tui-search-input-h5']"
+    >
       <div class="tui-search-input-left">
         <Icon
           class="icon"
@@ -22,12 +42,11 @@
         class="tui-search-input-main"
         type="text"
         :placeholder="props.placeholder"
-        :focus="false"
+        :focus="searchingStatus"
         enterkeyhint="search"
         @blur="onBlur"
         @keyup.enter="search"
         @confirm="search"
-        @click.stop.prevent="onSearchInputClick"
       >
       <div
         v-if="searchingStatus"
@@ -151,6 +170,8 @@ const onBlur = () => {
   display: flex;
   flex-direction: row;
   box-sizing: border-box;
+  border-radius: 8px;
+  padding: 0 2px;
 
   &-global {
     flex: 1;
@@ -160,13 +181,12 @@ const onBlur = () => {
     flex: 1;
     display: flex;
     flex-direction: row;
-    width: calc(100% - 20px);
     margin: 10px;
-    background: #ededed;
+    background: #FEFEFE;
     justify-content: center;
     align-items: center;
     height: 28px;
-    border-radius: 4px;
+    border-radius: 8px;
 
     &-main {
       flex: 1;
@@ -194,11 +214,22 @@ const onBlur = () => {
       padding: 0 7px;
     }
   }
+
+  .tui-search-input-place {
+    flex: 1;
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+    font-family: PingFang SC;
+    font-weight: 400;
+    color: #BBBBBB;
+  }
 }
 
 .tui-search-input-container-h5 {
   .tui-search-input-h5 {
-    height: 34px;
+    height: 40px;
   }
 
   .tui-search-input-cancel {

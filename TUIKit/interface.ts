@@ -142,8 +142,17 @@ export interface IUserProfile {
 }
 
 export interface IContactListItem {
+  icon?: string;
   title: string;
   list: any[];
+  key: string;
+  unreadCount?: number;
+}
+
+export interface FriendListData {
+  icon?: string;
+  title: string;
+  map: Record<string, Friend[]>;
   key: string;
   unreadCount?: number;
 }
@@ -152,7 +161,6 @@ export interface IContactList {
   friendApplicationList: IContactListItem;
   blackList: IContactListItem;
   groupList: IContactListItem;
-  friendList: IContactListItem;
   [key: string]: IContactListItem;
 }
 
@@ -321,6 +329,6 @@ export interface IChatResponese<T> {
   data: T;
 }
 
-export type ToolbarDisplayType = 'emojiPicker' | 'tools' | 'none';
+export type ToolbarDisplayType = 'emojiPicker' | 'tools' | 'dialog' | 'none';
 
 export type InputDisplayType = 'editor' | 'audio';

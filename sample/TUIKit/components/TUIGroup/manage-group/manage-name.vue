@@ -1,6 +1,18 @@
 <template>
   <div class="group-name">
-    <label>{{ TUITranslateService.t(`TUIGroup.群名称`) }}</label>
+    <div class="group-info" @click="toggleEditStatus">
+      <Avatar
+        useSkeletonAnimation
+        :url="groupProfile.avatar ||
+          'https://web.sdk.qcloud.com/im/demo/TUIkit/web/img/constomer.svg'"
+        size="40px"
+      />
+      <div class="group-details">
+        <label class="name">{{ groupProfile.name }}</label>
+        <p class="ID">ID: {{ groupProfile.groupID }}</p>
+      </div>
+      <Icon v-if="isAuthor" :file="rightIcon" />
+    </div>
     <div
       v-if="isEdit"
       :class="{
@@ -13,8 +25,8 @@
           class="edit-h5-header"
         >
           <aside class="left">
-            <h1>{{ TUITranslateService.t(`TUIGroup.修改群聊名称`) }}</h1>
-            <span>{{
+            <h1 class="title">{{ TUITranslateService.t(`TUIGroup.修改群聊名称`) }}</h1>
+            <span class="subtitle">{{
               TUITranslateService.t(
                 `TUIGroup.修改群聊名称后，将在群内通知其他成员`
               )
@@ -34,7 +46,6 @@
             v-model="inputGroupName"
             class="input"
             type="text"
-            @blur="updateProfile"
           >
           <span
             v-if="!isPC"
@@ -58,20 +69,6 @@
         </footer>
       </main>
     </div>
-    <p
-      v-if="!isEdit || !isPC"
-      class="name"
-      @click="toggleEditStatus"
-    >
-      <span>{{ groupProfile.name }}</span>
-      <Icon
-        v-if="isAuthor"
-        class="icon"
-        :file="editIcon"
-        width="14px"
-        height="14px"
-      />
-    </p>
   </div>
 </template>
 
@@ -81,8 +78,9 @@ import {
   TUITranslateService,
   IGroupModel,
 } from '@tencentcloud/chat-uikit-engine-lite';
+import Avatar from "../../common/Avatar/index.vue";
 import Icon from '../../common/Icon.vue';
-import editIcon from '../../../assets/icon/edit.svg';
+import rightIcon from '../../../assets/icon/right-icon.svg';
 import { Toast, TOAST_TYPE } from '../../common/Toast/index';
 import { isMobile, isPC } from '../../../utils/env';
 
@@ -158,15 +156,40 @@ watch(
   color: #000;
   display: flex;
   flex-direction: column;
+}
 
+.group-info {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.group-details {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  gap: 6px;
+  flex-direction: column;
   .name {
-    color: #999;
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: 500;
     display: flex;
     align-items: center;
-
-    .icon {
-      margin-left: 4px;
-    }
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+  .ID {
+    font-size: 12px;
+    line-height: 14px;
+    font-weight: 400;
+    color: #888;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
   }
 }
 
@@ -228,6 +251,17 @@ watch(
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    h1 {
+      font-family: PingFang SC;
+      font-weight: 500;
+      font-size: 22px;
+      line-height: 26px;
+    }
+
+    .subtitle {
+      color: #888;
+    }
 
     .close {
       font-family: PingFangSC-Regular;

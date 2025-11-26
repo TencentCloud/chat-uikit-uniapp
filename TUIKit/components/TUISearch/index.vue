@@ -23,11 +23,6 @@
           class="search-input"
           :searchType="currentSearchType"
         />
-        <SearchMore
-          v-if="isPC || !searchingStatus"
-          class="search-more"
-          :searchType="currentSearchType"
-        />
       </div>
       <SearchContainer
         v-if="searchingStatus"
@@ -81,13 +76,13 @@ import {
   computed,
   withDefaults,
   onUnmounted,
+  watch,
 } from '../../adapter-vue';
 import { TUIStore, StoreName } from '@tencentcloud/chat-uikit-engine-lite';
 import { TUIGlobal, outsideClick } from '@tencentcloud/universal-api';
 import SearchInput from './search-input/index.vue';
 import SearchContainer from './search-container/index.vue';
 import SearchResult from './search-result/index.vue';
-import SearchMore from './search-more/index.vue';
 import { searchMessageTypeDefault } from './search-type-list';
 import { searchMessageTimeDefault } from './search-time-list';
 import { isPC, isUniFrameWork } from '../../utils/env';
@@ -107,6 +102,8 @@ const props = withDefaults(
 const globalSearchRef = ref<HTMLElement | null>();
 const currentConversationID = ref<string>('');
 const searchingStatus = ref<boolean>(false);
+const currentSearchType = ref<SEARCH_TYPE>('global');
+const isShowSearch = ref<boolean>(false);
 // Whether to display the search in the chat
 const isShowInConversationSearch = ref<boolean>(isUniFrameWork);
 // Whether to search in full screen - Search in full screen when the mobile terminal is searching
@@ -117,18 +114,16 @@ const isFullScreen = computed(
     || (currentSearchType.value === 'conversation' && isShowInConversationSearch.value)),
 );
 
-const isShowSearch = computed(() => {
-  return currentSearchType.value === 'global'
-    || ((currentSearchType.value === 'conversation' || (!currentSearchType.value && isUniFrameWork))
-    && isShowInConversationSearch.value);
-});
-
-const currentSearchType = computed(() => {
-  if (isUniFrameWork && currentConversationID.value) {
-    return 'conversation';
+watch(() => [currentConversationID.value, isShowInConversationSearch.value], (data) => {
+  if (isUniFrameWork && data[0]) {
+    currentSearchType.value = 'conversation';
+  } else {
+    currentSearchType.value = props.searchType;
   }
-  return props.searchType;
-});
+  isShowSearch.value = currentSearchType.value === 'global'
+  || ((currentSearchType.value === 'conversation' || (!currentSearchType.value && isUniFrameWork))
+  && !!data[1]);
+}, { immediate: true, deep: true });
 
 const initSearchValue = (searchType: SEARCH_TYPE) => {
   TUIStore.update(StoreName.SEARCH, 'currentSearchInputValue', {
@@ -154,7 +149,7 @@ function onCurrentConversationIDUpdate(conversationID: string) {
     // PC side single page switch session, close search
     closeInConversationSearch();
   }
-  if(!conversationID && isUniFrameWork) {
+  if (!conversationID && isUniFrameWork) {
 	  initSearchValue('global');
   }
   currentConversationID.value = conversationID;

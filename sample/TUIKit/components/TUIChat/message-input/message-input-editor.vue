@@ -255,8 +255,9 @@ function reset() {
   resetEditor();
 }
 
-// #ifdef APP-PLUS
+
 function handleMaskClick(e: Event) {
+  // #ifdef APP-PLUS
 	e.stopPropagation();
 	emits('onFocus');
 	uni.$emit('scroll-to-bottom');
@@ -264,8 +265,8 @@ function handleMaskClick(e: Event) {
 		programmaticFocus.value = true;
     // IOS set 500ms timeout
 	}, 100);
+  // #endif
 }
-// #endif
 defineExpose({
   insertAt,
   resetEditor,

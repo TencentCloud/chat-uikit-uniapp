@@ -23,13 +23,9 @@ TUITranslateService.useI18n();
 // #endif
 
 TUIChatKit.init();
-const SDKAppID = 0; // Your SDKAppID
-const secretKey = ''; // Your secretKey
-const appKey = ''; // 客户端密钥（用户实现离线推送）可参考：https://cloud.tencent.com/document/product/269/103522
-
-uni.$chat_SDKAppID = SDKAppID;
-uni.$chat_secretKey = secretKey;
-uni.$push_appKey = appKey;
+uni.$chat_SDKAppID = 0; // Your SDKAppID
+uni.$chat_secretKey = ''; // Your secretKey
+uni.$push_appKey = ''; // 客户端密钥（用户实现离线推送）可参考：https://cloud.tencent.com/document/product/269/103522
 
 export default {
   onLaunch: function () {

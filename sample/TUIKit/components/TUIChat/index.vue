@@ -1,5 +1,5 @@
 <template>
-  <div class="chat">
+  <div class="chat" :style="{marginBottom: keywordHight + 'px'}">
     <div :class="['tui-chat', !isPC && 'tui-chat-h5']">
       <div
         v-if="!currentConversationID"
@@ -12,11 +12,6 @@
         :class="['tui-chat', !isPC && 'tui-chat-h5']"
       >
         <ChatHeader
-          :class="[
-            'tui-chat-header',
-            !isPC && 'tui-chat-H5-header',
-            isUniFrameWork && 'tui-chat-uniapp-header',
-          ]"
           :isGroup="isGroup"
           :headerExtensionList="headerExtensionList"
           @closeChat="closeChat"
@@ -79,14 +74,6 @@
           />
         </template>
       </div>
-      <!-- Group Management -->
-      <div
-        v-if="!isNotInGroup && isUniFrameWork && isGroup && headerExtensionList.length > 0"
-        class="group-profile"
-        @click="handleGroup"
-      >
-        {{ headerExtensionList[0].text }}
-      </div>
     </div>
   </div>
 </template>
@@ -142,6 +129,20 @@ const messageInputRef = ref();
 const messageListRef = ref<InstanceType<typeof MessageList>>();
 const headerExtensionList = ref<ExtensionInfo[]>([]);
 const featureConfig = TUIChatConfig.getFeatureConfig();
+const keywordHight = ref(0);
+
+const systemInfo = uni.getSystemInfoSync();
+const screenHeight = systemInfo.screenHeight;
+
+const windowResizeCallback = (res) => {
+  const value = screenHeight - res.size.windowHeight;
+  if (value > 0 && inputToolbarDisplayType.value !== 'dialog') {
+    inputToolbarDisplayType.value = 'none';
+  }
+  uni.$emit('scroll-to-bottom');
+  keywordHight.value = value;
+};
+uni.onWindowResize(windowResizeCallback);
 
 onMounted(() => {
   TUIStore.watch(StoreName.CONV, {
@@ -216,20 +217,12 @@ const handleGroup = () => {
 };
 
 function changeToolbarDisplayType(type: ToolbarDisplayType) {
-  const willOpen = inputToolbarDisplayType.value !== type;
-
-  if (willOpen && type !== 'none' && isUniFrameWork) {
-    uni.hideKeyboard();
-    setTimeout(() => {
-      inputToolbarDisplayType.value = type;
-      uni.$emit('scroll-to-bottom');
-    }, 200);
-  } else {
+  setTimeout(() => {
     inputToolbarDisplayType.value = inputToolbarDisplayType.value === type ? 'none' : type;
     if (inputToolbarDisplayType.value !== 'none' && isUniFrameWork) {
       uni.$emit('scroll-to-bottom');
     }
-  }
+  }, 100)
 }
 
 function scrollToLatestMessage() {
