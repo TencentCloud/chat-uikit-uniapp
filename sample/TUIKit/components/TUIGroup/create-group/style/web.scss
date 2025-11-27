@@ -1,23 +1,10 @@
 .group {
   padding: 30px;
   box-sizing: border-box;
-  width: 750px;
+  width: 100%;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
   border-radius: 10px;
-
-  .group-box {
-    .group-box-header {
-      display: flex;
-      flex-direction: row-reverse;
-      justify-content: space-between;
-
-      .group-box-header-title {
-        font-size: 18px;
-        line-height: 30px;
-      }
-    }
-  }
 
   &-list {
     &-item {

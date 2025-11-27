@@ -2,8 +2,8 @@
   <div :class="['tui-contact-list-card', !isPC && 'tui-contact-list-card-h5']">
     <div class="tui-contact-list-card-left">
       <Avatar
-        class="tui-contact-list-card-left-avatar"
         useSkeletonAnimation
+        size="30px"
         :url="generateAvatar(props.item)"
       />
       <div
@@ -153,7 +153,7 @@ function getOnlineStatus(): boolean {
 </script>
 <style lang="scss" scoped>
 .tui-contact-list-card {
-  padding: 5px 0;
+  padding: 10px 0;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -164,14 +164,8 @@ function getOnlineStatus(): boolean {
 
   &-left {
     position: relative;
-    width: 36px;
-    height: 36px;
-
-    &-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 5px;
-    }
+    width: 30px;
+    height: 30px;
 
     .online-status {
       box-sizing: border-box;
@@ -201,7 +195,7 @@ function getOnlineStatus(): boolean {
 
     &-name,
     &-other {
-      font-size: 14px;
+      font-size: 16px;
       flex: 1;
       overflow: hidden;
       text-overflow: ellipsis;

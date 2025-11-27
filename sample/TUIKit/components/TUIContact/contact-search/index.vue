@@ -1,39 +1,6 @@
 <template>
   <div :class="['tui-contact-search', !isPC && 'tui-contact-search-h5']">
     <div
-      v-if="!isSearching || !isPC"
-      :class="[
-        'tui-contact-search-header',
-        !isPC && 'tui-contact-search-h5-header',
-        isSearching && 'tui-contact-searching-h5-header',
-      ]"
-      @click="changeContactSearchingStatus(true)"
-    >
-      <div
-        :class="[
-          'tui-contact-search-header-icon',
-          !isPC && 'tui-contact-search-h5-header-icon',
-        ]"
-        @click.stop="changeContactSearchingStatus(!isSearching)"
-      >
-        <Icon
-          :file="isSearching ? backSVG : addSVG"
-          :width="isSearching ? '20px' : '14px'"
-          :height="isSearching ? '20px' : '14px'"
-        />
-      </div>
-
-      <div
-        :class="[
-          'tui-contact-search-header-title',
-          !isPC && 'tui-contact-search-h5-header-title',
-        ]"
-      >
-        {{ TUITranslateService.t("TUIContact.添加好友/群聊") }}
-      </div>
-    </div>
-    <div
-      v-if="isSearching"
       :class="[
         'tui-contact-search-main',
         !isPC && 'tui-contact-search-h5-main',
@@ -51,7 +18,7 @@
       >
       <div
         class="tui-contact-search-main-cancel"
-        @click="isSearching = false"
+        @click="cancel"
       >
         {{ TUITranslateService.t("取消") }}
       </div>
@@ -59,7 +26,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch } from '../../../adapter-vue';
+import { onMounted, ref, watch } from '../../../adapter-vue';
 import {
   TUITranslateService,
   TUIStore,
@@ -67,15 +34,10 @@ import {
 } from '@tencentcloud/chat-uikit-engine-lite';
 import TUICore, { TUIConstants } from '@tencentcloud/tui-core-lite';
 import { TUIGlobal } from '@tencentcloud/universal-api';
-import Icon from '../../common/Icon.vue';
-import addSVG from '../../../assets/icon/add.svg';
-import backSVG from '../../../assets/icon/back.svg';
 import { isPC } from '../../../utils/env';
-import { debounce } from '../../../utils/lodash';
 import { IContactSearchResult } from '../../../interface';
 
 const searchingPlaceholder = TUITranslateService.t('TUIContact.输入ID');
-const isSearching = ref<boolean>(false);
 const searchValue = ref<string>('');
 const searchResult = ref<IContactSearchResult>({
   user: {
@@ -88,9 +50,13 @@ const searchResult = ref<IContactSearchResult>({
   },
 });
 
-const changeContactSearchingStatus = debounce(function (status: boolean) {
-  isSearching.value = status;
-}, 200);
+const cancel = () => {
+  TUIStore.update(
+    StoreName.CUSTOM,
+    'currentContactSearchingStatus',
+    false,
+  );
+};
 
 const search = async () => {
   if (!searchValue.value) {
@@ -139,29 +105,18 @@ watch(
     immediate: true,
   },
 );
-watch(
-  () => isSearching.value,
-  () => {
-    TUIStore.update(
-      StoreName.CUSTOM,
-      'currentContactSearchingStatus',
-      isSearching.value,
-    );
-    if (isSearching.value) {
-      searchValue.value = '';
-      searchResult.value.user.list = [];
-      searchResult.value.group.list = [];
-    }
-  },
-  {
-    deep: true,
-    immediate: true,
-  },
-);
+
+onMounted(() => {
+  searchValue.value = '';
+  searchResult.value.user.list = [];
+  searchResult.value.group.list = [];
+});
 
 TUIGlobal.updateContactSearch = search;
 TUIGlobal.closeSearching = () => {
-  isSearching.value = false;
+  searchValue.value = '';
+  searchResult.value.user.list = [];
+  searchResult.value.group.list = [];
 };
 </script>
 <style lang="scss" scoped>
@@ -177,26 +132,12 @@ TUIGlobal.closeSearching = () => {
   border-bottom: 1px solid #f4f5f9;
   flex-direction: column;
 
-  &-header,
   &-main {
     width: 100%;
     height: 30px;
     display: flex;
     flex-direction: row;
     align-items: center;
-  }
-
-  &-header {
-    user-select: none;
-    cursor: pointer;
-
-    &-icon {
-      padding-right: 10px;
-    }
-
-    &-title {
-      font-size: 14px;
-    }
   }
 
   &-main {
@@ -231,20 +172,6 @@ TUIGlobal.closeSearching = () => {
     &-header {
       width: 100%;
     }
-  }
-}
-
-.tui-contact-searching-h5-header {
-  padding-bottom: 10px;
-  display: flex;
-  flex-direction: row;
-
-  .tui-contact-search-h5-header-title {
-    flex: 1;
-    text-align: center;
-    font-weight: 500;
-    font-size: 14px;
-    margin-right: 30px;
   }
 }
 </style>

@@ -12,26 +12,36 @@
     flex-direction: column;
 
     &-header {
+      position: relative;
       display: flex;
+      gap: 10px;
       flex-direction: row;
-      font-size: 14px;
+      font-size: 16px;
       cursor: pointer;
       user-select: none;
       padding: 10px 15px;
       justify-content: space-between;
+      
+      &::after {
+        position: absolute;
+        content: '';
+        width: calc(100% - 60px);
+        height: .5px;
+        background: #E5E5E5;
+        bottom: 0;
+        left: 60px;
+      }
 
       &-left {
         display: flex;
         flex-direction: row;
         align-items: center;
-      }
-
-      &-right {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        position: relative;
 
         &-unread {
+          position: absolute;
+          right: -8px;
+          top: -8px;
           display: flex;
           min-width: 10px;
           width: fit-content;
@@ -46,6 +56,14 @@
           justify-content: center;
           color: #fff;
         }
+      }
+
+      &-right {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        justify-content: space-between;
+        align-items: center;
       }
     }
 

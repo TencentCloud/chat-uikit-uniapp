@@ -3,31 +3,15 @@
     v-if="typeof contactInfoData === 'object' && Object.keys(contactInfoData).length"
     :class="['tui-contact-info', !isPC && 'tui-contact-info-h5']"
   >
-    <div
-      v-if="!isPC"
-      :class="[
-        'tui-contact-info-header',
-        !isPC && 'tui-contact-info-h5-header',
-      ]"
-    >
-      <div
-        :class="[
-          'tui-contact-info-header-icon',
-          !isPC && 'tui-contact-info-h5-header-icon',
-        ]"
-        @click="resetContactSearchingUIData"
-      >
-        <Icon :file="backSVG" />
-      </div>
-      <div
-        :class="[
-          'tui-contact-info-header-title',
-          !isPC && 'tui-contact-info-h5-header-title',
-        ]"
-      >
-        {{ TUITranslateService.t("TUIContact.添加好友/群聊") }}
-      </div>
-    </div>
+    <Navigation :title="contactInfoTitle || TUITranslateService.t('TUIChat.腾讯云 IM')">
+      <template #left>
+        <div @click="resetContactSearchingUIData">
+          <Icon
+            :file="backSVG"
+          />
+        </div>
+      </template>
+    </Navigation>
     <div :class="['tui-contact-info-basic', !isPC && 'tui-contact-info-h5-basic']">
       <div
         :class="[
@@ -200,6 +184,7 @@ import {
   contactMoreInfoConfig,
   contactButtonConfig,
 } from './contact-info-config';
+import Navigation from '../../common/Navigation/index.vue';
 import Icon from '../../common/Icon.vue';
 import editSVG from '../../../assets/icon/edit.svg';
 import backSVG from '../../../assets/icon/back.svg';
@@ -213,6 +198,7 @@ import {
   CONTACT_INFO_LABEL_POSITION,
   CONTACT_INFO_MORE_EDIT_TYPE,
   CONTACT_INFO_BUTTON_TYPE,
+  CONTACT_INFO_TITLE,
 } from '../../../constant';
 import { deepCopy } from '../../TUIChat/utils/utils';
 
@@ -224,6 +210,7 @@ const contactInfoData = ref<IContactInfoType>({} as IContactInfoType);
 const contactInfoBasicList = ref<Array<{ label: string; data: string }>>([]);
 const contactInfoMoreList = ref<IContactInfoMoreItem[]>([]);
 const contactInfoButtonList = ref<IContactInfoButton[]>([]);
+const contactInfoTitle = ref<string>('');
 
 const setEditing = (item: any) => {
   item.editing = true;
@@ -261,6 +248,7 @@ const blackList = ref<IBlackListUserItem[]>([]);
 onMounted(() => {
   TUIStore.watch(StoreName.CUSTOM, {
     currentContactInfo: onCurrentContactInfoUpdated,
+    currentContactListKey: onCurrentContactListKeyUpdated,
   });
   TUIStore.watch(StoreName.USER, {
     userBlacklist: onUserBlacklistUpdated,
@@ -270,11 +258,17 @@ onMounted(() => {
 onUnmounted(() => {
   TUIStore.unwatch(StoreName.CUSTOM, {
     currentContactInfo: onCurrentContactInfoUpdated,
+    currentContactListKey: onCurrentContactListKeyUpdated,
   });
   TUIStore.unwatch(StoreName.USER, {
     userBlacklist: onUserBlacklistUpdated,
   });
 });
+const onCurrentContactListKeyUpdated = (key: string) => {
+  if (CONTACT_INFO_TITLE[key]) {
+    contactInfoTitle.value = TUITranslateService.t(`TUIContact.${CONTACT_INFO_TITLE[key]}`);
+  }
+};
 
 const resetContactInfoUIData = () => {
   contactInfoData.value = {} as IContactInfoType;

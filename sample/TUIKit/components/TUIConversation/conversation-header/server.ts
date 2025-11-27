@@ -1,6 +1,7 @@
 import TUICore, { TUIConstants } from '@tencentcloud/tui-core-lite';
 import { TUITranslateService } from '@tencentcloud/chat-uikit-engine-lite';
 import { isPC } from '../../../utils/env';
+import addCircle from '../../../assets/icon/add-circle.svg';
 import createGroup from '../../../assets/icon/start-group.svg';
 import C2C from '../../../assets/icon/icon-c2c.svg';
 import { CONV_CREATE_TYPE } from '../../../constant';
@@ -31,7 +32,8 @@ export default class ConversationHeaderServer {
     const list = this.generateMenuList();
     if (!isPC && list.length > 0) {
       return [{
-        text: TUITranslateService.t('TUIConversation.发起会话'),
+        text: '',
+        icon: addCircle,
         data: {
           name: 'all',
           children: list,

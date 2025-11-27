@@ -1,3 +1,10 @@
+## [3.1.0] (2025-11-26)
+### Chore
+- 优化 conversation header、actions 位置、ConversationList、tabBar、TUIChat、message input toolbar、TUISearch、ContactList、ContactInfo、friendList 等 UI 组件。
+- 优化群组编辑项移动端交互、群组信息编辑结构、搜索框与会话头部嵌套、未读消息 TabBar 角标设置。
+- 优化联系人界面，新增 Navigation、搜索和功能按钮，优化信息显示，新增响应式数据和事件处理。
+- 优化导航结构，新增 Navigation 组件，调整条件渲染，添加标题管理和返回功能。
+
 ## [3.0.3] (2025-11-17)
 ### Chore
 - 优化键盘拉起以及切换工具栏、表情面板时的显示效果

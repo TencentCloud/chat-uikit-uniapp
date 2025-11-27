@@ -46,3 +46,10 @@ export const CONTACT_INFO_BUTTON_TYPE = {
   SUBMIT: "submit",
   CANCEL: "cancel",
 };
+
+export const CONTACT_INFO_TITLE = {
+  friendApplicationList: "新的联系人",
+  groupList: "我的群聊",
+  friendList: "我的好友",
+  blackList: "黑名单",
+};

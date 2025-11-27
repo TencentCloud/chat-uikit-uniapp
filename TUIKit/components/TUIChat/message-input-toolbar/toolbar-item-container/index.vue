@@ -51,7 +51,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref } from '../../../../adapter-vue';
+import { ref, watch } from '../../../../adapter-vue';
 import { outsideClick } from '@tencentcloud/universal-api';
 import Icon from '../../../common/Icon.vue';
 import BottomPopup from '../../../common/BottomPopup/index.vue';
@@ -94,6 +94,14 @@ const showDialog = ref(false);
 const toolbarItemRef = ref();
 const dialogRef = ref();
 
+watch(() => showDialog.value, (newVal) => {
+  if (!newVal) {
+    emits('onDialogClose', dialogRef);
+  } else {
+    emits('onDialogShow', dialogRef);
+  }
+});
+
 const toggleToolbarItem = () => {
   emits('onIconClick', dialogRef);
   if (isPC) {
@@ -110,7 +118,6 @@ const toggleToolbarItem = () => {
 
 const closeToolbarItem = () => {
   showDialog.value = false;
-  emits('onDialogClose', dialogRef);
 };
 
 const toggleDialogDisplay = (showStatus: boolean) => {
@@ -118,13 +125,6 @@ const toggleDialogDisplay = (showStatus: boolean) => {
     return;
   }
   showDialog.value = showStatus;
-  switch (showStatus) {
-    case true:
-      emits('onDialogShow', dialogRef);
-      break;
-    case false:
-      emits('onDialogClose', dialogRef);
-  }
 };
 
 const onPopupClose = () => {

@@ -136,7 +136,7 @@ function checkExceedBounds() {
                 top:
                   props.actionsMenuPosition.top
                   - (props.actionsMenuPosition.conversationHeight || 0)
-                  - data.height,
+                  - data.height + 88,
               };
             }
             // check if actionsMenu is exceed right of the screen

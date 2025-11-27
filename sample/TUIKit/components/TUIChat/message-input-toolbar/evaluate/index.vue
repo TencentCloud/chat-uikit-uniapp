@@ -2,7 +2,7 @@
   <ToolbarItemContainer
     ref="container"
     :iconFile="evaluateIcon"
-    title="评价"
+    title="自定义消息"
     :needBottomPopup="true"
     :iconWidth="isUniFrameWork ? '26px' : '20px'"
     :iconHeight="isUniFrameWork ? '26px' : '20px'"
@@ -104,8 +104,7 @@ import TUIChatEngine, {
 } from '@tencentcloud/chat-uikit-engine-lite';
 import { ref, computed } from '../../../../adapter-vue';
 import ToolbarItemContainer from '../toolbar-item-container/index.vue';
-import evaluateIconLight from '../../../../assets/icon/evalute-light.svg';
-import evaluateIconDark from '../../../../assets/icon/evalute-dark.svg';
+import custom from '../../../../assets/icon/custom.svg';
 import Link from '../../../../utils/documentLink';
 import Icon from '../../../common/Icon.vue';
 import starIcon from '../../../../assets/icon/star.png';
@@ -114,9 +113,8 @@ import { CHAT_MSG_CUSTOM_TYPE } from '../../../../constant';
 import { isPC, isH5, isUniFrameWork } from '../../../../utils/env';
 import { isEnabledMessageReadReceiptGlobal } from '../../utils/utils';
 import OfflinePushInfoManager, { IOfflinePushInfoCreateParams } from '../../offlinePushInfoManager/index';
-import TUIChatConfig from '../../config';
 
-const evaluateIcon = TUIChatConfig.getTheme() === 'dark' ? evaluateIconDark : evaluateIconLight;
+const evaluateIcon = custom;
 const props = defineProps({
   starTotal: {
     type: Number,

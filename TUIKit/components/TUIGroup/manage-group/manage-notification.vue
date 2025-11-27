@@ -233,6 +233,13 @@ const close = (tabName: string) => {
     align-items: center;
     justify-content: space-between;
 
+    h1 {
+      font-family: PingFang SC;
+      font-weight: 500;
+      font-size: 22px;
+      line-height: 26px;
+    }
+
     .close {
       font-family: PingFangSC-Regular;
       font-weight: 400;

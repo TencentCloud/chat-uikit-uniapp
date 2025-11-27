@@ -1,12 +1,24 @@
 <template>
-  <SelectUser
-    :isRadio="selectOptions.isRadio"
-    :isNeedSearch="selectOptions.isNeedSearch"
-    :title="selectOptions.title"
-    :userList="userList"
-    @search="handleSearch"
-    @complete="handleSelectedResult"
-  />
+  <div class="select-friend">
+    <Navigation :title="selectOptions.title">
+      <template #left>
+        <div @click="() => handleSelectedResult([])">
+          <Icon
+            :file="backSVG"
+          />
+        </div>
+      </template>
+    </Navigation>
+    <Transfer
+      :isSearch="selectOptions.isNeedSearch"
+      :list="userList"
+      :isH5="true"
+      :isRadio="selectOptions.isRadio"
+      @search="handleSearch"
+      @submit="handleSelectedResult"
+      @cancel="handleSelectedResult"
+    />
+  </div>
 </template>
 <script lang="ts" setup>
 import {
@@ -18,8 +30,11 @@ import {
 import { ref, watchEffect } from '../../../adapter-vue';
 import { Toast, TOAST_TYPE } from '../../common/Toast/index';
 import TUICore from '@tencentcloud/tui-core-lite';
-import SelectUser from '../../common/SelectUser/index.vue';
 import Server from '../server';
+import Navigation from '../../common/Navigation/index.vue';
+import Transfer from '../../common/Transfer/index.vue';
+import Icon from '../../common/Icon.vue';
+import backSVG from '../../../assets/icon/back.svg';
 const TUIContactServer = Server.getInstance();
 const TUIConstants = TUIContactServer.constants;
 
@@ -90,3 +105,11 @@ const handleSearch = async (val: string) => {
   }
 };
 </script>
+<style lang="scss" scoped>
+.select-friend {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+</style>

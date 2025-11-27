@@ -1,13 +1,14 @@
 <template>
-  <SelectUser
+  <Transfer
+    :isSearch="selectOptions.isNeedSearch"
+    :list="userList"
+    :isH5="true"
     :isRadio="selectOptions.isRadio"
-    :isNeedSearch="selectOptions.isNeedSearch"
-    :title="selectOptions.title"
-    :userList="userList"
     :total="group.memberCount"
     @getMore="getMember"
     @search="handleSearch"
-    @complete="handleSelectedResult"
+    @submit="handleSelectedResult"
+    @cancel="() => handleSelectedResult([])"
   />
 </template>
 <script lang="ts" setup>
@@ -22,7 +23,7 @@ import {
 import { ref, watchEffect } from '../../../adapter-vue';
 import { Toast, TOAST_TYPE } from '../../common/Toast/index';
 import TUICore from '@tencentcloud/tui-core-lite';
-import SelectUser from '../../common/SelectUser/index.vue';
+import Transfer from '../../common/Transfer/index.vue';
 import Server from '../server';
 const TUIContactServer = Server.getInstance();
 const TUIConstants = TUIContactServer.constants;

@@ -1,5 +1,23 @@
 <template>
-  <view style="display: none;" />
+  <div class="chat-header">
+    <Navigation :title="title">
+      <template #left>
+        <div @click="back">
+          <Icon
+            :file="backSVG"
+          />
+        </div>
+      </template>
+      <template #right>
+        <div @click="onNavigationBarButtonTap">
+          <Icon
+            v-if="isGroup"
+            :file="More"
+          />
+        </div>
+      </template>
+    </Navigation>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -10,19 +28,27 @@ import {
   IConversationModel,
   TUITranslateService,
 } from '@tencentcloud/chat-uikit-engine-lite';
-import { TUIGlobal } from '@tencentcloud/universal-api';
 import { onLoad } from '@dcloudio/uni-app';
+import Navigation from '../../common/Navigation/index.vue';
+import Icon from '../../common/Icon.vue';
+import More from '../../../assets/icon/more.svg';
+import backSVG from '../../../assets/icon/back.svg';
 
 const emits = defineEmits(['openGroupManagement']);
 const props = defineProps(['isGroup']);
 
 const currentConversation = ref<IConversationModel>();
 const typingStatus = ref(false);
+const title = ref('');
 
 const setChatHeaderContent = (content: string) => {
-  TUIGlobal?.setNavigationBarTitle({
-    title: content || '云通信 IM',
-  });
+  title.value = content || '云通信 IM';
+};
+
+const onNavigationBarButtonTap = () => {
+  if (props.isGroup) {
+    emits('openGroupManagement');
+  }
 };
 
 onMounted(() => {
@@ -62,4 +88,11 @@ function onTypingStatusUpdated(status: boolean) {
     setChatHeaderContent(currentConversation.value?.getShowName());
   }
 }
+
+function back() {
+  uni.navigateBack();
+}
 </script>
+<style lang="scss" scoped>
+
+</style>

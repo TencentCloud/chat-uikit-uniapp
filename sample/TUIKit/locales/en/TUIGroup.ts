@@ -36,6 +36,7 @@ const TUIGroup = {
   "发布": "Post",
   "编辑": "Edit",
   "查看更多": "View more",
+  "查看更多群成员": "View more group members",
   "管理员": "Admin",
   "群主": "Group owner",
   "我": "me",

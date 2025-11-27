@@ -35,7 +35,7 @@
           <Avatar
             useSkeletonAnimation
             :url="conversation.getAvatar()"
-            size="30px"
+            size="40px"
           />
           <div
             v-if="userOnlineStatusMap && isShowUserOnlineStatus(conversation)"
@@ -92,6 +92,7 @@
             <Icon
               v-if="conversation.isMuted"
               :file="muteIcon"
+              size="16px"
             />
           </div>
         </div>
@@ -222,7 +223,7 @@ const getActionsMenuPosition = (event: Event, index: number) => {
       if (data) {
         actionsMenuPosition.value = {
           // The uni-page-head of uni-h5 is not considered a member of the viewport, so the height of the head is manually increased.
-          top: data.bottom + (isH5 ? 44 : 0),
+          top: data.bottom - 44,
           // @ts-expect-error in uniapp event has touches property
           left: event.touches[0].pageX,
           conversationHeight: data.height,

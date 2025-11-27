@@ -1,4 +1,6 @@
 .tui-search {
+  background: #EBF0F6;
+
   &-main-global {
     width: 100%;
     height: fit-content;
@@ -12,6 +14,7 @@
   }
 
   .tui-search-global {
+    padding-bottom: 10px;
     &-header {
       display: flex;
       flex-direction: row;

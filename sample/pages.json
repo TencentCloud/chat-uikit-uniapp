@@ -9,13 +9,13 @@
     {
       "path": "TUIKit/components/TUIConversation/index",
       "style": {
-        "navigationBarTitleText": "腾讯云 IM"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "TUIKit/components/TUIChat/index",
       "style": {
-        "navigationBarTitleText": "腾讯云 IM",
+        "navigationStyle": "custom",
         "app-plus": {
           "softinputMode": "adjustResize"
         }
@@ -24,7 +24,7 @@
     {
       "path": "TUIKit/components/TUIContact/index",
       "style": {
-        "navigationBarTitleText": "腾讯云 IM"
+        "navigationStyle": "custom"
       }
     },
     {
@@ -36,29 +36,34 @@
     {
       "path": "TUIKit/components/TUIChat/video-play",
       "style": {
-        "navigationBarTitleText": "腾讯云 IM"
+        "navigationBarTitleText": "腾讯云 IM",
+        "navigationBarBackgroundColor": "#EBF0F6"
       }
     },
     {
       "path": "TUIKit/components/TUIChat/web-view",
       "style": {
-        "navigationBarTitleText": "腾讯云 IM"
+        "navigationBarTitleText": "腾讯云 IM",
+        "navigationBarBackgroundColor": "#EBF0F6"
       }
     },
     {
       "path": "TUIKit/components/TUIGroup/index",
       "style": {
-        "navigationBarTitleText": "腾讯云 IM"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "TUIKit/components/TUISearch/index",
       "style": {
-        "navigationBarTitleText": "聊天记录"
+        "navigationBarTitleText": "聊天记录",
+        "navigationBarBackgroundColor": "#EBF0F6"
       }
     }
   ],
   "tabBar": {
+    "backgroundColor": "#EBF0F6",
+    "height": "70px",
     "list": [
       {
         "pagePath": "TUIKit/components/TUIConversation/index",

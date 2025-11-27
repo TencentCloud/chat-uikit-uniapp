@@ -54,7 +54,7 @@ export default class CallkitPluginServer {
       const voiceCallExtension = {
         weight: 1000,
         text: '语音通话',
-        icon: 'https://web.sdk.qcloud.com/component/TUIKit/assets/call.png',
+        icon: 'https://web.sdk.qcloud.com/component/TUIKit/assets/uni-app/voice-call.svg',
         data: {
           name: 'voiceCall',
         },
@@ -67,7 +67,7 @@ export default class CallkitPluginServer {
       const videoCallExtension = {
         weight: 900,
         text: '视频通话',
-        icon: 'https://web.sdk.qcloud.com/component/TUIKit/assets/call-video-reverse.svg',
+        icon: 'https://web.sdk.qcloud.com/component/TUIKit/assets/uni-app/video-call.svg',
         data: {
           name: 'videoCall',
         },
